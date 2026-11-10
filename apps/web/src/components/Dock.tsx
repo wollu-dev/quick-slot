@@ -1,4 +1,4 @@
-import { X } from 'lucide-react';
+import { Star, X } from 'lucide-react';
 import { useSlots, toggleSlot } from '../lib/slots';
 import { getTool, toolUrl } from '../tools/registry';
 import AppIcon from './ui/AppIcon';
@@ -9,6 +9,7 @@ import AppIcon from './ui/AppIcon';
  */
 export default function Dock({ currentSlug }: { currentSlug?: string }) {
   const slots = useSlots();
+  const empty = slots.every((s) => !s);
 
   return (
     <nav
@@ -16,20 +17,24 @@ export default function Dock({ currentSlug }: { currentSlug?: string }) {
       className="pointer-events-none fixed inset-x-0 z-40 flex justify-center px-2"
       style={{ bottom: 'max(12px, env(safe-area-inset-bottom))' }}
     >
-      <div className="glass pointer-events-auto flex items-end gap-1 rounded-[20px] p-1.5 shadow-[0_10px_40px_-10px_rgb(0_0_0/0.3)] sm:gap-2 sm:rounded-[24px] sm:p-2">
+      <div className="glass pointer-events-auto relative flex items-end gap-1 rounded-[20px] p-1.5 shadow-[0_10px_40px_-10px_rgb(0_0_0/0.3)] sm:gap-2 sm:rounded-[24px] sm:p-2">
+        {empty && <EmptyHint />}
+
         {slots.map((slug, i) => {
           const tool = slug ? getTool(slug) : undefined;
           const active = !!tool && tool.slug === currentSlug;
           return (
-            <div key={i} className="group relative flex flex-col items-center">
+            <div key={i} className="group flex flex-col items-center">
               {tool ? (
-                <>
+                // 아이콘과 ✕ 를 한 덩어리로 확대해서 ✕ 가 확대된 아이콘을 따라가고,
+                // ✕ 위에 마우스를 올려도 덩어리(group) 위에 있으므로 확대가 풀리지 않는다.
+                <div className="relative origin-bottom transition duration-200 ease-out group-focus-within:-translate-y-1 group-focus-within:scale-115 group-hover:-translate-y-1 group-hover:scale-115">
                   <a
                     href={toolUrl(tool.slug)}
                     title={`${tool.name} · Alt+${i + 1}`}
                     aria-label={`${tool.name} (Alt+${i + 1})`}
                     aria-current={active ? 'page' : undefined}
-                    className="block origin-bottom rounded-[13px] transition duration-200 ease-out outline-none hover:-translate-y-1 hover:scale-115 focus-visible:-translate-y-1 focus-visible:ring-4 focus-visible:ring-accent/30"
+                    className="block rounded-[13px] outline-none focus-visible:ring-4 focus-visible:ring-accent/30"
                   >
                     <AppIcon tool={tool} size="dock" />
                   </a>
@@ -37,14 +42,14 @@ export default function Dock({ currentSlug }: { currentSlug?: string }) {
                     type="button"
                     aria-label={`${tool.name} 슬롯에서 빼기`}
                     onClick={() => toggleSlot(tool.slug)}
-                    className="absolute -top-2 -left-2 hidden size-5 place-items-center rounded-full bg-[var(--raised)] text-muted shadow-md transition group-hover:grid hover:text-danger focus:grid"
+                    className="absolute -top-1.5 -left-1.5 grid size-[18px] place-items-center rounded-full bg-[var(--raised)] text-muted opacity-0 shadow-md transition group-focus-within:opacity-100 group-hover:opacity-100 hover:text-danger"
                   >
-                    <X size={12} strokeWidth={3} />
+                    <X size={11} strokeWidth={3} />
                   </button>
-                </>
+                </div>
               ) : (
                 <div
-                  title="비어 있음 — 툴 페이지에서 '퀵슬롯에 추가'"
+                  title="비어 있음"
                   className="grid size-[34px] place-items-center rounded-[9px] border border-dashed border-muted/30 text-[11px] font-medium text-muted/50 sm:size-12 sm:rounded-[13px] sm:text-[12px]"
                 >
                   {i + 1}
@@ -57,5 +62,24 @@ export default function Dock({ currentSlug }: { currentSlug?: string }) {
         })}
       </div>
     </nav>
+  );
+}
+
+/** 슬롯이 모두 비어 있을 때 독 위에 뜨는 말풍선 */
+function EmptyHint() {
+  return (
+    <div className="dock-hint absolute bottom-full left-1/2 mb-3 w-max max-w-[calc(100vw-32px)] -translate-x-1/2" role="note">
+      <div className="glass-menu relative flex items-center gap-2 rounded-2xl px-4 py-2.5 text-[13px] leading-snug shadow-[0_10px_30px_-10px_rgb(0_0_0/0.3)]">
+        <Star size={15} strokeWidth={2.2} className="shrink-0 text-accent" fill="currentColor" />
+        <span>
+          툴 페이지에서 <b className="font-semibold">퀵슬롯에 추가</b>를 누르면 여기에 담겨요
+        </span>
+        {/* 꼬리 */}
+        <span
+          className="glass-menu absolute -bottom-[6px] left-1/2 size-3 -translate-x-1/2 rotate-45 rounded-[2px] border-t-0 border-l-0"
+          aria-hidden
+        />
+      </div>
+    </div>
   );
 }

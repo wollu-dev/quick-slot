@@ -238,6 +238,21 @@ input[type="checkbox"]:focus-visible {
   display: none;
 }
 
+/* 빈 독 위 말풍선: 천천히 위아래로 */
+/* 가로 가운데 정렬은 Tailwind 의 translate 속성이 맡고, 여기서는 transform 으로 세로만 움직인다 (둘이 겹치면 두 번 밀림) */
+@keyframes dock-hint-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+.dock-hint {
+  animation: dock-hint-float 3s ease-in-out infinite;
+}
+
 /* 드롭다운 메뉴가 열릴 때 */
 @keyframes menu-pop {
   from {
