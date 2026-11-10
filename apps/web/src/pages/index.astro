@@ -1,28 +1,45 @@
 ---
+import { ChevronRight, Cloud } from 'lucide-react';
 import Layout from '../layouts/Layout.astro';
 import SlotBar from '../components/SlotBar';
+import AppIcon from '../components/ui/AppIcon';
 import { categories, tools, toolUrl } from '../tools/registry';
 
 const readyCount = tools.filter((t) => t.status === 'ready').length;
 ---
 
 <Layout>
-  <section class="mb-10">
-    <h1 class="text-3xl font-bold tracking-tight sm:text-4xl">필요한 도구, 바로 꺼내 쓰세요</h1>
-    <p class="mt-2 text-muted">
-      설치도 가입도 없이. 파일은 내 PC를 떠나지 않습니다. <span class="text-fg">{readyCount}개</span> 사용 가능,
-      계속 추가 중.
+  <section class="mx-auto mb-14 max-w-2xl text-center">
+    <h1 class="text-[40px] leading-[1.1] font-bold tracking-[-0.03em] sm:text-[56px]">
+      필요한 도구,<br />바로 꺼내 쓰세요.
+    </h1>
+    <p class="mt-5 text-[17px] leading-relaxed text-muted sm:text-[19px]">
+      설치도, 가입도 없이. 파일은 내 기기를 떠나지 않습니다.
     </p>
-    <p class="mt-3 text-sm text-muted">
-      <span class="kbd">Ctrl K</span> 검색 · 툴 페이지에서 <span class="text-accent">☆ 퀵슬롯 등록</span> 후
-      <span class="kbd">Alt 1~9</span> 로 바로 열기
+    <p class="mt-6 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-[13px] text-muted">
+      <span><span class="font-semibold text-fg">{readyCount}개</span> 사용 가능</span>
+      <span class="hidden items-center gap-1.5 sm:flex"><span class="kbd">Ctrl K</span> 검색</span>
+      <span class="hidden items-center gap-1.5 sm:flex"><span class="kbd">Alt 1–9</span> 퀵슬롯</span>
     </p>
   </section>
 
-  <section class="mb-12">
-    <h2 class="mb-3 text-sm font-semibold text-muted">내 퀵슬롯</h2>
+  <section class="mb-16">
     <SlotBar client:load />
   </section>
+
+  <nav class="mb-12 flex flex-wrap justify-center gap-2" aria-label="카테고리">
+    {
+      categories.map((c) => {
+        const Icon = c.icon;
+        return (
+          <a href={`#${c.id}`} class="btn">
+            <Icon size={15} strokeWidth={2.2} color={c.color} />
+            {c.name}
+          </a>
+        );
+      })
+    }
+  </nav>
 
   {
     categories.map((cat) => {
@@ -30,27 +47,27 @@ const readyCount = tools.filter((t) => t.status === 'ready').length;
         .filter((t) => t.category === cat.id)
         .sort((a, b) => (a.status === b.status ? 0 : a.status === 'ready' ? -1 : 1));
       return (
-        <section id={cat.id} class="mb-10 scroll-mt-20">
-          <h2 class="mb-3 flex items-baseline gap-2 text-lg font-semibold">
-            <span>{cat.icon}</span>
-            {cat.name}
-            <span class="text-xs font-normal text-muted">{cat.description}</span>
-          </h2>
-          <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <section id={cat.id} class="mb-12 scroll-mt-24">
+          <div class="mb-4 flex items-baseline gap-3 px-1">
+            <h2 class="text-[22px] font-bold tracking-tight">{cat.name}</h2>
+            <span class="text-[14px] text-muted">{cat.description}</span>
+          </div>
+          <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {list.map((tool) => (
               <a
                 href={toolUrl(tool.slug)}
-                class:list={[
-                  'panel block p-4 transition hover:-translate-y-0.5 hover:border-accent',
-                  tool.status === 'soon' && 'opacity-50',
-                ]}
+                class="panel group flex items-center gap-3.5 p-3.5 pr-4 transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_14px_40px_-12px_rgb(0_0_0/0.22)]"
               >
-                <div class="flex items-center justify-between gap-2">
-                  <span class="font-medium">{tool.name}</span>
-                  {tool.status === 'soon' && <span class="text-[11px] text-muted">준비 중</span>}
-                  {tool.processing === 'server' && <span class="text-[11px] text-accent">☁️ 서버</span>}
-                </div>
-                <p class="mt-1 text-sm text-muted">{tool.description}</p>
+                <AppIcon tool={tool} size="md" className={tool.status === 'soon' ? 'opacity-45 grayscale-[0.4]' : ''} />
+                <span class="min-w-0 flex-1">
+                  <span class="flex items-center gap-2">
+                    <span class:list={['truncate text-[15px] font-semibold', tool.status === 'soon' && 'text-muted']}>{tool.name}</span>
+                    {tool.status === 'soon' && <span class="shrink-0 rounded-full bg-panel-2 px-2 py-0.5 text-[11px] font-medium text-muted">준비 중</span>}
+                    {tool.processing === 'server' && <Cloud size={13} className="shrink-0 text-muted" aria-label="서버에서 처리" />}
+                  </span>
+                  <span class="mt-0.5 block truncate text-[13px] text-muted">{tool.description}</span>
+                </span>
+                <ChevronRight size={17} className="shrink-0 text-muted/60 transition group-hover:translate-x-0.5" />
               </a>
             ))}
           </div>

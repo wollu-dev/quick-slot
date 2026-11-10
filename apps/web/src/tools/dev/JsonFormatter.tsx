@@ -138,7 +138,7 @@ export default function JsonFormatter() {
       </div>
 
       {error && (
-        <div className="rounded-lg bg-danger/10 p-3 text-sm text-danger">
+        <div className="rounded-2xl bg-danger/10 p-3 text-sm text-danger">
           <p className="font-medium">
             JSON 오류{error.line && ` — ${error.line}번째 줄, ${error.col}번째 칸`}
           </p>

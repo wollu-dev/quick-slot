@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { X } from 'lucide-react';
 import DropZone from '../../components/ui/DropZone';
 import { dedupeNames, downloadBlob, formatBytes, makeZip, readBytes, splitName, timestampForFilename } from '../../lib/files';
 
@@ -128,7 +129,7 @@ export default function BatchRename({ mode }: { mode: Mode }) {
               <label className="label" htmlFor="onlyExts">이 확장자만 바꾸기 (선택)</label>
               <input id="onlyExts" className="input font-mono" placeholder="예: jpeg, JPG" value={o.onlyExts} onChange={(e) => set('onlyExts', e.target.value)} />
             </div>
-            <p className="rounded-lg bg-panel-2 p-3 text-xs leading-relaxed text-muted">
+            <p className="rounded-2xl bg-panel-2 p-3 text-xs leading-relaxed text-muted">
               확장자만 바꾸면 파일 내용은 그대로예요. PNG를 JPG로 <b className="text-fg">형식 자체를 변환</b>하려면 이미지 변환 툴을 쓰세요.
             </p>
           </>
@@ -206,7 +207,9 @@ export default function BatchRename({ mode }: { mode: Mode }) {
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-xs text-muted">{formatBytes(r.file.size)}</span>
-                  <button type="button" className="text-muted hover:text-danger" aria-label="목록에서 빼기" onClick={() => setFiles((p) => p.filter((_, j) => j !== i))}>✕</button>
+                  <button type="button" className="grid size-6 place-items-center rounded-full text-muted transition hover:bg-danger/10 hover:text-danger" aria-label="목록에서 빼기" onClick={() => setFiles((p) => p.filter((_, j) => j !== i))}>
+                    <X size={14} strokeWidth={2.4} />
+                  </button>
                 </div>
               </li>
             ))}

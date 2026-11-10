@@ -10,7 +10,20 @@ QuickSlot: 설치 없이 브라우저에서 바로 쓰는 생활·개발 도구 
 - npm workspaces 모노레포. 프론트는 `apps/web` (Astro 7 + React 19 islands + Tailwind 4). 백엔드 `apps/api` 는 아직 없음.
 - 툴의 단일 진실 공급원은 `apps/web/src/tools/registry.ts`. 툴 추가·상태 변경은 여기부터.
 - 원칙: 툴은 기본적으로 브라우저 안에서만 처리(`processing: 'client'`). 사용자 파일을 서버로 보내지 않는다. 서버가 꼭 필요한 툴만 `'server'` 로 표시.
-- UI 문구는 한국어. 색은 `apps/web/src/styles/global.css` 의 `@theme` 토큰(bg, panel, line, fg, muted, accent, danger, ok)만 사용.
+- UI 문구는 한국어.
+
+## 디자인 규칙
+
+반투명 유리(글래스) 스타일, 라이트/다크는 시스템 설정을 따른다. 기준은 `apps/web/src/styles/global.css`.
+
+- **색**: 토큰만 사용 — `bg`, `panel`, `panel-2`, `line`, `fg`, `muted`, `accent`, `accent-fg`, `danger`, `ok`. 하드코딩 색 금지 (예외: `registry.ts` 의 카테고리 타일 색).
+- **표면**: 카드·패널은 `panel`(= `glass` + 둥근 모서리), 위에 뜨는 창은 `glass-strong`. 넓은 `textarea.input` 은 자동으로 유리 표면이 된다.
+- **컨트롤**: 버튼 `btn` / `btn-primary` / `btn-tinted`, 입력 `input`, 라벨 `label`, 여러 개 중 하나 고르기는 `Segmented` 컴포넌트. 체크박스는 CSS 로 자동으로 스위치 모양이 된다.
+- **아이콘**: `lucide-react` 선 아이콘만. **이모지를 UI 아이콘으로 쓰지 않는다.** 툴 아이콘은 `AppIcon` (카테고리 색 타일).
+- **모서리**: 카드 22px, 큰 영역 26px, 버튼·뱃지는 완전히 둥글게(pill). `rounded-sm/md/lg` 처럼 각진 모서리는 쓰지 않는다.
+- **주의**: `backdrop-filter` 가 걸린 요소 안의 `position: fixed` 자식은 화면이 아니라 그 요소 기준으로 배치된다. 모달·오버레이는 `createPortal(…, document.body)` 로 띄운다.
+- **그리드**: 카드 그리드에는 `grid-cols-1` 처럼 열 수를 명시한다 (안 하면 긴 텍스트 때문에 모바일에서 화면 밖으로 넘친다).
+- 변경 후 라이트·다크, 그리고 모바일 폭(390px)에서 확인한다.
 
 ## 명령어
 

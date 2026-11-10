@@ -1,6 +1,8 @@
 ---
+import { ChevronLeft, Cloud, Lock } from 'lucide-react';
 import Layout from './Layout.astro';
 import SlotButton from '../components/SlotButton';
+import AppIcon from '../components/ui/AppIcon';
 import { getTool, getCategory } from '../tools/registry';
 
 interface Props {
@@ -13,26 +15,28 @@ const category = getCategory(tool.category);
 ---
 
 <Layout title={tool.name} description={tool.description}>
-  <nav class="mb-3 text-xs text-muted">
-    <a href="/" class="hover:text-fg">홈</a>
-    <span class="mx-1">/</span>
-    <a href={`/#${category.id}`} class="hover:text-fg">{category.icon} {category.name}</a>
-  </nav>
+  <a href={`/#${category.id}`} class="mb-6 inline-flex items-center gap-0.5 text-[15px] text-accent hover:opacity-80">
+    <ChevronLeft size={19} strokeWidth={2.4} />
+    {category.name}
+  </a>
 
-  <div class="mb-6 flex flex-wrap items-start justify-between gap-3">
-    <div>
-      <h1 class="text-2xl font-bold tracking-tight">{tool.name}</h1>
-      <p class="mt-1 text-sm text-muted">{tool.description}</p>
+  <div class="mb-8 flex flex-wrap items-center gap-x-4 gap-y-4">
+    <AppIcon tool={tool} size="lg" />
+    <div class="min-w-0 flex-1 basis-56">
+      <h1 class="text-[26px] leading-tight font-bold tracking-tight break-keep sm:text-[32px]">{tool.name}</h1>
+      <p class="mt-1 text-[15px] break-keep text-muted">{tool.description}</p>
     </div>
-    <div class="flex items-center gap-2">
+    <div class="flex w-full items-center gap-2 sm:w-auto">
       {
         tool.processing === 'client' ? (
-          <span class="rounded-full bg-ok/10 px-2.5 py-1 text-xs text-ok" title="파일이 서버로 전송되지 않습니다">
-            🔒 브라우저에서 처리
+          <span class="inline-flex h-9 items-center gap-1.5 rounded-full bg-ok/12 px-3.5 text-[13px] font-medium text-ok" title="파일이 서버로 전송되지 않습니다">
+            <Lock size={13} strokeWidth={2.4} />
+            기기에서 처리
           </span>
         ) : (
-          <span class="rounded-full bg-accent/10 px-2.5 py-1 text-xs text-accent" title="서버에서 처리 후 즉시 삭제됩니다">
-            ☁️ 서버에서 처리
+          <span class="inline-flex h-9 items-center gap-1.5 rounded-full bg-accent/12 px-3.5 text-[13px] font-medium text-accent" title="서버에서 처리 후 즉시 삭제됩니다">
+            <Cloud size={13} strokeWidth={2.4} />
+            서버에서 처리
           </span>
         )
       }

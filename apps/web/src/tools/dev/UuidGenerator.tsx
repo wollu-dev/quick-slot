@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import CopyButton from '../../components/ui/CopyButton';
+import Segmented from '../../components/ui/Segmented';
 
 type Version = 'v4' | 'v7';
 type Format = 'default' | 'upper' | 'nohyphen' | 'braces';
@@ -47,16 +48,15 @@ export default function UuidGenerator() {
       <div className="flex flex-wrap items-end gap-3">
         <div>
           <span className="label">버전</span>
-          <div className="flex rounded-lg border border-line p-0.5 text-sm">
-            {([
+          <Segmented
+            label="버전"
+            value={version}
+            onChange={setVersion}
+            options={[
               ['v4', 'v4 (랜덤)'],
               ['v7', 'v7 (시간순)'],
-            ] as const).map(([k, label]) => (
-              <button key={k} type="button" onClick={() => setVersion(k)} className={`rounded-md px-3 py-1 ${version === k ? 'bg-panel-2 text-fg' : 'text-muted'}`}>
-                {label}
-              </button>
-            ))}
-          </div>
+            ]}
+          />
         </div>
         <div>
           <label className="label" htmlFor="count">개수 (최대 1000)</label>

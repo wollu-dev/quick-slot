@@ -1,6 +1,8 @@
 ---
 import '../styles/global.css';
+import { Lock } from 'lucide-react';
 import CommandPalette from '../components/CommandPalette';
+import Logo from '../components/Logo.astro';
 
 interface Props {
   title?: string;
@@ -15,9 +17,11 @@ const fullTitle = title ? `${title} · QuickSlot` : 'QuickSlot · 필요한 도�
 <html lang="ko">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="description" content={description} />
     <meta name="generator" content={Astro.generator} />
+    <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#050507" media="(prefers-color-scheme: dark)" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link
       rel="stylesheet"
@@ -25,11 +29,13 @@ const fullTitle = title ? `${title} · QuickSlot` : 'QuickSlot · 필요한 도�
     />
     <title>{fullTitle}</title>
   </head>
-  <body class="min-h-screen antialiased">
-    <header class="sticky top-0 z-40 border-b border-line bg-bg/85 backdrop-blur">
-      <div class="mx-auto flex max-w-6xl items-center gap-4 px-4 py-3">
-        <a href="/" class="flex shrink-0 items-center gap-2 font-bold tracking-tight">
-          <span class="grid size-7 place-items-center rounded-md bg-accent text-sm text-accent-fg">Q</span>
+  <body class="min-h-screen">
+    <div class="backdrop" aria-hidden="true"></div>
+
+    <header class="sticky top-0 z-40 px-4 pt-3">
+      <div class="glass mx-auto flex h-14 max-w-6xl items-center gap-4 rounded-full pr-2 pl-3">
+        <a href="/" class="flex shrink-0 items-center gap-2.5 text-[17px] font-semibold tracking-tight">
+          <Logo size={30} />
           <span>QuickSlot</span>
         </a>
         <div class="flex flex-1 justify-end">
@@ -38,12 +44,13 @@ const fullTitle = title ? `${title} · QuickSlot` : 'QuickSlot · 필요한 도�
       </div>
     </header>
 
-    <main class="mx-auto max-w-6xl px-4 py-8">
+    <main class="mx-auto max-w-6xl px-4 pt-10 pb-16 sm:px-6">
       <slot />
     </main>
 
-    <footer class="border-t border-line py-6 text-center text-xs text-muted">
-      🔒 표시된 툴은 모든 처리가 브라우저 안에서 이루어지며, 파일이 서버로 전송되지 않습니다.
+    <footer class="mx-auto flex max-w-6xl items-center justify-center gap-1.5 px-4 pb-10 text-center text-[13px] text-muted">
+      <Lock size={13} strokeWidth={2.2} />
+      브라우저에서 처리하는 툴은 파일을 서버로 보내지 않습니다.
     </footer>
   </body>
 </html>
