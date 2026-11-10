@@ -22,7 +22,6 @@ const en: Dict = {
   },
   header: { home: 'QuickSlot home', search: 'Search QuickSlot', settings: 'Settings' },
   footer: {
-    privacy: 'Tools that run in your browser never upload your files.',
     copyright: (year) => `© ${year} Jaeyun Jung (WolLu)`,
     links: 'Project links',
     github: 'GitHub',
@@ -58,6 +57,7 @@ const en: Dict = {
     drop: 'Drop files here',
     orClick: 'or click to choose',
     addMore: 'Add more files',
+    privacy: 'Your files never leave this device',
   },
   settings: {
     title: 'Settings',

@@ -22,7 +22,6 @@ const ja: Dict = {
   },
   header: { home: 'QuickSlot ホーム', search: 'QuickSlot を検索', settings: '設定' },
   footer: {
-    privacy: 'ブラウザで処理するツールは、ファイルをサーバーに送信しません。',
     copyright: (year) => `© ${year} Jaeyun Jung（WolLu）`,
     links: 'プロジェクトのリンク',
     github: 'GitHub',
@@ -58,6 +57,7 @@ const ja: Dict = {
     drop: 'ここにファイルをドロップ',
     orClick: 'またはクリックして選択',
     addMore: 'ファイルを追加',
+    privacy: 'ファイルがこの端末の外に出ることはありません',
   },
   settings: {
     title: '設定',
