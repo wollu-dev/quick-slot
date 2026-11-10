@@ -592,6 +592,17 @@ const ko = {
     copySummary: '정산 내용 복사',
     summaryTitle: (total: string, n: number) => `[정산] 총 ${total} / ${n}명`,
   },
+  typo: {
+    direction: '변환 방향',
+    auto: '자동',
+    engToKor: '영문 → 한글',
+    korToEng: '한글 → 영문',
+    detected: (dir: string) => `자동 감지: ${dir}`,
+    placeholder: '한/영 키를 깜빡하고 친 글을 붙여 넣으세요. 예: dkssudgktpdy',
+    sample: '예시 넣기',
+    useResult: '결과를 입력으로',
+    note: '표준 두벌식 자판 기준이에요. 자동은 한글이 섞여 있으면 한글 → 영문, 아니면 영문 → 한글로 바꿔요. 숫자와 기호는 그대로 둬요.',
+  },
   uuid: {
     version: '버전',
     v4: 'v4 (랜덤)',

@@ -43,6 +43,7 @@ Renaming a batch of files, stripping GPS data from a photo, pretty-printing JSON
 | **File Date Changer** | Download files with new created and modified dates as a ZIP, or get a PowerShell / Bash script |
 | **Metadata Remover** | Strip GPS, camera info and more from JPEG / PNG / WebP without losing quality |
 | **Character Counter** | Characters with and without spaces, words, bytes, reading time |
+| **Korean ↔ English Keyboard Fix** | Fix text typed in the wrong Korean / English mode (dkssud → 안녕, ㅗ디ㅣㅐ → hello) |
 | **JSON Formatter** | Pretty-print, minify, and pinpoint the exact line and column of errors |
 | **Base64 Encode / Decode** | Text and files, URL-safe and data-URL output |
 | **Unix Timestamp** | Convert timestamps ↔ dates with auto-detected units |
@@ -55,7 +56,7 @@ Renaming a batch of files, stripping GPS data from a photo, pretty-printing JSON
 | **Bill Splitter** | Split a bill evenly or with extras per person, round to 10 / 100 / 1000, and copy a summary to share |
 
 <details>
-<summary><b>Coming soon</b> (14 tools)</summary>
+<summary><b>Coming soon</b> (13 tools)</summary>
 
 | Category | Tools |
 |---|---|
@@ -63,7 +64,7 @@ Renaming a batch of files, stripping GPS data from a photo, pretty-printing JSON
 | PDF & Docs | Merge PDF · Split PDF · Images → PDF · Office → PDF |
 | Images | Image Compressor · Image Resizer · QR Code |
 | Video & Audio | Video → GIF · Screen Recorder |
-| Text | Text Diff · Korean ↔ English Keyboard Fix |
+| Text | Text Diff |
 | Developer | Normal Map Green Flip |
 
 </details>

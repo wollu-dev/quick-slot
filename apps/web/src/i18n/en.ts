@@ -583,6 +583,17 @@ const en: Dict = {
     copySummary: 'Copy summary',
     summaryTitle: (total: string, n: number) => `[Split] ${total} / ${n} people`,
   },
+  typo: {
+    direction: 'Direction',
+    auto: 'Auto',
+    engToKor: 'English keys → Korean',
+    korToEng: 'Korean → English keys',
+    detected: (dir: string) => `Detected: ${dir}`,
+    placeholder: 'Paste text typed with the wrong Korean / English mode, for example dkssudgktpdy',
+    sample: 'Try an example',
+    useResult: 'Use result as input',
+    note: 'Uses the standard Korean 2-set (dubeolsik) layout. Auto converts Korean → English keys if the text has any Hangul, otherwise English keys → Korean. Numbers and symbols stay as they are.',
+  },
   uuid: {
     version: 'Version',
     v4: 'v4 (random)',
