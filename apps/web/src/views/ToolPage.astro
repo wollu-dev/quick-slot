@@ -24,6 +24,7 @@ import PasswordGenerator from '../tools/dev/PasswordGenerator';
 import JwtDecoder from '../tools/dev/JwtDecoder';
 import ColorConverter from '../tools/dev/ColorConverter';
 import DateCalculator from '../tools/life/DateCalculator';
+import UnitConverter from '../tools/life/UnitConverter';
 
 interface Props {
   lang: Lang;
@@ -82,6 +83,7 @@ const tt = toolText(lang, tool.slug);
   {slug === 'jwt-decoder' && <JwtDecoder client:only="react" lang={lang} />}
   {slug === 'color-converter' && <ColorConverter client:load lang={lang} />}
   {slug === 'date-calculator' && <DateCalculator client:only="react" lang={lang} />}
+  {slug === 'unit-converter' && <UnitConverter client:load lang={lang} />}
 
   {
     tool.status === 'soon' && (
