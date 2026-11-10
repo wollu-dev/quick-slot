@@ -25,12 +25,14 @@ function Warning({ tool, onClose }: { tool: CustomTool; onClose: () => void }) {
   const t = useT();
   const c = t.custom;
   const [dontAsk, setDontAsk] = useState(false);
-  const openRef = useRef<HTMLButtonElement>(null);
+  // Focus starts on Cancel: a warning should never be confirmed by a stray key press
+  // (e.g. the Enter that chose the tool in search would otherwise also press "Open")
+  const cancelRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
     window.addEventListener('keydown', onKey);
-    openRef.current?.focus();
+    cancelRef.current?.focus();
     return () => window.removeEventListener('keydown', onKey);
   }, [onClose]);
 
@@ -92,10 +94,10 @@ function Warning({ tool, onClose }: { tool: CustomTool; onClose: () => void }) {
         </label>
 
         <div className="mt-5 grid grid-cols-2 gap-2">
-          <button type="button" className="btn" onClick={onClose}>
+          <button ref={cancelRef} type="button" className="btn" onClick={onClose}>
             {c.cancel}
           </button>
-          <button ref={openRef} type="button" className="btn btn-primary" onClick={open}>
+          <button type="button" className="btn btn-primary" onClick={open}>
             <ExternalLink size={15} strokeWidth={2.2} />
             {c.open}
           </button>

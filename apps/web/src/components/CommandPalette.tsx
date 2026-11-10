@@ -116,6 +116,9 @@ function CommandPalette() {
       e.preventDefault();
       setActive((a) => Math.max(a - 1, 0));
     } else if (e.key === 'Enter') {
+      if (e.nativeEvent.isComposing) return; // Enter that ends Korean/Japanese IME input
+      // Cancel the default so this Enter can't also press a button that gets focus next
+      e.preventDefault();
       go(results[active]);
     } else if (e.key === 'Escape') {
       setOpen(false);
