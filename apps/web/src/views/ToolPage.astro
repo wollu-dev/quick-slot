@@ -23,6 +23,7 @@ import UuidGenerator from '../tools/dev/UuidGenerator';
 import PasswordGenerator from '../tools/dev/PasswordGenerator';
 import JwtDecoder from '../tools/dev/JwtDecoder';
 import ColorConverter from '../tools/dev/ColorConverter';
+import DateCalculator from '../tools/life/DateCalculator';
 
 interface Props {
   lang: Lang;
@@ -80,6 +81,7 @@ const tt = toolText(lang, tool.slug);
   {slug === 'password-generator' && <PasswordGenerator client:only="react" lang={lang} />}
   {slug === 'jwt-decoder' && <JwtDecoder client:only="react" lang={lang} />}
   {slug === 'color-converter' && <ColorConverter client:load lang={lang} />}
+  {slug === 'date-calculator' && <DateCalculator client:only="react" lang={lang} />}
 
   {
     tool.status === 'soon' && (

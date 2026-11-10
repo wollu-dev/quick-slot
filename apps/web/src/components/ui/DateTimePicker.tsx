@@ -5,20 +5,29 @@ import { LANG_TAGS, useLang, useT } from '../../i18n';
 import { usePopover } from './usePopover';
 
 interface Props {
-  /** Local date and time as `YYYY-MM-DDTHH:mm:ss` (the same format as <input type="datetime-local">) */
+  /**
+   * Local date and time as `YYYY-MM-DDTHH:mm:ss` (the same format as <input type="datetime-local">),
+   * or `YYYY-MM-DD` when `time` is false
+   */
   value: string;
   onChange: (v: string) => void;
   id?: string;
   /** Accessible name when there is no visible label */
   label?: string;
+  /** Show and edit the time too (default). false = date only */
+  time?: boolean;
 }
 
 const pad = (n: number) => String(n).padStart(2, '0');
 export const toDateTimeValue = (d: Date) =>
   `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+export const toDateValue = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+/** Always read as local time (new Date('2026-11-11') alone would be UTC midnight) */
 const parse = (v: string) => {
-  const d = new Date(v);
-  return Number.isNaN(d.getTime()) ? new Date() : d;
+  const m = v.match(/^(\d{4})-(\d{2})-(\d{2})(?:T(\d{2}):(\d{2})(?::(\d{2}))?)?$/);
+  if (!m) return new Date();
+  const [, y, mo, d, h = '0', mi = '0', sec = '0'] = m;
+  return new Date(+y, +mo - 1, +d, +h, +mi, +sec);
 };
 const sameDay = (a: Date, b: Date) => a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
 
@@ -27,7 +36,7 @@ const sameDay = (a: Date, b: Date) => a.getFullYear() === b.getFullYear() && a.g
  * date/time popup can't be styled and ignores the site language.
  * Weekday and month names come from Intl in the current language.
  */
-export default function DateTimePicker({ value, onChange, id, label }: Props) {
+export default function DateTimePicker({ value, onChange, id, label, time = true }: Props) {
   const t = useT();
   const lang = useLang();
   const tag = LANG_TAGS[lang];
@@ -62,7 +71,7 @@ export default function DateTimePicker({ value, onChange, id, label }: Props) {
     return () => window.removeEventListener('keydown', onKey);
   }, [open, close]);
 
-  const set = (d: Date) => onChange(toDateTimeValue(d));
+  const set = (d: Date) => onChange(time ? toDateTimeValue(d) : toDateValue(d));
   const setDay = (day: Date) => {
     const d = new Date(date);
     d.setFullYear(day.getFullYear(), day.getMonth(), day.getDate());
@@ -87,7 +96,9 @@ export default function DateTimePicker({ value, onChange, id, label }: Props) {
     return Array.from({ length: 7 }, (_, i) => f.format(new Date(2023, 0, 1 + i))); // 2023-01-01 is a Sunday
   }, [tag]);
   const monthLabel = new Intl.DateTimeFormat(tag, { year: 'numeric', month: 'long' }).format(view);
-  const shown = date.toLocaleString(tag, { dateStyle: 'medium', timeStyle: 'medium' });
+  const shown = time
+    ? date.toLocaleString(tag, { dateStyle: 'medium', timeStyle: 'medium' })
+    : date.toLocaleDateString(tag, { year: 'numeric', month: 'short', day: 'numeric', weekday: 'short' });
   const today = new Date();
 
   const onDayKey = (e: React.KeyboardEvent, day: Date) => {
@@ -178,6 +189,7 @@ export default function DateTimePicker({ value, onChange, id, label }: Props) {
               })}
             </div>
 
+            {time && (
             <div className="mt-3 flex items-center gap-2 border-t border-line pt-3">
               <span className="mr-auto pl-1 text-[13px] font-medium text-muted">{t.picker.time}</span>
               <TimePart label={t.picker.hour} value={date.getHours()} max={23} onChange={(n) => setTime('h', n)} />
@@ -186,6 +198,7 @@ export default function DateTimePicker({ value, onChange, id, label }: Props) {
               <span className="text-muted">:</span>
               <TimePart label={t.picker.second} value={date.getSeconds()} max={59} onChange={(n) => setTime('s', n)} />
             </div>
+            )}
 
             <div className="mt-3 grid grid-cols-2 gap-2">
               <button
@@ -197,7 +210,7 @@ export default function DateTimePicker({ value, onChange, id, label }: Props) {
                   setView(new Date(now.getFullYear(), now.getMonth(), 1));
                 }}
               >
-                {t.picker.now}
+                {time ? t.picker.now : t.picker.today}
               </button>
               <button type="button" className="btn btn-primary" onClick={() => close()}>
                 {t.common.done}
