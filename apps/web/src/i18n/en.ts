@@ -12,6 +12,7 @@ const en: Dict = {
     copyFailed: 'Copy failed',
     reset: 'Start over',
     working: 'Working…',
+    input: 'Input',
     result: 'Result',
     save: 'Save',
     done: 'Done',

@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import CopyButton from '../../components/ui/CopyButton';
 import DropZone from '../../components/ui/DropZone';
 import Segmented from '../../components/ui/Segmented';
+import TextPanel from '../../components/ui/TextPanel';
 import { useT, withI18n } from '../../i18n';
 import { formatBytes } from '../../lib/files';
 
@@ -80,18 +81,16 @@ function Base64Tool() {
       </div>
 
       {tab === 'text' ? (
-        <div className="grid gap-3 lg:grid-cols-2">
-          <textarea
+        <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+          <TextPanel
+            label={t.common.input}
             value={text}
-            onChange={(e) => setText(e.target.value)}
-            spellCheck={false}
+            onChange={setText}
             placeholder={direction === 'encode' ? b.encodePlaceholder : b.decodePlaceholder}
-            className="input min-h-[40vh] resize-y font-mono text-[13px]"
           />
-          <div className="relative">
-            <textarea readOnly value={result.value} spellCheck={false} placeholder={t.common.result} className="input min-h-[40vh] resize-y bg-panel font-mono text-[13px]" />
-            {result.error && <p className="mt-1 text-sm text-danger">{result.error}</p>}
-            {result.value && <CopyButton text={result.value} className="absolute top-3 right-3" />}
+          <div className="flex flex-col gap-1">
+            <TextPanel label={t.common.result} value={result.value} actions={result.value && <CopyButton text={result.value} />} />
+            {result.error && <p className="text-sm text-danger">{result.error}</p>}
           </div>
         </div>
       ) : (

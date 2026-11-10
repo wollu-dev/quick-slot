@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import CopyButton from '../../components/ui/CopyButton';
 import Select from '../../components/ui/Select';
+import TextPanel from '../../components/ui/TextPanel';
 import { useT, withI18n, type Dict } from '../../i18n';
 import { downloadBlob } from '../../lib/files';
 
@@ -180,28 +181,32 @@ function JsonFormatter() {
         </div>
       )}
 
-      <div className="grid gap-3 lg:grid-cols-2">
-        <textarea
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+        <TextPanel
+          label={t.common.input}
           value={input}
-          onChange={(e) => setInput(e.target.value)}
+          onChange={setInput}
           onKeyDown={(e) => {
             if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') run('pretty');
           }}
-          spellCheck={false}
           placeholder={j.placeholder}
-          className="input min-h-[60vh] resize-y font-mono text-[13px]"
+          minHeight="min-h-[60vh]"
         />
-        <div className="relative">
-          <textarea readOnly value={output} spellCheck={false} placeholder={t.common.result} className="input min-h-[60vh] resize-y bg-panel font-mono text-[13px]" />
-          {output && (
-            <div className="absolute top-3 right-3 flex gap-2">
-              <CopyButton text={output} />
-              <button type="button" className="btn" onClick={() => downloadBlob(new Blob([output], { type: 'application/json' }), 'formatted.json')}>
-                {t.common.save}
-              </button>
-            </div>
-          )}
-        </div>
+        <TextPanel
+          label={t.common.result}
+          value={output}
+          minHeight="min-h-[60vh]"
+          actions={
+            output && (
+              <>
+                <CopyButton text={output} />
+                <button type="button" className="btn" onClick={() => downloadBlob(new Blob([output], { type: 'application/json' }), 'formatted.json')}>
+                  {t.common.save}
+                </button>
+              </>
+            )
+          }
+        />
       </div>
     </div>
   );

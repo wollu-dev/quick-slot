@@ -12,6 +12,7 @@ const ja: Dict = {
     copyFailed: 'コピー失敗',
     reset: '最初から',
     working: '作成中…',
+    input: '入力',
     result: '結果',
     save: '保存',
     done: '完了',
