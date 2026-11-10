@@ -14,6 +14,7 @@ QuickSlot: 브라우저에서 바로 쓰는 생활·개발 도구 모음. 구조
 - npm workspaces 모노레포. 웹사이트는 `apps/web` (Astro 7 + React 19 islands + Tailwind 4). 백엔드(`apps/api`)는 아직 없음.
 - 툴의 단일 진실 공급원은 `apps/web/src/tools/registry.ts`. 툴 추가·상태 변경은 여기부터.
 - 원칙: 툴은 모든 처리를 브라우저 안에서 한다(`processing: 'client'`). 사용자 파일을 서버로 보내지 않는다. 서버가 꼭 필요한 툴만 `'server'` 로 표시.
+- 내 도구(`lib/customTools.ts`)는 사용자가 직접 추가하는 외부 사이트 링크다. 브라우저에만 저장하고, http(s) 주소만 받으며, 외부 도구 경고(`ExternalToolWarning`)를 거친 뒤 `noopener,noreferrer` 로 새 탭에서 연다. 그 사이트에서 아무것도 불러오지 않는다(파비콘, 미리보기, iframe 금지).
 - 무거운 엔진(ffmpeg.wasm, HEIC·AVIF 코덱 같은 WebAssembly)은 필요할 때만 동적 `import()` 로 불러오고, CDN 이 아니라 이 사이트에서 직접 제공한다.
 - 파일 변환은 확장자와 내용이 다른 파일을 절대 만들지 않는다. 실제 형식은 바이트로 판단하고(`lib/convert/formats.ts`), 형식이 같을 때만 이름을 바꾸며, 변환할 수 없는 것은 거절한다.
 

@@ -46,6 +46,9 @@ export const categories: Category[] = [
   { id: 'life', icon: Calculator, color: '#14a8bd' },
 ];
 
+/** Tile colors the user can pick for a custom (external) tool */
+export const CUSTOM_COLORS = ['#8e8e93', '#0a84ff', '#30b158', '#ff9f0a', '#ff375f', '#5e5ce6', '#14a8bd', '#ac8e68'];
+
 const t = (tool: Omit<Tool, 'processing'> & { processing?: Tool['processing'] }): Tool => ({
   processing: 'client',
   ...tool,

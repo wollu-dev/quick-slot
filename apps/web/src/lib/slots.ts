@@ -53,6 +53,13 @@ export function toggleSlot(slug: string): boolean {
   return true;
 }
 
+/** Takes a tool out of the slots, if it is in one (e.g. a custom tool that was deleted) */
+export function removeFromSlots(slug: string) {
+  const slots = readSlots();
+  if (!slots.includes(slug)) return;
+  writeSlots(slots.map((s) => (s === slug ? null : s)));
+}
+
 export function useSlots() {
   const [slots, setSlots] = useState<(string | null)[]>(() => Array(SLOT_COUNT).fill(null));
   useEffect(() => {

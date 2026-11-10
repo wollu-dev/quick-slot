@@ -90,6 +90,14 @@ body {
   overflow-wrap: break-word;
 }
 
+/* Japanese has no spaces between words, so keep-all would make whole clauses unbreakable.
+   Break anywhere, but never start a line with closing punctuation such as 。 */
+html[lang="ja"] body,
+html[lang="ja"] .break-keep {
+  word-break: normal;
+  line-break: strict;
+}
+
 /* Fixed background: shading gradient + fine noise grain (instead of background-attachment: fixed, which doesn't work on iOS) */
 body::before {
   content: "";

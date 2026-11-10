@@ -31,6 +31,7 @@ Renaming a batch of files, stripping GPS data from a photo, pretty-printing JSON
 - **🔒 Private by design.** Every tool runs in your browser. Files are processed on your device and never uploaded.
 - **⚡ Instant.** Nothing to install or sign up for. Open a tool and drop your files in.
 - **⭐ Quick Slots.** Pin up to 9 favorite tools to a macOS-style dock and open them with <kbd>Alt</kbd>+<kbd>1</kbd>–<kbd>9</kbd>.
+- **🔗 Your own tools.** Add any website you use often (for example an AI chat) as a tool. It shows up in search and the dock, and opens in a new tab after a short warning about uploads, licenses and privacy.
 - **🌏 Multilingual.** Korean, English and Japanese, with light, dark and auto appearance.
 
 ## Tools
