@@ -14,7 +14,9 @@ QuickSlot: 설치 없이 브라우저에서 바로 쓰는 생활·개발 도구 
 
 ## 디자인 규칙
 
-반투명 유리(글래스) 스타일, 라이트/다크는 시스템 설정을 따른다. 기준은 `apps/web/src/styles/global.css`.
+단색 배경 위의 반투명 유리(글래스) 표면, 라이트/다크는 시스템 설정을 따른다. 기준은 `apps/web/src/styles/global.css`.
+
+- **배경**: 단색(`bg` 토큰)만. 그라데이션·색 번짐·패턴 배경을 넣지 않는다.
 
 - **색**: 토큰만 사용 — `bg`, `panel`, `panel-2`, `line`, `fg`, `muted`, `accent`, `accent-fg`, `danger`, `ok`. 하드코딩 색 금지 (예외: `registry.ts` 의 카테고리 타일 색).
 - **표면**: 카드·패널은 `panel`(= `glass` + 둥근 모서리), 위에 뜨는 창은 `glass-strong`. 넓은 `textarea.input` 은 자동으로 유리 표면이 된다.
