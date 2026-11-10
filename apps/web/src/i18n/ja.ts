@@ -3,7 +3,7 @@ import type { Dict } from './ko';
 const ja: Dict = {
   meta: {
     siteTitle: 'QuickSlot · 必要なツールを、すぐに',
-    siteDescription: 'インストール不要、ブラウザですぐ使える日常・開発ツール集。ファイルがサーバーに送られることはありません。',
+    siteDescription: 'インストール不要、ブラウザですぐ使える日常・開発ツール集。ファイルは基本的に端末内で処理されます。',
     h1: 'QuickSlot：ブラウザですぐ使える日常・開発ツール集',
   },
   common: {
@@ -118,7 +118,7 @@ const ja: Dict = {
     warnTitle: '外部サイトに移動します',
     warnLead: (host: string) => `**${host}** はQuickSlotのツールではありません。新しいタブで開く前に、以下を確認してください。`,
     warnFilesTitle: 'ファイルのアップロード',
-    warnFiles: 'そのサイトにアップロードしたファイルは、そのサイトのサーバーに送信される場合があります。QuickSlotのツールのように端末内だけで処理される保証はありません。',
+    warnFiles: 'そのサイトにアップロードしたファイルは、そのサイトのサーバーに送信される場合があります。QuickSlotはツールごとにファイルの処理場所を表示しますが、外部サイトにはそのような表示や保証はありません。',
     warnLicenseTitle: 'ライセンス・利用規約',
     warnLicense: 'そのサイトの利用規約とライセンスが適用されます。成果物の権利や商用利用の可否はご自身で確認してください。',
     warnPrivacyTitle: '個人情報',

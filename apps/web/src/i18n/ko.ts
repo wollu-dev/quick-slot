@@ -6,7 +6,7 @@
 const ko = {
   meta: {
     siteTitle: 'QuickSlot · 필요한 도구를 바로 꺼내 쓰세요',
-    siteDescription: '설치 없이 브라우저에서 바로 쓰는 생활·개발 도구 모음. 파일은 서버로 올라가지 않습니다.',
+    siteDescription: '설치 없이 브라우저에서 바로 쓰는 생활·개발 도구 모음. 파일은 기본적으로 내 기기 안에서 처리됩니다.',
     h1: 'QuickSlot: 브라우저에서 바로 쓰는 생활·개발 도구 모음',
   },
   common: {
@@ -124,7 +124,7 @@ const ko = {
     warnTitle: '외부 사이트로 이동해요',
     warnLead: (host: string) => `**${host}** 은(는) QuickSlot이 만든 도구가 아니에요. 새 탭에서 열기 전에 아래 내용을 확인하세요.`,
     warnFilesTitle: '파일 업로드',
-    warnFiles: '그 사이트에 올린 파일은 그 사이트의 서버로 전송될 수 있어요. QuickSlot 도구처럼 기기 안에서만 처리된다는 보장이 없어요.',
+    warnFiles: '그 사이트에 올린 파일은 그 사이트의 서버로 전송될 수 있어요. QuickSlot은 도구마다 파일이 어디서 처리되는지 표시하지만, 외부 사이트에는 그런 표시나 보장이 없어요.',
     warnLicenseTitle: '라이선스·이용약관',
     warnLicense: '그 사이트의 이용약관과 라이선스가 적용돼요. 결과물의 권리나 상업적 이용 가능 여부는 직접 확인하세요.',
     warnPrivacyTitle: '개인정보',

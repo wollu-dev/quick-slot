@@ -3,7 +3,7 @@ import type { Dict } from './ko';
 const en: Dict = {
   meta: {
     siteTitle: 'QuickSlot · The tools you need, one click away',
-    siteDescription: 'Everyday and developer tools that run right in your browser. No install, and your files never leave your device.',
+    siteDescription: 'Everyday and developer tools that run right in your browser. No install, and your files are processed on your device by default.',
     h1: 'QuickSlot: everyday and developer tools that run in your browser',
   },
   common: {
@@ -118,7 +118,7 @@ const en: Dict = {
     warnTitle: 'You’re leaving QuickSlot',
     warnLead: (host: string) => `**${host}** is not a QuickSlot tool. Please read the following before it opens in a new tab.`,
     warnFilesTitle: 'File uploads',
-    warnFiles: 'Files you upload there may be sent to that site’s servers. Unlike QuickSlot tools, there’s no guarantee they stay on your device.',
+    warnFiles: 'Files you upload there may be sent to that site’s servers. QuickSlot shows where each of its tools processes your files, but external sites come with no such label or guarantee.',
     warnLicenseTitle: 'License and terms',
     warnLicense: 'That site’s terms of service and licenses apply. Check the rights to your results and whether commercial use is allowed yourself.',
     warnPrivacyTitle: 'Privacy',
