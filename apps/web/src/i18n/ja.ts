@@ -29,6 +29,17 @@ const ja: Dict = {
     license: 'MITライセンス',
     issues: '不具合を報告',
   },
+  picker: {
+    prevMonth: '前の月',
+    nextMonth: '次の月',
+    time: '時刻',
+    hour: '時',
+    minute: '分',
+    second: '秒',
+    now: '現在',
+    increase: '増やす',
+    decrease: '減らす',
+  },
   palette: { noResults: '見つかりません' },
   home: { filters: 'カテゴリフィルター', all: 'すべて' },
   toolPage: {

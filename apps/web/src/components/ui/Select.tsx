@@ -1,6 +1,7 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Check, ChevronsUpDown } from 'lucide-react';
+import { usePopover } from './usePopover';
 
 interface Props<T extends string> {
   value: T;
@@ -12,8 +13,6 @@ interface Props<T extends string> {
   className?: string;
 }
 
-const GAP = 6;
-
 /**
  * Dropdown. Built by hand because the browser's native <select> list can't be styled.
  * The menu is portaled to body so it isn't trapped by a panel's backdrop-filter or overflow.
@@ -21,17 +20,17 @@ const GAP = 6;
 export default function Select<T extends string>({ value, onChange, options, id, label, className = '' }: Props<T>) {
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(0);
-  const [pos, setPos] = useState<{ top: number; left: number; width: number; origin: 'top' | 'bottom' } | null>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLUListElement>(null);
   const selectedIndex = Math.max(0, options.findIndex(([v]) => v === value));
   const current = options[selectedIndex]?.[1] ?? '';
 
-  const close = (focusTrigger = true) => {
+  const close = useCallback((focusTrigger = true) => {
     setOpen(false);
-    setPos(null);
     if (focusTrigger) triggerRef.current?.focus();
-  };
+  }, []);
+  const dismiss = useCallback(() => close(false), [close]);
+  const pos = usePopover(open, triggerRef, menuRef, dismiss);
 
   const choose = (i: number) => {
     const opt = options[i];
@@ -44,42 +43,9 @@ export default function Select<T extends string>({ value, onChange, options, id,
     setOpen(true);
   };
 
-  // On open, position relative to the trigger. Flip above it if there isn't enough room below.
-  useLayoutEffect(() => {
-    if (!open || !triggerRef.current || !menuRef.current) return;
-    const r = triggerRef.current.getBoundingClientRect();
-    const h = menuRef.current.offsetHeight;
-    const below = window.innerHeight - r.bottom - GAP;
-    const placeAbove = below < h && r.top > below;
-    setPos({
-      top: placeAbove ? r.top - GAP - h : r.bottom + GAP,
-      left: Math.min(r.left, window.innerWidth - Math.max(r.width, menuRef.current.offsetWidth) - 8),
-      width: r.width,
-      origin: placeAbove ? 'bottom' : 'top',
-    });
-    menuRef.current.focus({ preventScroll: true });
-  }, [open]);
-
-  // Close on outside click, scroll or window resize
   useEffect(() => {
-    if (!open) return;
-    const onDown = (e: MouseEvent) => {
-      const t = e.target as Node;
-      if (!menuRef.current?.contains(t) && !triggerRef.current?.contains(t)) close(false);
-    };
-    const onScroll = (e: Event) => {
-      if (!menuRef.current?.contains(e.target as Node)) close(false);
-    };
-    const onResize = () => close(false);
-    document.addEventListener('mousedown', onDown);
-    window.addEventListener('scroll', onScroll, true);
-    window.addEventListener('resize', onResize);
-    return () => {
-      document.removeEventListener('mousedown', onDown);
-      window.removeEventListener('scroll', onScroll, true);
-      window.removeEventListener('resize', onResize);
-    };
-  }, [open]);
+    if (pos) menuRef.current?.focus({ preventScroll: true });
+  }, [pos]);
 
   const onTriggerKey = (e: React.KeyboardEvent) => {
     if (['ArrowDown', 'ArrowUp', 'Enter', ' '].includes(e.key)) {

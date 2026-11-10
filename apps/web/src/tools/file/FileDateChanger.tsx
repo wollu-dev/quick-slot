@@ -6,6 +6,8 @@ import Segmented from '../../components/ui/Segmented';
 import { useT, withI18n, type Dict } from '../../i18n';
 import Rich from '../../i18n/Rich';
 import { downloadBlob, makeZip, readBytes, timestampForFilename } from '../../lib/files';
+import DateTimePicker from '../../components/ui/DateTimePicker';
+import NumberField from '../../components/ui/NumberField';
 
 type Shell = 'powershell' | 'bash';
 type ScriptText = Dict['fileDate']['script'];
@@ -151,11 +153,11 @@ function FileDateChanger() {
       <aside className="panel space-y-4 self-start p-4">
         <div>
           <label className="label" htmlFor="date">{f.date}</label>
-          <input id="date" type="datetime-local" step={1} className="input" value={date} onChange={(e) => setDate(e.target.value)} />
+          <DateTimePicker id="date" value={date} onChange={setDate} />
         </div>
         <div>
           <label className="label" htmlFor="step">{f.step}</label>
-          <input id="step" type="number" min={0} className="input" value={stepSec} onChange={(e) => setStepSec(Math.max(0, Number(e.target.value) || 0))} />
+          <NumberField id="step" min={0} value={stepSec} onChange={setStepSec} />
           <p className="mt-1 text-xs text-muted">{f.stepNote}</p>
         </div>
         <fieldset className="space-y-1.5 text-sm">

@@ -5,6 +5,7 @@ import Select from '../../components/ui/Select';
 import { LANG_TAGS, useLang, useT, withI18n, type Dict } from '../../i18n';
 import Rich from '../../i18n/Rich';
 import { dedupeNames, downloadBlob, formatBytes, makeZip, readBytes, splitName, timestampForFilename } from '../../lib/files';
+import NumberField from '../../components/ui/NumberField';
 
 type CaseMode = 'none' | 'lower' | 'upper';
 
@@ -129,11 +130,11 @@ function BatchRename() {
           <div className="grid grid-cols-2 gap-2">
             <div>
               <label className="label" htmlFor="start">{t.rename.start}</label>
-              <input id="start" type="number" className="input" value={o.start} onChange={(e) => set('start', Number(e.target.value) || 0)} />
+              <NumberField id="start" min={0} value={o.start} onChange={(v) => set('start', v)} />
             </div>
             <div>
               <label className="label" htmlFor="pad">{t.rename.pad}</label>
-              <input id="pad" type="number" min={0} max={10} className="input" value={o.pad} onChange={(e) => set('pad', Math.min(10, Math.max(0, Number(e.target.value) || 0)))} />
+              <NumberField id="pad" min={0} max={10} value={o.pad} onChange={(v) => set('pad', v)} />
             </div>
           </div>
           <div>

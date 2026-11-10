@@ -29,6 +29,17 @@ const en: Dict = {
     license: 'MIT License',
     issues: 'Report an issue',
   },
+  picker: {
+    prevMonth: 'Previous month',
+    nextMonth: 'Next month',
+    time: 'Time',
+    hour: 'Hour',
+    minute: 'Minute',
+    second: 'Second',
+    now: 'Now',
+    increase: 'Increase',
+    decrease: 'Decrease',
+  },
   palette: { noResults: 'No results' },
   home: { filters: 'Category filter', all: 'All' },
   toolPage: {
