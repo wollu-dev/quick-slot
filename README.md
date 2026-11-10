@@ -6,8 +6,8 @@
 
 **The tools you need, one click away in your browser.**
 
-Everyday and developer utilities that run entirely on your device.<br />
-No install, no sign-up, and your files never leave your computer.
+Everyday and developer utilities that run on your device.<br />
+No install, no sign-up, and your files stay on your computer unless a tool clearly says otherwise.
 
 [![CI](https://github.com/wollu-dev/quick-slot/actions/workflows/ci.yml/badge.svg)](https://github.com/wollu-dev/quick-slot/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
@@ -28,7 +28,7 @@ No install, no sign-up, and your files never leave your computer.
 
 Renaming a batch of files, stripping GPS data from a photo, pretty-printing JSON. Small jobs like these usually mean hunting for a sketchy website and uploading your files to someone else's server.
 
-- **🔒 Private by design.** Every tool runs in your browser. Files are processed on your device and never uploaded.
+- **🔒 Private by design.** Tools run in your browser by default, so your files are processed on your device. The rare tool that needs a server is marked as such, and files sent to it are deleted right after processing.
 - **⚡ Instant.** Nothing to install or sign up for. Open a tool and drop your files in.
 - **⭐ Quick Slots.** Pin up to 9 favorite tools to a macOS-style dock and open them with <kbd>Alt</kbd>+<kbd>1</kbd>–<kbd>9</kbd>.
 - **🔗 Your own tools.** Add any website you use often (for example an AI chat) as a tool. It shows up in search and the dock, and opens in a new tab after a short warning about uploads, licenses and privacy.
