@@ -94,7 +94,7 @@ export const tools: Tool[] = [
   t({ slug: 'normal-map-flip', category: 'dev', icon: Layers, keywords: ['노멀맵', 'normal', 'unity', 'unreal', '게임', 'texture'], status: 'soon', accepts: ['image/*'] }),
 
   // Everyday
-  t({ slug: 'date-calculator', category: 'life', icon: CalendarDays, keywords: ['날짜', 'dday', 'd-day', '나이', '만나이', '계산'], status: 'soon' }),
+  t({ slug: 'date-calculator', category: 'life', icon: CalendarDays, keywords: ['날짜', 'dday', 'd-day', '디데이', '나이', '만나이', '만 나이', '계산', '기념일', '평일', '영업일', 'date', 'days between', 'age', 'business days', '日付', '年齢'], status: 'ready' }),
   t({ slug: 'unit-converter', category: 'life', icon: Ruler, keywords: ['단위', '변환', '평', '길이', '무게'], status: 'soon' }),
   t({ slug: 'dutch-pay', category: 'life', icon: Receipt, keywords: ['더치페이', 'n빵', '정산', '나누기'], status: 'soon' }),
 ];
