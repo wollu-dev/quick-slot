@@ -107,7 +107,9 @@ const t = getDict(lang);
 
   for (const chip of chips) {
     chip.addEventListener('click', () => {
-      const f = chip.dataset.filter ?? 'all';
+      // Clicking the filter that is already selected clears it (back to All)
+      const picked = chip.dataset.filter ?? 'all';
+      const f = chip.getAttribute('aria-pressed') === 'true' ? 'all' : picked;
       apply(f);
       history.replaceState(null, '', f === 'all' ? location.pathname : `#${f}`);
     });
