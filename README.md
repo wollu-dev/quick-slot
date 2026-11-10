@@ -4,7 +4,7 @@
 
 # QuickSlot
 
-**The tools you need, one click away — right in your browser.**
+**The tools you need, one click away in your browser.**
 
 Everyday and developer utilities that run entirely on your device.<br />
 No install, no sign-up, and your files never leave your computer.
@@ -26,12 +26,12 @@ No install, no sign-up, and your files never leave your computer.
 
 ## Why QuickSlot?
 
-Renaming a batch of files, stripping GPS data from a photo, pretty-printing JSON — small jobs that usually mean hunting for a sketchy website and uploading your files to someone else's server.
+Renaming a batch of files, stripping GPS data from a photo, pretty-printing JSON. Small jobs like these usually mean hunting for a sketchy website and uploading your files to someone else's server.
 
-- **🔒 Private by design** — Every tool runs in your browser. Files are processed on your device and never uploaded.
-- **⚡ Instant** — Nothing to install or sign up for. Open a tool and drop your files in.
-- **⭐ Quick Slots** — Pin up to 9 favorite tools to a macOS-style dock and open them with <kbd>Alt</kbd>+<kbd>1</kbd>–<kbd>9</kbd>.
-- **🌏 Multilingual** — Korean, English and Japanese, with light, dark and auto appearance.
+- **🔒 Private by design.** Every tool runs in your browser. Files are processed on your device and never uploaded.
+- **⚡ Instant.** Nothing to install or sign up for. Open a tool and drop your files in.
+- **⭐ Quick Slots.** Pin up to 9 favorite tools to a macOS-style dock and open them with <kbd>Alt</kbd>+<kbd>1</kbd>–<kbd>9</kbd>.
+- **🌏 Multilingual.** Korean, English and Japanese, with light, dark and auto appearance.
 
 ## Tools
 
@@ -40,7 +40,7 @@ Renaming a batch of files, stripping GPS data from a photo, pretty-printing JSON
 | **Bulk Extension Changer** | Change the extension of many files at once and download a ZIP |
 | **Batch Rename** | Numbering, find & replace, regex, case conversion |
 | **File Date Changer** | Generate a PowerShell / Bash script that sets created and modified dates |
-| **Metadata Remover** | Strip GPS, camera info and more from JPEG / PNG / WebP — no quality loss |
+| **Metadata Remover** | Strip GPS, camera info and more from JPEG / PNG / WebP without losing quality |
 | **Character Counter** | Characters with and without spaces, words, bytes, reading time |
 | **JSON Formatter** | Pretty-print, minify, and pinpoint the exact line and column of errors |
 | **Base64 Encode / Decode** | Text and files, URL-safe and data-URL output |
@@ -64,11 +64,11 @@ Renaming a batch of files, stripping GPS data from a photo, pretty-printing JSON
 
 ## Features
 
-- **Spotlight-style search** — Press <kbd>Ctrl</kbd>+<kbd>K</kbd> (or <kbd>/</kbd>) to find any tool, even by its name in another language.
-- **Quick Slot dock** — Place it at the bottom, left or right, in three sizes. The tool you're using is marked with a dot, just like a running app.
-- **Settings sheet** — Appearance, dock position and size, and language, in one place. Applied before the first paint, so there's no flicker.
-- **Language suggestions** — If your browser language differs from the page, QuickSlot offers to switch instead of redirecting you, so every language stays crawlable by search engines.
-- **Lossless where it matters** — The metadata remover edits bytes directly instead of re-encoding, and keeps rotation and color profiles unless you say otherwise.
+- **Spotlight-style search.** Press <kbd>Ctrl</kbd>+<kbd>K</kbd> (or <kbd>/</kbd>) to find any tool, even by its name in another language.
+- **Quick Slot dock.** Place it at the bottom, left or right, in three sizes. The tool you're using is marked with a dot, just like a running app.
+- **Settings sheet.** Appearance, dock position and size, and language, in one place. Applied before the first paint, so there's no flicker.
+- **Language suggestions.** If your browser language differs from the page, QuickSlot offers to switch instead of redirecting you, so every language stays crawlable by search engines.
+- **Lossless where it matters.** The metadata remover edits bytes directly instead of re-encoding, and keeps rotation and color profiles unless you say otherwise.
 
 ## Getting started
 
@@ -108,7 +108,7 @@ The site URL is never hard-coded. Set it where you build:
 quick-slot/
 ├─ apps/web/                 # The website (Astro + React islands + Tailwind CSS)
 │  ├─ src/
-│  │  ├─ tools/registry.ts   # ★ Tool manifest — home, search and dock all read from it
+│  │  ├─ tools/registry.ts   # ★ Tool manifest that home, search and the dock all read from
 │  │  ├─ tools/<category>/   # One React component per tool
 │  │  ├─ i18n/               # Dictionaries: ko.ts (source of types), en.ts, ja.ts
 │  │  ├─ views/              # Page templates shared by every language
@@ -125,7 +125,7 @@ quick-slot/
 
 1. Add an entry to `apps/web/src/tools/registry.ts`.
 2. Add its name and description under `tools` in `apps/web/src/i18n/ko.ts`, `en.ts` and `ja.ts` (a missing key is a type error).
-   With `status: 'soon'` you're done — a "coming soon" page is generated in all three languages.
+   With `status: 'soon'` you're done. A "coming soon" page is generated in all three languages.
 3. Write the component in `apps/web/src/tools/<category>/MyTool.tsx`.
    Put every UI string in the dictionaries, read them with `useT()`, and export with `export default withI18n(MyTool)`.
 4. Wire it up in the "Tool component wiring" block of `apps/web/src/views/ToolPage.astro`:
@@ -143,17 +143,17 @@ quick-slot/
 | English | `/en/` |
 | 日本語 (Japanese) | `/ja/` |
 
-Every language is a separate static page with `hreflang` links. QuickSlot never redirects based on the browser language — that would send search-engine crawlers (which mostly browse in English) away from the Korean and Japanese pages. Instead it shows a suggestion banner, and only redirects once the user has chosen a language.
+Every language is a separate static page with `hreflang` links. QuickSlot never redirects based on the browser language, because that would send search-engine crawlers (which mostly browse in English) away from the Korean and Japanese pages. Instead it shows a suggestion banner, and only redirects once the user has chosen a language.
 
 ## Deployment
 
-The planned deployment is a Docker image published to the GitHub Container Registry and self-hosted. It isn't set up yet — for now, CI only type-checks and builds every pull request.
+The planned deployment is a Docker image published to the GitHub Container Registry and self-hosted. It isn't set up yet. For now, CI only type-checks and builds every pull request.
 
 ## Contributing
 
 Contributions are welcome! This project follows GitHub Flow: branch from `main`, open a pull request, and squash-merge once CI passes.
 
-Please read **[AGENTS.md](AGENTS.md)** first — it holds the rules for code, design, i18n, commits and pull requests, for humans and AI coding agents alike. ([한국어](AGENTS.ko.md) · [日本語](AGENTS.ja.md))
+Please read **[AGENTS.md](AGENTS.md)** first. It holds the rules for code, design, i18n, commits and pull requests, for humans and AI coding agents alike. ([한국어](AGENTS.ko.md) · [日本語](AGENTS.ja.md))
 
 ## License
 

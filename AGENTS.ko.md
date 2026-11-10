@@ -26,6 +26,7 @@ QuickSlot: 브라우저에서 바로 쓰는 생활·개발 도구 모음. 구조
 
 - `README.md` 나 `AGENTS.md` 를 바꾸면 `.ko.md`·`.ja.md` 번역도 **같은 PR 에서** 고쳐서 내용이 어긋나지 않게 한다.
 - 제품 데이터인 한국어는 코드에 있어도 된다: 한국어 사전 `i18n/ko.ts`, `registry.ts` 의 한국어 검색 `keywords`.
+- 문서, 커밋 메시지, PR 설명은 담백하고 직접적인 문장으로 쓴다. 대시(—)는 되도록 쓰지 않고 마침표·쉼표·콜론·괄호로 대신한다.
 
 ## 다국어 (한국어 · English · 日本語)
 
@@ -35,12 +36,12 @@ QuickSlot: 브라우저에서 바로 쓰는 생활·개발 도구 모음. 구조
 - 라이브러리(`lib/`)는 문구 대신 코드를 돌려주고 화면에서 번역한다 (예: `metadata.ts` 의 `ItemKind`, `MetadataError.code`).
 - 내부 링크는 `localizePath(lang, path)` / `toolUrl(slug, lang)` 로 만든다. `/tools/…` 를 직접 쓰지 않는다.
 - React 섬(island) 최상위 컴포넌트는 `withI18n` 으로 감싸고, Astro 에서 `lang={lang}` 을 넘긴다.
-- **브라우저 언어로 자동 이동시키지 않는다** — 검색엔진이 다른 언어 페이지를 수집하지 못한다. `LanguageSuggest` 배너는 언어를 "제안"만 하고, 이동은 사용자가 직접 고른 언어(`quickslot:lang` 저장값)가 있을 때만 한다. 로봇에게만 다르게 보여주지 않는다 (User-Agent 판별 금지).
+- **브라우저 언어로 자동 이동시키지 않는다.** 그러면 검색엔진이 다른 언어 페이지를 수집하지 못한다. `LanguageSuggest` 배너는 언어를 "제안"만 하고, 이동은 사용자가 직접 고른 언어(`quickslot:lang` 저장값)가 있을 때만 한다. 로봇에게만 다르게 보여주지 않는다 (User-Agent 판별 금지).
 
 ## 배포
 
 - **배포 방식: Docker 이미지 → GitHub Container Registry(`ghcr.io`) → 직접 호스팅.** 다른 호스팅(GitHub Pages, Vercel, Netlify, Cloudflare Pages 등)은 쓰지 않으므로 제안하거나 설정하지 않는다.
-- **현재 상태: 아직 만들지 않음.** 서비스가 완성 단계에 가까워지면 만든다 — 그 전에 `Dockerfile` 이나 이미지 게시 워크플로를 추가하지 않는다. 지금 자동화는 CI(`.github/workflows/ci.yml`: 타입 검사·빌드)뿐이다.
+- **현재 상태: 아직 만들지 않음.** 서비스가 완성 단계에 가까워지면 만든다. 그 전에 `Dockerfile` 이나 이미지 게시 워크플로를 추가하지 않는다. 지금 자동화는 CI(`.github/workflows/ci.yml`: 타입 검사·빌드)뿐이다.
 - 만들 때의 방향: 2단계 `Dockerfile` (Node 로 빌드 → nginx 에 정적 결과물만 담기), 사이트 주소는 `ARG SITE_URL`. 이미지 게시는 `main` 머지마다가 아니라 **버전 태그(`v*`)를 push 할 때만**.
 - **도메인·주소를 코드에 쓰지 않는다.** 사이트 주소는 빌드 환경 변수 `SITE_URL` 로만 받는다 (`astro.config.mjs` → `Astro.site`). 전체 주소가 필요하면 `Astro.site` 를 쓰고, 없을 때는 상대 주소로 동작하게 만든다.
 - 환경 변수를 추가하면 `apps/web/.env.example` 과 README 의 "설정(Configuration)" 표(세 언어 모두)에도 적는다.
@@ -50,11 +51,11 @@ QuickSlot: 브라우저에서 바로 쓰는 생활·개발 도구 모음. 구조
 무채색 배경 위의 반투명 유리 표면. 기준은 `apps/web/src/styles/global.css`.
 
 - **설정**: 헤더 오른쪽 톱니바퀴 → 설정 시트(`SettingsSheet`, iOS 설정 같은 묶음 목록): 화면 모드 · 퀵슬롯 위치/크기 · 언어. 사용자 설정은 여기에만 모은다.
-- **첫 화면 전에 적용**: 테마(`data-theme`), 독 위치·크기(`data-dock`, `data-dock-size`), 언어 이동은 `Layout.astro` 의 `<head>` 인라인 스크립트가 그리기 전에 한다. 이후 변경은 `src/lib/theme.ts`, `src/lib/dock.ts`, `src/i18n` — **저장 키·기본값을 양쪽 같이 고칠 것.**
+- **첫 화면 전에 적용**: 테마(`data-theme`), 독 위치·크기(`data-dock`, `data-dock-size`), 언어 이동은 `Layout.astro` 의 `<head>` 인라인 스크립트가 그리기 전에 한다. 이후 변경은 `src/lib/theme.ts`, `src/lib/dock.ts`, `src/i18n` 에서 한다. **저장 키·기본값을 양쪽 같이 고칠 것.**
 - **테마**: 라이트 / 다크 / 자동(기본). 적용은 `<html data-theme="light|dark">` 로만. CSS 에 `@media (prefers-color-scheme)` 를 쓰지 말고, 다크 스타일은 `[data-theme="dark"]` 토큰이나 Tailwind `dark:` 변형으로.
 - **독**: 배치·크기·확대 효과는 `global.css` 의 `.dock*` 규칙이 `html[data-dock]` 을 보고 정한다. 640px 미만에서는 설정과 상관없이 아래에 작게. 독에 가려지면 안 되는 페이지 맨 아래 요소에는 `.dock-safe`.
-- **배경**: `global.css` 의 `body::before` 로만 그린다 — 무채색 위→아래 명암(`bg-top` → `bg-bottom`) + 고운 노이즈 질감. 색이 들어간 그라데이션·색 번짐·패턴은 넣지 않는다. 페이지마다 배경을 따로 깔지 않는다.
-- **색**: 토큰만 사용 — `bg`, `panel`, `panel-2`, `line`, `fg`, `muted`, `accent`, `accent-fg`, `danger`, `ok`. 하드코딩 색 금지 (예외: `registry.ts` 의 카테고리 타일 색, 설정의 화면 모드 미리보기).
+- **배경**: `global.css` 의 `body::before` 로만 그린다: 무채색 위→아래 명암(`bg-top` → `bg-bottom`) + 고운 노이즈 질감. 색이 들어간 그라데이션·색 번짐·패턴은 넣지 않는다. 페이지마다 배경을 따로 깔지 않는다.
+- **색**: 토큰만 사용: `bg`, `panel`, `panel-2`, `line`, `fg`, `muted`, `accent`, `accent-fg`, `danger`, `ok`. 하드코딩 색 금지 (예외: `registry.ts` 의 카테고리 타일 색, 설정의 화면 모드 미리보기).
 - **표면**: 카드·패널은 `panel`(= `glass` + 둥근 모서리), 검색 창은 `glass-strong`, 글을 읽어야 하는 떠 있는 창(메뉴, 설정 시트)은 `glass-menu`(더 불투명). 넓은 `textarea.input` 은 자동으로 유리 표면이 된다.
 - **컨트롤**: 버튼 `btn` / `btn-primary` / `btn-tinted`, 입력 `input`, 라벨 `label`. 선택지 2~3개는 `Segmented`, 그 이상은 `Select` 컴포넌트. **브라우저 기본 `<select>` 는 쓰지 않는다** (펼친 목록을 꾸밀 수 없음). 체크박스는 CSS 로 자동으로 스위치 모양이 된다.
 - **높이**: 한 줄짜리 컨트롤(버튼, 입력, `Select`, `Segmented`)은 모두 36px(`h-9`).
@@ -70,8 +71,8 @@ QuickSlot: 브라우저에서 바로 쓰는 생활·개발 도구 모음. 구조
 
 ```bash
 npm install
-npm run check    # 타입 검사 — 변경 후 반드시 실행
-npm run build    # 빌드 — 변경 후 반드시 실행
+npm run check    # 타입 검사 (변경 후 반드시 실행)
+npm run build    # 빌드 (변경 후 반드시 실행)
 npm run dev      # 개발 서버 (http://localhost:4321)
 ```
 
@@ -102,11 +103,11 @@ npm run dev      # 개발 서버 (http://localhost:4321)
 ```
 <type>(<scope>): <summary>
 
-<body — 무엇을, 왜 (선택)>
+<body: 무엇을, 왜 (선택)>
 ```
 
 - 종류: `feat`, `fix`, `refactor`, `docs`, `chore`, `test`, `style`, `perf`
-- 범위(선택): 툴 slug 나 영역 — 예: `feat(qr-code): add QR code generator`, `fix(json-formatter): fix error position calculation`
+- 범위(선택): 툴 slug 나 영역. 예: `feat(qr-code): add QR code generator`, `fix(json-formatter): fix error position calculation`
 - 요약은 **영어**, 명령형, 50자 이내, 마침표 없음.
 
 ### PR
