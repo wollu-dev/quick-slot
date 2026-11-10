@@ -10,6 +10,8 @@ QuickSlot: 설치 없이 브라우저에서 바로 쓰는 생활·개발 도구 
 - npm workspaces 모노레포. 프론트는 `apps/web` (Astro 7 + React 19 islands + Tailwind 4). 백엔드 `apps/api` 는 아직 없음.
 - 툴의 단일 진실 공급원은 `apps/web/src/tools/registry.ts`. 툴 추가·상태 변경은 여기부터.
 - 원칙: 툴은 기본적으로 브라우저 안에서만 처리(`processing: 'client'`). 사용자 파일을 서버로 보내지 않는다. 서버가 꼭 필요한 툴만 `'server'` 로 표시.
+- 커밋 메시지·주석·문서는 한국어.
+
 ## 다국어 (한국어 · English · 日本語)
 
 - **UI 문구를 코드에 직접 쓰지 않는다.** 모든 문구는 `apps/web/src/i18n/ko.ts` 에 먼저 넣고, `en.ts`·`ja.ts` 에 같은 키로 번역한다 (키가 빠지면 타입 오류). React 에서는 `useT()`, `.astro` 에서는 `getDict(lang)`.
@@ -22,9 +24,11 @@ QuickSlot: 설치 없이 브라우저에서 바로 쓰는 생활·개발 도구 
 
 ## 배포 설정
 
+- **배포 방식: Docker 이미지 → GitHub Container Registry(`ghcr.io`) → 직접 호스팅(셀프 호스팅).** GitHub Pages·Vercel·Netlify·Cloudflare Pages 등 다른 호스팅은 쓰지 않으므로 제안하거나 설정하지 않는다.
+- **현재 상태: 아직 만들지 않음.** 서비스가 완성 단계에 가까워지면 만든다 — 그 전에 `Dockerfile` 이나 이미지 게시 워크플로를 먼저 추가하지 않는다. 지금 자동화는 CI(`.github/workflows/ci.yml`, 타입 검사·빌드)뿐이다.
+- 만들 때의 방향: `Dockerfile` 은 Node 로 빌드 → nginx 에 정적 결과물만 담는 2단계 빌드. 사이트 주소는 `ARG SITE_URL` 로 받는다. 이미지 게시는 `main` 머지마다가 아니라 **버전 태그(`v*`)를 push 할 때만** 한다.
 - **도메인·주소를 코드에 쓰지 않는다.** 사이트 주소는 빌드 환경 변수 `SITE_URL` 로만 받는다 (`astro.config.mjs` → `Astro.site`). 전체 주소가 필요하면 `Astro.site` 를 쓰고, 없을 때는 상대 주소로 동작하게 만든다.
 - 새 환경 변수를 추가하면 `apps/web/.env.example` 과 README 의 "환경 변수" 표에 같이 적는다.
-- 커밋 메시지·주석·문서는 한국어.
 
 ## 디자인 규칙
 
