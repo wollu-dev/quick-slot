@@ -583,6 +583,17 @@ const ja: Dict = {
     copySummary: '精算内容をコピー',
     summaryTitle: (total: string, n: number) => `[精算] 合計 ${total} / ${n}人`,
   },
+  typo: {
+    direction: '変換の向き',
+    auto: '自動',
+    engToKor: '英字 → ハングル',
+    korToEng: 'ハングル → 英字',
+    detected: (dir: string) => `自動判定: ${dir}`,
+    placeholder: '韓/英の切り替えを忘れて打った文字を貼り付けてください。例: dkssudgktpdy',
+    sample: '例を入れる',
+    useResult: '結果を入力に',
+    note: '標準の2ボル式配列が基準です。自動では、ハングルが含まれていればハングル → 英字、なければ英字 → ハングルに変換します。数字と記号はそのままです。',
+  },
   uuid: {
     version: 'バージョン',
     v4: 'v4（ランダム）',

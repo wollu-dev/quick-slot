@@ -16,6 +16,7 @@ import FileConverter from '../tools/file/FileConverter';
 import FileDateChanger from '../tools/file/FileDateChanger';
 import MetadataRemover from '../tools/file/MetadataRemover';
 import CharCounter from '../tools/text/CharCounter';
+import KoreanEnglishTypo from '../tools/text/KoreanEnglishTypo';
 import Base64Tool from '../tools/dev/Base64Tool';
 import JsonFormatter from '../tools/dev/JsonFormatter';
 import UnixTimestamp from '../tools/dev/UnixTimestamp';
@@ -76,6 +77,7 @@ const tt = toolText(lang, tool.slug);
   {slug === 'file-date-changer' && <FileDateChanger client:only="react" lang={lang} />}
   {slug === 'metadata-remover' && <MetadataRemover client:load lang={lang} />}
   {slug === 'char-counter' && <CharCounter client:load lang={lang} />}
+  {slug === 'korean-english-typo' && <KoreanEnglishTypo client:load lang={lang} />}
   {slug === 'json-formatter' && <JsonFormatter client:load lang={lang} />}
   {slug === 'base64' && <Base64Tool client:load lang={lang} />}
   {slug === 'unix-timestamp' && <UnixTimestamp client:only="react" lang={lang} />}
