@@ -7,9 +7,11 @@ import Logo from '../components/Logo.astro';
 interface Props {
   title?: string;
   description?: string;
+  /** 페이지 본문에 큰 검색창이 있으면 헤더 검색 버튼을 숨긴다 */
+  hideHeaderSearch?: boolean;
 }
 
-const { title, description = '설치 없이 브라우저에서 바로 쓰는 생활·개발 도구 모음. 파일은 서버로 올라가지 않습니다.' } = Astro.props;
+const { title, hideHeaderSearch = false, description = '설치 없이 브라우저에서 바로 쓰는 생활·개발 도구 모음. 파일은 서버로 올라가지 않습니다.' } = Astro.props;
 const fullTitle = title ? `${title} · QuickSlot` : 'QuickSlot · 필요한 도구를 바로 꺼내 쓰세요';
 ---
 
@@ -39,7 +41,7 @@ const fullTitle = title ? `${title} · QuickSlot` : 'QuickSlot · 필요한 도�
           <span>QuickSlot</span>
         </a>
         <div class="flex flex-1 justify-end">
-          <CommandPalette client:load />
+          <CommandPalette client:load showTrigger={!hideHeaderSearch} />
         </div>
       </div>
     </header>

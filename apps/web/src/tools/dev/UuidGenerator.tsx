@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import CopyButton from '../../components/ui/CopyButton';
 import Segmented from '../../components/ui/Segmented';
+import Select from '../../components/ui/Select';
 
 type Version = 'v4' | 'v7';
 type Format = 'default' | 'upper' | 'nohyphen' | 'braces';
@@ -64,12 +65,18 @@ export default function UuidGenerator() {
         </div>
         <div>
           <label className="label" htmlFor="fmt">형식</label>
-          <select id="fmt" className="input w-auto" value={fmt} onChange={(e) => setFmt(e.target.value as Format)}>
-            <option value="default">소문자 (기본)</option>
-            <option value="upper">대문자</option>
-            <option value="nohyphen">하이픈 없이</option>
-            <option value="braces">{'{중괄호}'} (C#/Windows GUID)</option>
-          </select>
+          <Select
+            id="fmt"
+            className="w-auto min-w-36"
+            value={fmt}
+            onChange={setFmt}
+            options={[
+              ['default', '소문자 (기본)'],
+              ['upper', '대문자'],
+              ['nohyphen', '하이픈 없이'],
+              ['braces', '{중괄호} (C#/Windows GUID)'],
+            ]}
+          />
         </div>
         <button type="button" className="btn btn-primary" onClick={generate}>새로 생성</button>
         <CopyButton text={out} label="전체 복사" />

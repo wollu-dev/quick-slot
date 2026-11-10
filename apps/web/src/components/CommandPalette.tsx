@@ -5,6 +5,8 @@ import { tools, toolUrl, type Tool } from '../tools/registry';
 import { readSlots } from '../lib/slots';
 import AppIcon from './ui/AppIcon';
 
+export const OPEN_SEARCH_EVENT = 'quickslot:open-search';
+
 function score(tool: Tool, q: string): number {
   if (!q) return 1;
   const name = tool.name.toLowerCase();
@@ -16,7 +18,8 @@ function score(tool: Tool, q: string): number {
   return 0;
 }
 
-export default function CommandPalette() {
+/** showTrigger=false 면 헤더의 검색 버튼은 숨기고 단축키·검색 창만 동작 (홈처럼 큰 검색창이 따로 있을 때) */
+export default function CommandPalette({ showTrigger = true }: { showTrigger?: boolean }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [active, setActive] = useState(0);
@@ -51,8 +54,14 @@ export default function CommandPalette() {
         }
       }
     };
+    // 다른 곳(홈의 큰 검색창 등)에서 검색 창을 열 때
+    const onOpen = () => setOpen(true);
     window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
+    window.addEventListener(OPEN_SEARCH_EVENT, onOpen);
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      window.removeEventListener(OPEN_SEARCH_EVENT, onOpen);
+    };
   }, []);
 
   useEffect(() => {
@@ -89,7 +98,7 @@ export default function CommandPalette() {
 
   return (
     <>
-      <button
+      {showTrigger && <button
         type="button"
         onClick={() => setOpen(true)}
         className="flex h-10 w-full max-w-[260px] items-center gap-2 rounded-full bg-panel-2 px-3.5 text-[14px] text-muted transition hover:bg-[color-mix(in_srgb,var(--panel-2)_100%,var(--fg)_6%)]"
@@ -97,7 +106,7 @@ export default function CommandPalette() {
         <Search size={16} strokeWidth={2.2} />
         <span className="flex-1 text-left">검색</span>
         <span className="kbd hidden bg-transparent sm:inline-flex">Ctrl K</span>
-      </button>
+      </button>}
 
       {/* 헤더의 backdrop-filter 가 fixed 요소의 기준이 되어버리므로 body 로 portal */}
       {open && createPortal(

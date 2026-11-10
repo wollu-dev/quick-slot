@@ -2,28 +2,15 @@
 import { ChevronRight, Cloud } from 'lucide-react';
 import Layout from '../layouts/Layout.astro';
 import SlotBar from '../components/SlotBar';
+import HeroSearch from '../components/HeroSearch';
 import AppIcon from '../components/ui/AppIcon';
 import { categories, tools, toolUrl } from '../tools/registry';
-
-const readyCount = tools.filter((t) => t.status === 'ready').length;
 ---
 
-<Layout>
-  <section class="mx-auto mb-14 max-w-2xl text-center">
-    <h1 class="text-[40px] leading-[1.1] font-bold tracking-[-0.03em] sm:text-[56px]">
-      필요한 도구,<br />바로 꺼내 쓰세요.
-    </h1>
-    <p class="mt-5 text-[17px] leading-relaxed text-muted sm:text-[19px]">
-      설치도, 가입도 없이. 파일은 내 기기를 떠나지 않습니다.
-    </p>
-    <p class="mt-6 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-[13px] text-muted">
-      <span><span class="font-semibold text-fg">{readyCount}개</span> 사용 가능</span>
-      <span class="hidden items-center gap-1.5 sm:flex"><span class="kbd">Ctrl K</span> 검색</span>
-      <span class="hidden items-center gap-1.5 sm:flex"><span class="kbd">Alt 1–9</span> 퀵슬롯</span>
-    </p>
-  </section>
-
-  <section class="mb-16">
+<Layout hideHeaderSearch>
+  <section class="mb-16 flex flex-col items-center gap-8 pt-6 sm:pt-12">
+    <h1 class="sr-only">QuickSlot — 브라우저에서 바로 쓰는 생활·개발 도구 모음</h1>
+    <HeroSearch client:load />
     <SlotBar client:load />
   </section>
 

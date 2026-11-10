@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { X } from 'lucide-react';
 import DropZone from '../../components/ui/DropZone';
+import Select from '../../components/ui/Select';
 import { dedupeNames, downloadBlob, formatBytes, makeZip, readBytes, splitName, timestampForFilename } from '../../lib/files';
 
 type Mode = 'extension' | 'rename';
@@ -166,11 +167,16 @@ export default function BatchRename({ mode }: { mode: Mode }) {
             </div>
             <div>
               <label className="label" htmlFor="case">대소문자</label>
-              <select id="case" className="input" value={o.caseMode} onChange={(e) => set('caseMode', e.target.value as CaseMode)}>
-                <option value="none">그대로</option>
-                <option value="lower">모두 소문자</option>
-                <option value="upper">모두 대문자</option>
-              </select>
+              <Select
+                id="case"
+                value={o.caseMode}
+                onChange={(v) => set('caseMode', v)}
+                options={[
+                  ['none', '그대로'],
+                  ['lower', '모두 소문자'],
+                  ['upper', '모두 대문자'],
+                ]}
+              />
             </div>
             <div className="space-y-1.5 text-sm">
               <label className="flex items-center gap-2"><input type="checkbox" checked={o.spaceToUnderscore} onChange={(e) => set('spaceToUnderscore', e.target.checked)} /> 공백을 _ 로</label>

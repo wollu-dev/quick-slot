@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import CopyButton from '../../components/ui/CopyButton';
+import Select from '../../components/ui/Select';
 import { downloadBlob } from '../../lib/files';
 
 type Indent = '2' | '4' | 'tab';
@@ -126,11 +127,18 @@ export default function JsonFormatter() {
       <div className="flex flex-wrap items-center gap-2">
         <button type="button" className="btn btn-primary" onClick={() => run('pretty')} disabled={!input.trim()}>정렬하기</button>
         <button type="button" className="btn" onClick={() => run('minify')} disabled={!input.trim()}>한 줄로 압축</button>
-        <select className="input w-auto" value={indent} onChange={(e) => setIndent(e.target.value as Indent)} aria-label="들여쓰기">
-          <option value="2">공백 2칸</option>
-          <option value="4">공백 4칸</option>
-          <option value="tab">탭</option>
-        </select>
+        <Select
+          id="indent"
+          label="들여쓰기"
+          className="w-auto min-w-28"
+          value={indent}
+          onChange={setIndent}
+          options={[
+            ['2', '공백 2칸'],
+            ['4', '공백 4칸'],
+            ['tab', '탭'],
+          ]}
+        />
         <label className="flex items-center gap-1.5 text-sm">
           <input type="checkbox" checked={sorted} onChange={(e) => setSorted(e.target.checked)} /> 키 이름순 정렬
         </label>
