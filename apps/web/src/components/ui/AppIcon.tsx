@@ -2,6 +2,8 @@ import type { CSSProperties } from 'react';
 import { getCategory, type Tool } from '../../tools/registry';
 
 const SIZES = {
+  /** 하단 독: 모바일에서는 9칸이 한 줄에 들어가도록 작게 */
+  dock: { box: 'size-[34px] rounded-[9px] sm:size-12 sm:rounded-[13px] [&>svg]:size-[52%]', icon: 24 },
   sm: { box: 'size-8 rounded-[9px]', icon: 17 },
   md: { box: 'size-11 rounded-[12px]', icon: 22 },
   lg: { box: 'size-14 rounded-[15px]', icon: 28 },

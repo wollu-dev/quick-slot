@@ -14,7 +14,7 @@ if (!tool) throw new Error(`registry.ts 에 없는 툴: ${Astro.props.slug}`);
 const category = getCategory(tool.category);
 ---
 
-<Layout title={tool.name} description={tool.description}>
+<Layout title={tool.name} description={tool.description} currentSlug={tool.slug}>
   <a href={`/#${category.id}`} class="mb-6 inline-flex items-center gap-0.5 text-[15px] text-accent hover:opacity-80">
     <ChevronLeft size={19} strokeWidth={2.4} />
     {category.name}

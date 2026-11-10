@@ -1,32 +1,33 @@
 ---
-import { ChevronRight, Cloud } from 'lucide-react';
+import { ChevronRight, Cloud, LayoutGrid } from 'lucide-react';
 import Layout from '../layouts/Layout.astro';
-import SlotBar from '../components/SlotBar';
-import HeroSearch from '../components/HeroSearch';
 import AppIcon from '../components/ui/AppIcon';
 import { categories, tools, toolUrl } from '../tools/registry';
 ---
 
-<Layout hideHeaderSearch>
-  <section class="mb-16 flex flex-col items-center gap-8 pt-6 sm:pt-12">
-    <h1 class="sr-only">QuickSlot — 브라우저에서 바로 쓰는 생활·개발 도구 모음</h1>
-    <HeroSearch client:load />
-    <SlotBar client:load />
-  </section>
+<Layout>
+  <h1 class="sr-only">QuickSlot — 브라우저에서 바로 쓰는 생활·개발 도구 모음</h1>
 
-  <nav class="mb-12 flex flex-wrap justify-center gap-2" aria-label="카테고리">
+  <!-- 카테고리 필터: 본문과 같은 왼쪽 정렬, 모바일에서는 가로 스크롤 -->
+  <div class="no-scrollbar -mx-4 mb-8 flex gap-2 overflow-x-auto px-4 sm:mx-0 sm:flex-wrap sm:px-0" role="toolbar" aria-label="카테고리 필터">
+    <button type="button" class="chip" data-filter="all" aria-pressed="true">
+      <LayoutGrid size={15} strokeWidth={2.2} />
+      전체
+      <span class="chip-count">{tools.length}</span>
+    </button>
     {
       categories.map((c) => {
         const Icon = c.icon;
         return (
-          <a href={`#${c.id}`} class="btn">
+          <button type="button" class="chip" data-filter={c.id} aria-pressed="false">
             <Icon size={15} strokeWidth={2.2} color={c.color} />
             {c.name}
-          </a>
+            <span class="chip-count">{tools.filter((t) => t.category === c.id).length}</span>
+          </button>
         );
       })
     }
-  </nav>
+  </div>
 
   {
     categories.map((cat) => {
@@ -34,7 +35,7 @@ import { categories, tools, toolUrl } from '../tools/registry';
         .filter((t) => t.category === cat.id)
         .sort((a, b) => (a.status === b.status ? 0 : a.status === 'ready' ? -1 : 1));
       return (
-        <section id={cat.id} class="mb-12 scroll-mt-24">
+        <section data-category={cat.id} class="mb-12">
           <div class="mb-4 flex items-baseline gap-3 px-1">
             <h2 class="text-[22px] font-bold tracking-tight">{cat.name}</h2>
             <span class="text-[14px] text-muted">{cat.description}</span>
@@ -63,3 +64,25 @@ import { categories, tools, toolUrl } from '../tools/registry';
     })
   }
 </Layout>
+
+<script>
+  // 카테고리 필터. 선택은 주소의 #해시로 남겨서 툴 페이지의 "← 파일" 링크로 돌아와도 유지된다.
+  const chips = [...document.querySelectorAll<HTMLButtonElement>('[data-filter]')];
+  const sections = [...document.querySelectorAll<HTMLElement>('[data-category]')];
+
+  const apply = (filter: string) => {
+    for (const c of chips) c.setAttribute('aria-pressed', String(c.dataset.filter === filter));
+    for (const s of sections) s.hidden = filter !== 'all' && s.dataset.category !== filter;
+  };
+
+  for (const chip of chips) {
+    chip.addEventListener('click', () => {
+      const f = chip.dataset.filter ?? 'all';
+      apply(f);
+      history.replaceState(null, '', f === 'all' ? location.pathname : `#${f}`);
+    });
+  }
+
+  const initial = location.hash.slice(1);
+  apply(chips.some((c) => c.dataset.filter === initial) ? initial : 'all');
+</script>

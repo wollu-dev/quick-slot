@@ -5,7 +5,8 @@ import { tools, toolUrl, type Tool } from '../tools/registry';
 import { readSlots } from '../lib/slots';
 import AppIcon from './ui/AppIcon';
 
-export const OPEN_SEARCH_EVENT = 'quickslot:open-search';
+/** 검색 관련 문구는 모두 이 이름으로 통일 */
+const SEARCH_LABEL = 'QuickSlot 검색';
 
 function score(tool: Tool, q: string): number {
   if (!q) return 1;
@@ -18,8 +19,8 @@ function score(tool: Tool, q: string): number {
   return 0;
 }
 
-/** showTrigger=false 면 헤더의 검색 버튼은 숨기고 단축키·검색 창만 동작 (홈처럼 큰 검색창이 따로 있을 때) */
-export default function CommandPalette({ showTrigger = true }: { showTrigger?: boolean }) {
+/** 헤더 가운데의 검색 버튼 + 스포트라이트형 검색 창 + 전역 단축키 */
+export default function CommandPalette() {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [active, setActive] = useState(0);
@@ -54,14 +55,8 @@ export default function CommandPalette({ showTrigger = true }: { showTrigger?: b
         }
       }
     };
-    // 다른 곳(홈의 큰 검색창 등)에서 검색 창을 열 때
-    const onOpen = () => setOpen(true);
     window.addEventListener('keydown', onKey);
-    window.addEventListener(OPEN_SEARCH_EVENT, onOpen);
-    return () => {
-      window.removeEventListener('keydown', onKey);
-      window.removeEventListener(OPEN_SEARCH_EVENT, onOpen);
-    };
+    return () => window.removeEventListener('keydown', onKey);
   }, []);
 
   useEffect(() => {
@@ -98,15 +93,15 @@ export default function CommandPalette({ showTrigger = true }: { showTrigger?: b
 
   return (
     <>
-      {showTrigger && <button
+      <button
         type="button"
         onClick={() => setOpen(true)}
-        className="flex h-10 w-full max-w-[260px] items-center gap-2 rounded-full bg-panel-2 px-3.5 text-[14px] text-muted transition hover:bg-[color-mix(in_srgb,var(--panel-2)_100%,var(--fg)_6%)]"
+        className="flex h-10 w-full items-center gap-2 rounded-full bg-panel-2 px-4 text-[14px] text-muted transition hover:bg-[color-mix(in_srgb,var(--panel-2)_100%,var(--fg)_6%)]"
       >
-        <Search size={16} strokeWidth={2.2} />
-        <span className="flex-1 text-left">검색</span>
+        <Search size={16} strokeWidth={2.2} className="shrink-0" />
+        <span className="flex-1 truncate text-left">{SEARCH_LABEL}</span>
         <span className="kbd hidden bg-transparent sm:inline-flex">Ctrl K</span>
-      </button>}
+      </button>
 
       {/* 헤더의 backdrop-filter 가 fixed 요소의 기준이 되어버리므로 body 로 portal */}
       {open && createPortal(
@@ -114,7 +109,7 @@ export default function CommandPalette({ showTrigger = true }: { showTrigger?: b
           className="fixed inset-0 z-50 flex items-start justify-center bg-black/15 px-4 pt-[14vh] backdrop-blur-md dark:bg-black/45"
           onMouseDown={(e) => e.target === e.currentTarget && setOpen(false)}
         >
-          <div className="glass-strong w-full max-w-[620px] overflow-hidden rounded-[26px] shadow-[0_30px_80px_-20px_rgb(0_0_0/0.45)]" role="dialog" aria-label="툴 검색">
+          <div className="glass-strong w-full max-w-[620px] overflow-hidden rounded-[26px] shadow-[0_30px_80px_-20px_rgb(0_0_0/0.45)]" role="dialog" aria-label={SEARCH_LABEL}>
             <div className="flex items-center gap-3 px-5">
               <Search size={22} strokeWidth={2.2} className="shrink-0 text-muted" />
               <input
@@ -122,7 +117,7 @@ export default function CommandPalette({ showTrigger = true }: { showTrigger?: b
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={onInputKey}
-                placeholder="QuickSlot 검색"
+                placeholder={SEARCH_LABEL}
                 className="h-16 w-full bg-transparent text-[22px] tracking-tight outline-none placeholder:text-muted/70"
               />
             </div>

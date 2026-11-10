@@ -175,6 +175,17 @@ body::before {
     @apply bg-[var(--raised)] text-fg shadow-[0_1px_3px_rgb(0_0_0/0.12),0_1px_1px_rgb(0_0_0/0.04)];
   }
 
+  /* 필터 칩: 선택되면 글자색·배경색이 뒤집힘 */
+  .chip {
+    @apply inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full bg-panel-2 px-3.5 text-[14px] font-medium whitespace-nowrap text-fg transition duration-200 select-none hover:bg-[color-mix(in_srgb,var(--panel-2)_100%,var(--fg)_6%)] active:scale-[0.97];
+  }
+  .chip[aria-pressed="true"] {
+    @apply bg-fg text-[var(--bg)] hover:bg-fg;
+  }
+  .chip-count {
+    @apply text-[12px] font-medium tabular-nums opacity-50;
+  }
+
   /* 앱 아이콘 타일 */
   .app-icon {
     @apply grid shrink-0 place-items-center text-white shadow-[inset_0_1px_0_rgb(255_255_255/0.35),0_2px_6px_-2px_rgb(0_0_0/0.25)];
@@ -218,6 +229,13 @@ input[type="checkbox"]:checked::before {
 input[type="checkbox"]:focus-visible {
   outline: 3px solid color-mix(in srgb, var(--accent) 40%, transparent);
   outline-offset: 2px;
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }
 
 /* 드롭다운 메뉴가 열릴 때 */
