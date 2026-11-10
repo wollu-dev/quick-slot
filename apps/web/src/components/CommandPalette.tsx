@@ -96,7 +96,7 @@ export default function CommandPalette() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="flex h-10 w-full items-center gap-2 rounded-full bg-panel-2 px-4 text-[14px] text-muted transition hover:bg-[color-mix(in_srgb,var(--panel-2)_100%,var(--fg)_6%)]"
+        className="flex h-9 w-full items-center gap-2 rounded-full bg-panel-2 px-4 text-[14px] text-muted transition hover:bg-[color-mix(in_srgb,var(--panel-2)_100%,var(--fg)_6%)]"
       >
         <Search size={16} strokeWidth={2.2} className="shrink-0" />
         <span className="flex-1 truncate text-left">{SEARCH_LABEL}</span>

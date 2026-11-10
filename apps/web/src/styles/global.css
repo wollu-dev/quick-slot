@@ -1,12 +1,18 @@
 @import "tailwindcss";
 
 /*
- * QuickSlot 디자인 시스템 — 무채색 배경(위→아래 명암 + 고운 질감) 위의 반투명 유리 표면, 라이트/다크 자동 전환
+ * QuickSlot 디자인 시스템 — 무채색 배경(위→아래 명암 + 고운 질감) 위의 반투명 유리 표면
  * 색은 아래 토큰만 사용한다: bg, panel, panel-2, line, fg, muted, accent, accent-fg, danger, ok
+ *
+ * 테마: <html data-theme="light|dark"> 로 결정된다. Layout.astro 의 <head> 인라인 스크립트가
+ * 사용자 선택(라이트/다크/시스템)을 읽어 화면을 그리기 전에 설정한다. 다크 스타일은
+ * Tailwind 의 dark: 변형 또는 아래 [data-theme="dark"] 토큰으로만 만든다.
  */
 
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
 :root {
-  color-scheme: light dark;
+  color-scheme: light;
 
   --bg: #f3f3f6;
   /* 배경 명암: 위가 살짝 밝고 아래로 갈수록 어두워짐 */
@@ -30,8 +36,8 @@
   --switch-off: rgb(120 120 128 / 0.22);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
+:root[data-theme="dark"] {
+    color-scheme: dark;
     --bg: #141416;
     --bg-top: #1c1c1f;
     --bg-bottom: #0f0f11;
@@ -49,7 +55,6 @@
     --glass-shadow: inset 0 1px 0 rgb(255 255 255 / 0.04);
     --raised: #636366;
     --switch-off: rgb(120 120 128 / 0.36);
-  }
 }
 
 @theme inline {
@@ -171,7 +176,8 @@ body::before {
   .segmented > button {
     @apply rounded-[8px] px-3.5 text-[13px] font-medium text-fg/80 transition duration-200;
   }
-  .segmented > button[aria-pressed="true"] {
+  .segmented > button[aria-pressed="true"],
+  .segmented > button[aria-checked="true"] {
     @apply bg-[var(--raised)] text-fg shadow-[0_1px_3px_rgb(0_0_0/0.12),0_1px_1px_rgb(0_0_0/0.04)];
   }
 

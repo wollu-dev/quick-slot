@@ -14,7 +14,9 @@ QuickSlot: 설치 없이 브라우저에서 바로 쓰는 생활·개발 도구 
 
 ## 디자인 규칙
 
-단색 배경 위의 반투명 유리(글래스) 표면, 라이트/다크는 시스템 설정을 따른다. 기준은 `apps/web/src/styles/global.css`.
+무채색 배경 위의 반투명 유리(글래스) 표면. 기준은 `apps/web/src/styles/global.css`.
+
+- **테마**: 헤더에서 라이트 / 시스템 / 다크를 고른다 (기본: 시스템). 적용은 `<html data-theme="light|dark">` 하나로만 한다. CSS 에 `@media (prefers-color-scheme)` 를 쓰지 말고, 다크 스타일은 `[data-theme="dark"]` 토큰이나 Tailwind `dark:` 변형으로 만든다. 첫 화면 적용은 `Layout.astro` 의 `<head>` 인라인 스크립트, 이후 변경은 `src/lib/theme.ts` — 둘의 저장 키·규칙을 같이 고칠 것.
 
 - **배경**: `global.css` 의 `body::before` 하나로만 그린다 — 무채색 위→아래 명암(`bg-top` → `bg-bottom`) + 고운 노이즈 질감. 색이 들어간 그라데이션·색 번짐·패턴 배경은 넣지 않는다. 페이지마다 따로 배경을 깔지 않는다.
 

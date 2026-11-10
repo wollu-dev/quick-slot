@@ -1,7 +1,33 @@
+import { useEffect, useState } from 'react';
 import { Star, X } from 'lucide-react';
 import { useSlots, toggleSlot } from '../lib/slots';
 import { getTool, toolUrl } from '../tools/registry';
 import AppIcon from './ui/AppIcon';
+
+const HINT_DISMISSED_KEY = 'quickslot:dock-hint-dismissed';
+
+/** 말풍선을 닫았는지 (브라우저에 기억). 저장된 값을 읽기 전에는 보이지 않게 해서 깜빡임을 막는다. */
+function useHintVisible() {
+  const [state, setState] = useState<'loading' | 'show' | 'hidden'>('loading');
+  useEffect(() => {
+    let dismissed = false;
+    try {
+      dismissed = localStorage.getItem(HINT_DISMISSED_KEY) === '1';
+    } catch {
+      /* 저장소 사용 불가 */
+    }
+    setState(dismissed ? 'hidden' : 'show');
+  }, []);
+  const dismiss = () => {
+    setState('hidden');
+    try {
+      localStorage.setItem(HINT_DISMISSED_KEY, '1');
+    } catch {
+      /* 저장소 사용 불가: 이번 페이지에서만 닫힘 */
+    }
+  };
+  return [state === 'show', dismiss] as const;
+}
 
 /**
  * 화면 하단에 고정된 퀵슬롯 독 (macOS Dock 처럼). 모든 페이지에 표시된다.
@@ -10,6 +36,7 @@ import AppIcon from './ui/AppIcon';
 export default function Dock({ currentSlug }: { currentSlug?: string }) {
   const slots = useSlots();
   const empty = slots.every((s) => !s);
+  const [hintVisible, dismissHint] = useHintVisible();
 
   return (
     <nav
@@ -18,7 +45,7 @@ export default function Dock({ currentSlug }: { currentSlug?: string }) {
       style={{ bottom: 'max(12px, env(safe-area-inset-bottom))' }}
     >
       <div className="glass pointer-events-auto relative flex items-end gap-1 rounded-[20px] p-1.5 shadow-[0_10px_40px_-10px_rgb(0_0_0/0.3)] sm:gap-2 sm:rounded-[24px] sm:p-2">
-        {empty && <EmptyHint />}
+        {empty && hintVisible && <EmptyHint onClose={dismissHint} />}
 
         {slots.map((slug, i) => {
           const tool = slug ? getTool(slug) : undefined;
@@ -66,14 +93,23 @@ export default function Dock({ currentSlug }: { currentSlug?: string }) {
 }
 
 /** 슬롯이 모두 비어 있을 때 독 위에 뜨는 말풍선 */
-function EmptyHint() {
+function EmptyHint({ onClose }: { onClose: () => void }) {
   return (
     <div className="dock-hint absolute bottom-full left-1/2 mb-3 w-max max-w-[calc(100vw-32px)] -translate-x-1/2" role="note">
-      <div className="glass-menu relative flex items-center gap-2 rounded-2xl px-4 py-2.5 text-[13px] leading-snug shadow-[0_10px_30px_-10px_rgb(0_0_0/0.3)]">
+      <div className="glass-menu relative flex items-center gap-2 rounded-2xl py-2 pr-2 pl-4 text-[13px] leading-snug shadow-[0_10px_30px_-10px_rgb(0_0_0/0.3)]">
         <Star size={15} strokeWidth={2.2} className="shrink-0 text-accent" fill="currentColor" />
         <span>
           툴 페이지에서 <b className="font-semibold">퀵슬롯에 추가</b>를 누르면 여기에 담겨요
         </span>
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="안내 닫기"
+          title="닫기"
+          className="grid size-6 shrink-0 place-items-center rounded-full text-muted transition hover:bg-panel-2 hover:text-fg"
+        >
+          <X size={14} strokeWidth={2.4} />
+        </button>
         {/* 꼬리 */}
         <span
           className="glass-menu absolute -bottom-[6px] left-1/2 size-3 -translate-x-1/2 rotate-45 rounded-[2px] border-t-0 border-l-0"
