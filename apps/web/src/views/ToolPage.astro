@@ -12,6 +12,7 @@ import { getDict, localizePath, type Lang } from '../i18n';
 import { getTool, toolText } from '../tools/registry';
 
 import BatchRename from '../tools/file/BatchRename';
+import FileConverter from '../tools/file/FileConverter';
 import FileDateChanger from '../tools/file/FileDateChanger';
 import MetadataRemover from '../tools/file/MetadataRemover';
 import CharCounter from '../tools/text/CharCounter';
@@ -64,8 +65,8 @@ const tt = toolText(lang, tool.slug);
   </div>
 
   {/* ───── Tool component wiring ───── */}
-  {slug === 'extension-changer' && <BatchRename client:load lang={lang} mode="extension" />}
-  {slug === 'batch-rename' && <BatchRename client:load lang={lang} mode="rename" />}
+  {slug === 'file-converter' && <FileConverter client:load lang={lang} />}
+  {slug === 'batch-rename' && <BatchRename client:load lang={lang} />}
   {slug === 'file-date-changer' && <FileDateChanger client:only="react" lang={lang} />}
   {slug === 'metadata-remover' && <MetadataRemover client:load lang={lang} />}
   {slug === 'char-counter' && <CharCounter client:load lang={lang} />}

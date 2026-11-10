@@ -29,5 +29,7 @@ export default defineConfig({
 
   vite: {
     plugins: [tailwindcss()],
+    // These ship their own workers and WebAssembly files; pre-bundling them breaks the relative URLs
+    optimizeDeps: { exclude: ['@ffmpeg/ffmpeg', '@ffmpeg/util', '@jsquash/avif'] },
   },
 });

@@ -37,7 +37,7 @@ Renaming a batch of files, stripping GPS data from a photo, pretty-printing JSON
 
 | Tool | What it does |
 |---|---|
-| **Bulk Extension Changer** | Change the extension of many files at once and download a ZIP |
+| **File Converter** | Actually convert images, audio, video and data files (JPG, PNG, WebP, AVIF, HEIC, MP3, MP4, WebM, JSON, YAML, CSV, XML and more) |
 | **Batch Rename** | Numbering, find & replace, regex, case conversion |
 | **File Date Changer** | Generate a PowerShell / Bash script that sets created and modified dates |
 | **Metadata Remover** | Strip GPS, camera info and more from JPEG / PNG / WebP without losing quality |
@@ -48,13 +48,13 @@ Renaming a batch of files, stripping GPS data from a photo, pretty-printing JSON
 | **UUID Generator** | Generate UUID v4 / v7 in bulk |
 
 <details>
-<summary><b>Coming soon</b> (21 tools)</summary>
+<summary><b>Coming soon</b> (20 tools)</summary>
 
 | Category | Tools |
 |---|---|
 | Files | Hash & Checksum · ZIP & Unzip |
 | PDF & Docs | Merge PDF · Split PDF · Images → PDF · Office → PDF |
-| Images | Image Convert & Compress · Image Resizer · HEIC → JPG · QR Code |
+| Images | Image Compressor · Image Resizer · QR Code |
 | Video & Audio | Video → GIF · Screen Recorder |
 | Text | Text Diff · Korean ↔ English Keyboard Fix |
 | Developer | Password Generator · JWT Decoder · Color Converter · Normal Map Green Flip |
@@ -68,6 +68,7 @@ Renaming a batch of files, stripping GPS data from a photo, pretty-printing JSON
 - **Quick Slot dock.** Place it at the bottom, left or right, in three sizes. The tool you're using is marked with a dot, just like a running app.
 - **Settings sheet.** Appearance, dock position and size, and language, in one place. Applied before the first paint, so there's no flicker.
 - **Language suggestions.** If your browser language differs from the page, QuickSlot offers to switch instead of redirecting you, so every language stays crawlable by search engines.
+- **Safe file conversion.** The real format is read from the file content, not the extension. When the format already matches, the file is only renamed with no re-encoding, and combinations that can't be converted are refused instead of producing a mislabeled file. Audio and video use ffmpeg.wasm (about 30 MB, downloaded only the first time).
 - **Lossless where it matters.** The metadata remover edits bytes directly instead of re-encoding, and keeps rotation and color profiles unless you say otherwise.
 
 ## Getting started
