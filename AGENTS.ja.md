@@ -44,6 +44,7 @@ QuickSlot: ブラウザですぐ使える日常・開発ツール集。構成と
 - **現状: まだ構築していない。** サービスが完成に近づいたら構築する。それまでに `Dockerfile` やイメージ公開のワークフローを追加しない。現在の自動化は CI（`.github/workflows/ci.yml`: 型チェックとビルド）だけ。
 - 構築するときの方針: 2段階の `Dockerfile`（Node でビルド → nginx で静的な成果物だけを配信）、サイトURLは `ARG SITE_URL`。イメージの公開は `main` へのマージごとではなく、**バージョンタグ（`v*`）を push したときだけ**。
 - **ドメインやURLをコードに書かない。** サイトURLはビルド環境変数 `SITE_URL` からのみ受け取る（`astro.config.mjs` → `Astro.site`）。絶対URLが必要なら `Astro.site` を使い、未設定のときは相対URLで動くようにする。
+- プロジェクトのリンク（GitHub リポジトリ）と作者は、ルートの `package.json` の `repository`、`author` から取得する。画面のコードにURLを書かず、`apps/web/src/lib/project.ts` で読み込む。
 - 環境変数を追加したら、`apps/web/.env.example` と README の「設定（Configuration）」表（3言語すべて）にも書く。
 
 ## デザインルール

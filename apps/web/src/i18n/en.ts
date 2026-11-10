@@ -21,7 +21,14 @@ const en: Dict = {
     zipDownload: (n) => `Download ZIP (${n})`,
   },
   header: { home: 'QuickSlot home', search: 'Search QuickSlot', settings: 'Settings' },
-  footer: { privacy: 'Tools that run in your browser never upload your files.' },
+  footer: {
+    privacy: 'Tools that run in your browser never upload your files.',
+    copyright: (year) => `© ${year} Jaeyun Jung (WolLu)`,
+    links: 'Project links',
+    github: 'GitHub',
+    license: 'MIT License',
+    issues: 'Report an issue',
+  },
   palette: { noResults: 'No results' },
   home: { filters: 'Category filter', all: 'All' },
   toolPage: {

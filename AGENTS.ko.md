@@ -44,6 +44,7 @@ QuickSlot: 브라우저에서 바로 쓰는 생활·개발 도구 모음. 구조
 - **현재 상태: 아직 만들지 않음.** 서비스가 완성 단계에 가까워지면 만든다. 그 전에 `Dockerfile` 이나 이미지 게시 워크플로를 추가하지 않는다. 지금 자동화는 CI(`.github/workflows/ci.yml`: 타입 검사·빌드)뿐이다.
 - 만들 때의 방향: 2단계 `Dockerfile` (Node 로 빌드 → nginx 에 정적 결과물만 담기), 사이트 주소는 `ARG SITE_URL`. 이미지 게시는 `main` 머지마다가 아니라 **버전 태그(`v*`)를 push 할 때만**.
 - **도메인·주소를 코드에 쓰지 않는다.** 사이트 주소는 빌드 환경 변수 `SITE_URL` 로만 받는다 (`astro.config.mjs` → `Astro.site`). 전체 주소가 필요하면 `Astro.site` 를 쓰고, 없을 때는 상대 주소로 동작하게 만든다.
+- 프로젝트 링크(GitHub 저장소)와 작성자는 루트 `package.json` 의 `repository`, `author` 에서 가져온다. 화면 코드에 주소를 쓰지 말고 `apps/web/src/lib/project.ts` 로 읽는다.
 - 환경 변수를 추가하면 `apps/web/.env.example` 과 README 의 "설정(Configuration)" 표(세 언어 모두)에도 적는다.
 
 ## 디자인 규칙

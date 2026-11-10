@@ -6,6 +6,8 @@ import Dock from '../components/Dock';
 import SettingsSheet from '../components/SettingsSheet';
 import LanguageSuggest from '../components/LanguageSuggest';
 import Logo from '../components/Logo.astro';
+import GithubMark from '../components/GithubMark.astro';
+import { REPO_URL } from '../lib/project';
 import { LOCALES, getDict, localizePath, type Lang } from '../i18n';
 
 interface Props {
@@ -106,10 +108,41 @@ const absolute = (p: string) => (Astro.site ? new URL(p, Astro.site).href : p);
       <slot />
     </main>
 
-    <!-- Bottom padding so content is not hidden behind the dock (.dock-safe) -->
-    <footer class="dock-safe mx-auto flex max-w-6xl items-center justify-center gap-1.5 px-4 text-center text-[13px] text-muted">
-      <Lock size={13} strokeWidth={2.2} />
-      {t.footer.privacy}
+    <!--
+      Quiet footer in the style of Apple's site: hairlines and small gray text, left-aligned with the content.
+      .dock-safe adds bottom padding so the footer is not hidden behind the dock.
+    -->
+    <footer class="dock-safe mx-auto max-w-6xl px-4 text-[12px] leading-relaxed text-muted sm:px-6">
+      <div class="border-t border-line pt-5">
+        <p class="flex items-start gap-1.5">
+          <Lock size={12} strokeWidth={2.2} className="mt-[3px] shrink-0" />
+          {t.footer.privacy}
+        </p>
+
+        <div class="mt-4 flex flex-col gap-3 border-t border-line pt-4 sm:flex-row sm:items-center sm:justify-between">
+          <p class="flex items-center gap-2">
+            <Logo size={16} />
+            <span>{t.footer.copyright(new Date().getFullYear())}</span>
+          </p>
+
+          {
+            REPO_URL && (
+              <nav aria-label={t.footer.links} class="flex flex-wrap items-center gap-y-1 divide-x divide-line">
+                <a href={REPO_URL} target="_blank" rel="noopener noreferrer" class="footer-link pr-3">
+                  <GithubMark size={13} />
+                  {t.footer.github}
+                </a>
+                <a href={`${REPO_URL}/blob/main/LICENSE`} target="_blank" rel="noopener noreferrer" class="footer-link px-3">
+                  {t.footer.license}
+                </a>
+                <a href={`${REPO_URL}/issues`} target="_blank" rel="noopener noreferrer" class="footer-link pl-3">
+                  {t.footer.issues}
+                </a>
+              </nav>
+            )
+          }
+        </div>
+      </div>
     </footer>
 
     <Dock client:load lang={lang} currentSlug={currentSlug} />
