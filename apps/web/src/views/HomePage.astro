@@ -1,8 +1,9 @@
 ---
 /** Home page. The per-language pages (src/pages/index.astro, src/pages/[lang]/index.astro) use this template. */
-import { ChevronRight, Cloud, LayoutGrid } from 'lucide-react';
+import { ChevronRight, Cloud, ExternalLink, LayoutGrid } from 'lucide-react';
 import Layout from '../layouts/Layout.astro';
 import AppIcon from '../components/ui/AppIcon';
+import MyTools from '../components/MyTools';
 import { getDict, type Lang } from '../i18n';
 import { categories, categoryText, tools, toolText, toolUrl } from '../tools/registry';
 
@@ -22,7 +23,7 @@ const t = getDict(lang);
     <button type="button" class="chip" data-filter="all" aria-pressed="true">
       <LayoutGrid size={15} strokeWidth={2.2} />
       {t.home.all}
-      <span class="chip-count">{tools.length}</span>
+      <span class="chip-count" data-count="all">{tools.length}</span>
     </button>
     {
       categories.map((c) => {
@@ -36,6 +37,11 @@ const t = getDict(lang);
         );
       })
     }
+    <button type="button" class="chip" data-filter="custom" aria-pressed="false">
+      <ExternalLink size={15} strokeWidth={2.2} />
+      {t.custom.title}
+      <span class="chip-count" data-count="custom">0</span>
+    </button>
   </div>
 
   {
@@ -78,6 +84,11 @@ const t = getDict(lang);
       );
     })
   }
+
+  <!-- The user's own external tools (stored in the browser, rendered on the client) -->
+  <section data-category="custom" class="mb-12">
+    <MyTools client:load lang={lang} builtInCount={tools.length} />
+  </section>
 </Layout>
 
 <script>

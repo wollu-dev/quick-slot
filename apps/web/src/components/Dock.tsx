@@ -4,7 +4,9 @@ import { useLang, useT, withI18n } from '../i18n';
 import Rich from '../i18n/Rich';
 import { useSlots, toggleSlot } from '../lib/slots';
 import { getTool, toolText, toolUrl } from '../tools/registry';
-import AppIcon from './ui/AppIcon';
+import { getCustomTool, useCustomTools } from '../lib/customTools';
+import AppIcon, { LetterIcon } from './ui/AppIcon';
+import { useLaunchCustomTool } from './ExternalToolWarning';
 
 const HINT_DISMISSED_KEY = 'quickslot:dock-hint-dismissed';
 
@@ -73,6 +75,8 @@ function Dock({ currentSlug }: { currentSlug?: string }) {
   const [hintVisible, dismissHint] = useHintVisible();
   const navRef = useRef<HTMLElement>(null);
   const hoverReady = useHoverReady(navRef);
+  const customTools = useCustomTools();
+  const [launchCustom, customWarning] = useLaunchCustomTool();
 
   return (
     <nav ref={navRef} aria-label={t.dock.label} className="dock" data-hover-ready={hoverReady ? '' : undefined}>
@@ -81,11 +85,33 @@ function Dock({ currentSlug }: { currentSlug?: string }) {
 
         {slots.map((slug, i) => {
           const tool = slug ? getTool(slug) : undefined;
+          const custom = slug && !tool ? getCustomTool(slug, customTools) : undefined;
           const active = !!tool && tool.slug === currentSlug;
           const name = tool ? toolText(lang, tool.slug).name : '';
           return (
             <div key={i} className="dock-slot">
-              {tool ? (
+              {custom ? (
+                // External tool: opens in a new tab after the warning (see ExternalToolWarning)
+                <div className="dock-lift">
+                  <button
+                    type="button"
+                    onClick={() => launchCustom(custom)}
+                    title={`${custom.name} · ${t.custom.external} · Alt+${i + 1}`}
+                    aria-label={`${custom.name}, ${t.custom.external} (Alt+${i + 1})`}
+                    className="block rounded-[13px] outline-none focus-visible:ring-4 focus-visible:ring-accent/30"
+                  >
+                    <LetterIcon name={custom.name} color={custom.color} size="dock" />
+                  </button>
+                  <button
+                    type="button"
+                    aria-label={t.dock.remove(custom.name)}
+                    onClick={() => toggleSlot(slug!)}
+                    className="dock-remove absolute -top-1.5 -left-1.5 grid size-[18px] place-items-center rounded-full bg-[var(--raised)] text-muted shadow-md hover:text-danger"
+                  >
+                    <X size={11} strokeWidth={3} />
+                  </button>
+                </div>
+              ) : tool ? (
                 // The icon and ✕ are magnified together as one unit (.dock-lift) so the ✕ follows the enlarged icon,
                 // and hovering the ✕ keeps the magnification since it is still inside the same cell (.dock-slot).
                 <div className="dock-lift">
@@ -120,6 +146,7 @@ function Dock({ currentSlug }: { currentSlug?: string }) {
           );
         })}
       </div>
+      {customWarning}
     </nav>
   );
 }

@@ -1,10 +1,23 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { CornerDownLeft, Search } from 'lucide-react';
+import { CornerDownLeft, ExternalLink, Search } from 'lucide-react';
 import { LOCALES, useLang, useT, withI18n, type Lang } from '../i18n';
 import { tools, toolText, toolUrl, type Tool } from '../tools/registry';
 import { readSlots } from '../lib/slots';
-import AppIcon from './ui/AppIcon';
+import { getCustomTool, hostOf, useCustomTools, type CustomTool } from '../lib/customTools';
+import AppIcon, { LetterIcon } from './ui/AppIcon';
+import { useLaunchCustomTool } from './ExternalToolWarning';
+
+type Result = { kind: 'tool'; tool: Tool } | { kind: 'custom'; tool: CustomTool };
+
+function scoreCustom(tool: CustomTool, q: string): number {
+  if (!q) return 1;
+  const n = tool.name.toLowerCase();
+  if (n.startsWith(q)) return 100;
+  if (n.includes(q)) return 80;
+  if (tool.url.toLowerCase().includes(q)) return 30;
+  return 0;
+}
 
 /** Rank the current language's name/description highest, but also match names in other languages and keywords */
 function score(tool: Tool, q: string, lang: Lang): number {
@@ -30,15 +43,21 @@ function CommandPalette() {
   const [active, setActive] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
+  const customTools = useCustomTools();
+  const [launchCustom, customWarning] = useLaunchCustomTool();
 
-  const results = useMemo(() => {
+  // Custom tools rank like ready tools; with an empty query they come after the built-in ones
+  const results = useMemo<Result[]>(() => {
     const q = query.trim().toLowerCase();
-    return tools
-      .map((tool) => ({ tool, s: score(tool, q, lang) + (tool.status === 'ready' ? 1 : 0) }))
-      .filter((r) => r.s > (q ? 1 : 0))
+    const scored = [
+      ...tools.map((tool) => ({ r: { kind: 'tool', tool } as Result, s: score(tool, q, lang) + (tool.status === 'ready' ? 1 : 0) })),
+      ...customTools.map((tool) => ({ r: { kind: 'custom', tool } as Result, s: scoreCustom(tool, q) + (q ? 1 : 0) })),
+    ];
+    return scored
+      .filter((x) => x.s > (q ? 1 : 0))
       .sort((a, b) => b.s - a.s)
-      .map((r) => r.tool);
-  }, [query, lang]);
+      .map((x) => x.r);
+  }, [query, lang, customTools]);
 
   // Global shortcuts: Ctrl/Cmd+K or '/' to open, Alt+1–9 to jump to a Quick Slot
   useEffect(() => {
@@ -55,13 +74,15 @@ function CommandPalette() {
         const slug = readSlots()[Number(e.code.slice(5)) - 1];
         if (slug) {
           e.preventDefault();
-          location.href = toolUrl(slug, lang);
+          const custom = getCustomTool(slug);
+          if (custom) launchCustom(custom);
+          else location.href = toolUrl(slug, lang);
         }
       }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [lang]);
+  }, [lang, launchCustom]);
 
   useEffect(() => {
     if (open) {
@@ -77,8 +98,14 @@ function CommandPalette() {
     listRef.current?.querySelector<HTMLElement>(`[data-idx="${active}"]`)?.scrollIntoView({ block: 'nearest' });
   }, [active]);
 
-  const go = (tool: Tool | undefined) => {
-    if (tool) location.href = toolUrl(tool.slug, lang);
+  const go = (r: Result | undefined) => {
+    if (!r) return;
+    if (r.kind === 'tool') {
+      location.href = toolUrl(r.tool.slug, lang);
+    } else {
+      setOpen(false);
+      launchCustom(r.tool);
+    }
   };
 
   const onInputKey = (e: React.KeyboardEvent) => {
@@ -129,21 +156,27 @@ function CommandPalette() {
               {results.length > 0 && <div className="mx-5 h-px bg-line" />}
               <ul ref={listRef} className="max-h-[52vh] overflow-y-auto p-2">
                 {results.length === 0 && <li className="px-3 py-8 text-center text-[15px] text-muted">{t.palette.noResults}</li>}
-                {results.map((tool, i) => {
-                  const { name, description } = toolText(lang, tool.slug);
+                {results.map((r, i) => {
+                  const { name, description } = r.kind === 'tool' ? toolText(lang, r.tool.slug) : { name: r.tool.name, description: hostOf(r.tool.url) };
                   return (
-                    <li key={tool.slug} data-idx={i}>
+                    <li key={r.kind === 'tool' ? r.tool.slug : r.tool.id} data-idx={i}>
                       <button
                         type="button"
                         onMouseMove={() => setActive(i)}
-                        onClick={() => go(tool)}
+                        onClick={() => go(r)}
                         className={`flex w-full items-center gap-3 rounded-[14px] px-3 py-2 text-left transition-colors ${i === active ? 'bg-accent text-accent-fg' : ''}`}
                       >
-                        <AppIcon tool={tool} size="sm" />
+                        {r.kind === 'tool' ? <AppIcon tool={r.tool} size="sm" /> : <LetterIcon name={r.tool.name} color={r.tool.color} size="sm" />}
                         <span className="min-w-0 flex-1">
                           <span className="block truncate text-[15px] font-medium">{name}</span>
                           <span className={`block truncate text-[12px] ${i === active ? 'text-accent-fg/80' : 'text-muted'}`}>
-                            {tool.status === 'soon' ? `${t.common.comingSoon} · ` : ''}
+                            {r.kind === 'tool' && r.tool.status === 'soon' ? `${t.common.comingSoon} · ` : ''}
+                            {r.kind === 'custom' && (
+                              <>
+                                <ExternalLink size={11} strokeWidth={2.4} className="mr-1 inline align-[-1px]" />
+                                {`${t.custom.external} · `}
+                              </>
+                            )}
                             {description}
                           </span>
                         </span>
@@ -157,6 +190,7 @@ function CommandPalette() {
           </div>,
           document.body,
         )}
+      {customWarning}
     </>
   );
 }

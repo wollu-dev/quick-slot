@@ -14,6 +14,7 @@ QuickSlot: ブラウザですぐ使える日常・開発ツール集。構成と
 - npm workspaces のモノレポ。ウェブサイトは `apps/web`（Astro 7 + React 19 islands + Tailwind 4）。バックエンド（`apps/api`）はまだありません。
 - ツールの唯一の情報源は `apps/web/src/tools/registry.ts`。ツールの追加・状態変更はここから。
 - 原則: ツールはすべての処理をブラウザ内で行う（`processing: 'client'`）。ユーザーのファイルをサーバーに送らない。本当にサーバーが必要なツールだけ `'server'` にする。
+- マイツール（`lib/customTools.ts`）はユーザーが自分で追加する外部サイトへのリンク。ブラウザにだけ保存し、http(s) のURLだけを受け付け、外部ツールの警告（`ExternalToolWarning`）を経てから `noopener,noreferrer` で新しいタブに開く。そのサイトからは何も読み込まない（ファビコン、プレビュー、iframe は禁止）。
 - 重いエンジン（ffmpeg.wasm、HEIC・AVIF コーデックなどの WebAssembly）は、必要なときだけ動的 `import()` で読み込み、CDN ではなくこのサイトから配信する。
 - ファイル変換では、拡張子と中身が食い違うファイルを決して作らない。本当の形式はバイト列から判定し（`lib/convert/formats.ts`）、形式が同じときだけ名前を変え、変換できないものは拒否する。
 
