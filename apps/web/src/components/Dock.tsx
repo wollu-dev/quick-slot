@@ -1,10 +1,42 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Star, X } from 'lucide-react';
 import { useSlots, toggleSlot } from '../lib/slots';
 import { getTool, toolUrl } from '../tools/registry';
 import AppIcon from './ui/AppIcon';
 
 const HINT_DISMISSED_KEY = 'quickslot:dock-hint-dismissed';
+
+const HOVER_LIFT = 'group-hover:-translate-y-1 group-hover:scale-115';
+const HOVER_SHOW = 'group-hover:opacity-100';
+
+/**
+ * 독의 호버 효과를 켜도 되는지.
+ * 툴로 갔다가 뒤로가기로 돌아오면 브라우저가 마우스가 아직 클릭했던 독 아이콘 위에 있다고 판단해서
+ * (실제 마우스는 다른 곳에 있어도) :hover 가 남는다. 그래서 페이지가 보인 뒤 마우스가 실제로 움직였을 때만 호버를 켠다.
+ * 같은 이유로 클릭 때문에 독에 남은 포커스도 풀어준다.
+ */
+function useHoverReady(navRef: React.RefObject<HTMLElement | null>) {
+  const [ready, setReady] = useState(false);
+  useEffect(() => {
+    const onMove = () => {
+      setReady(true);
+      window.removeEventListener('pointermove', onMove);
+    };
+    const arm = () => {
+      setReady(false);
+      const el = document.activeElement;
+      if (el instanceof HTMLElement && navRef.current?.contains(el)) el.blur();
+      window.addEventListener('pointermove', onMove);
+    };
+    arm();
+    window.addEventListener('pageshow', arm);
+    return () => {
+      window.removeEventListener('pageshow', arm);
+      window.removeEventListener('pointermove', onMove);
+    };
+  }, [navRef]);
+  return ready;
+}
 
 /** 말풍선을 닫았는지 (브라우저에 기억). 저장된 값을 읽기 전에는 보이지 않게 해서 깜빡임을 막는다. */
 function useHintVisible() {
@@ -37,9 +69,12 @@ export default function Dock({ currentSlug }: { currentSlug?: string }) {
   const slots = useSlots();
   const empty = slots.every((s) => !s);
   const [hintVisible, dismissHint] = useHintVisible();
+  const navRef = useRef<HTMLElement>(null);
+  const hoverReady = useHoverReady(navRef);
 
   return (
     <nav
+      ref={navRef}
       aria-label="퀵슬롯"
       className="pointer-events-none fixed inset-x-0 z-40 flex justify-center px-2"
       style={{ bottom: 'max(12px, env(safe-area-inset-bottom))' }}
@@ -55,7 +90,8 @@ export default function Dock({ currentSlug }: { currentSlug?: string }) {
               {tool ? (
                 // 아이콘과 ✕ 를 한 덩어리로 확대해서 ✕ 가 확대된 아이콘을 따라가고,
                 // ✕ 위에 마우스를 올려도 덩어리(group) 위에 있으므로 확대가 풀리지 않는다.
-                <div className="relative origin-bottom transition duration-200 ease-out group-focus-within:-translate-y-1 group-focus-within:scale-115 group-hover:-translate-y-1 group-hover:scale-115">
+                // 확대 조건: 마우스 호버(페이지에 온 뒤 마우스가 실제로 움직인 다음부터) 또는 키보드 포커스(:focus-visible).
+                <div className={`relative origin-bottom transition duration-200 ease-out group-has-[:focus-visible]:-translate-y-1 group-has-[:focus-visible]:scale-115 ${hoverReady ? HOVER_LIFT : ''}`}>
                   <a
                     href={toolUrl(tool.slug)}
                     title={`${tool.name} · Alt+${i + 1}`}
@@ -69,7 +105,7 @@ export default function Dock({ currentSlug }: { currentSlug?: string }) {
                     type="button"
                     aria-label={`${tool.name} 슬롯에서 빼기`}
                     onClick={() => toggleSlot(tool.slug)}
-                    className="absolute -top-1.5 -left-1.5 grid size-[18px] place-items-center rounded-full bg-[var(--raised)] text-muted opacity-0 shadow-md transition group-focus-within:opacity-100 group-hover:opacity-100 hover:text-danger"
+                    className={`absolute -top-1.5 -left-1.5 grid size-[18px] place-items-center rounded-full bg-[var(--raised)] text-muted opacity-0 shadow-md transition group-has-[:focus-visible]:opacity-100 hover:text-danger ${hoverReady ? HOVER_SHOW : ''}`}
                   >
                     <X size={11} strokeWidth={3} />
                   </button>
