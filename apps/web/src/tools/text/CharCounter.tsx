@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { LANG_TAGS, useLang, useT, withI18n, type Dict } from '../../i18n';
+import NumberField from '../../components/ui/NumberField';
 
 const DRAFT_KEY = 'quickslot:char-counter:draft';
 
@@ -88,14 +89,7 @@ function CharCounter() {
       <div className="flex flex-wrap items-center gap-3 text-sm">
         <label className="flex items-center gap-2">
           <span className="text-muted">{c.limit}</span>
-          <input
-            type="number"
-            min={1}
-            placeholder={c.limitPlaceholder}
-            className="input w-28"
-            value={limit}
-            onChange={(e) => setLimit(e.target.value ? Math.max(1, Number(e.target.value)) : '')}
-          />
+          <NumberField min={1} allowEmpty placeholder={c.limitPlaceholder} className="w-36" value={limit} onChange={setLimit} />
         </label>
         {limit !== '' && (
           <div className="flex min-w-48 flex-1 items-center gap-2">

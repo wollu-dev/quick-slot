@@ -33,6 +33,17 @@ const ko = {
     license: 'MIT 라이선스',
     issues: '문제 신고',
   },
+  picker: {
+    prevMonth: '이전 달',
+    nextMonth: '다음 달',
+    time: '시간',
+    hour: '시',
+    minute: '분',
+    second: '초',
+    now: '지금',
+    increase: '늘리기',
+    decrease: '줄이기',
+  },
   palette: { noResults: '결과 없음' },
   home: { filters: '카테고리 필터', all: '전체' },
   toolPage: {

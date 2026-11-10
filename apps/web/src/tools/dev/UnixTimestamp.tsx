@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import CopyButton from '../../components/ui/CopyButton';
 import { LANG_TAGS, useLang, useT, withI18n, type Lang } from '../../i18n';
+import DateTimePicker, { toDateTimeValue } from '../../components/ui/DateTimePicker';
 
 const pad = (n: number) => String(n).padStart(2, '0');
 const toLocalInput = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
@@ -36,7 +37,7 @@ function UnixTimestamp() {
   const lang = useLang();
   const [now, setNow] = useState(() => Date.now());
   const [ts, setTs] = useState('');
-  const [dateInput, setDateInput] = useState('');
+  const [dateInput, setDateInput] = useState(() => toDateTimeValue(new Date()));
 
   useEffect(() => {
     setTs(String(Math.floor(Date.now() / 1000)));
@@ -94,7 +95,7 @@ function UnixTimestamp() {
 
         <section className="panel p-4">
           <h2 className="mb-3 text-sm font-semibold">{s.dateToTs}</h2>
-          <input type="datetime-local" step={1} className="input" value={dateInput} onChange={(e) => setDateInput(e.target.value)} />
+          <DateTimePicker label={s.dateToTs} value={dateInput} onChange={setDateInput} />
           {fromDate && (
             <div className="mt-3">
               <p className="mb-1 text-xs text-muted">{s.tzNote(tz)}</p>

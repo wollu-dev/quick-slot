@@ -3,6 +3,7 @@ import CopyButton from '../../components/ui/CopyButton';
 import Segmented from '../../components/ui/Segmented';
 import Select from '../../components/ui/Select';
 import { useT, withI18n } from '../../i18n';
+import NumberField from '../../components/ui/NumberField';
 
 type Version = 'v4' | 'v7';
 type Format = 'default' | 'upper' | 'nohyphen' | 'braces';
@@ -65,7 +66,7 @@ function UuidGenerator() {
           <label className="label" htmlFor="count">
             {u.count}
           </label>
-          <input id="count" type="number" min={1} max={1000} className="input w-28" value={count} onChange={(e) => setCount(Number(e.target.value) || 1)} />
+          <NumberField id="count" min={1} max={1000} className="w-32" value={count} onChange={setCount} />
         </div>
         <div>
           <label className="label" htmlFor="fmt">
