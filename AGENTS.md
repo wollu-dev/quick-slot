@@ -58,6 +58,7 @@ Translucent glass surfaces over a neutral background. The reference is `apps/web
 - **Color**: tokens only: `bg`, `panel`, `panel-2`, `line`, `fg`, `muted`, `accent`, `accent-fg`, `danger`, `ok`. No hard-coded colors (exceptions: category tile colors in `registry.ts`, and the appearance previews in settings).
 - **Surfaces**: cards and panels use `panel` (= `glass` + rounded corners), the search window uses `glass-strong`, and floating windows meant for reading (menus, the settings sheet) use `glass-menu` (more opaque). A large `textarea.input` automatically becomes a glass surface.
 - **Controls**: buttons `btn` / `btn-primary` / `btn-tinted`, inputs `input`, labels `label`; use `Segmented` for 2–3 options and the `Select` component for more. **Never use the native `<select>`** (its open list can't be styled). Checkboxes are automatically styled as switches by CSS.
+- **Text input and output areas**: use the `TextPanel` component (a header row with the title and buttons, the text area below). Never float buttons such as Copy over a text area; long text would run underneath them.
 - **Height**: single-line controls (buttons, inputs, `Select`, `Segmented`) are all 36px (`h-9`).
 - **Icons**: `lucide-react` line icons only. **Never use emoji as UI icons.** Tool icons use `AppIcon` (a category-colored tile).
 - **Corners**: cards 22px, large areas 26px, buttons and badges fully rounded (pill). Don't use sharp corners like `rounded-sm/md/lg`.

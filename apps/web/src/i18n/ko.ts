@@ -15,6 +15,7 @@ const ko = {
     copyFailed: '복사 실패',
     reset: '처음부터',
     working: '만드는 중...',
+    input: '입력',
     result: '결과',
     save: '저장',
     done: '완료',
