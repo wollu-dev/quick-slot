@@ -157,4 +157,4 @@ Please read **[AGENTS.md](AGENTS.md)** first. It holds the rules for code, desig
 
 ## License
 
-[MIT](LICENSE) © 2026 WolLu
+[MIT](LICENSE) © 2026 Jaeyun Jung (WolLu)

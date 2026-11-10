@@ -157,4 +157,4 @@ Docker 이미지를 GitHub Container Registry 에 올려 직접 호스팅할 계
 
 ## 라이선스
 
-[MIT](LICENSE) © 2026 WolLu
+[MIT](LICENSE) © 2026 정재윤 (Jaeyun Jung, WolLu)
