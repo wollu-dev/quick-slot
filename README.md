@@ -39,7 +39,7 @@ Renaming a batch of files, stripping GPS data from a photo, pretty-printing JSON
 |---|---|
 | **File Converter** | Actually convert images, audio, video and data files (JPG, PNG, WebP, AVIF, HEIC, MP3, MP4, WebM, JSON, YAML, CSV, XML and more) |
 | **Batch Rename** | Numbering, find & replace, regex, case conversion |
-| **File Date Changer** | Generate a PowerShell / Bash script that sets created and modified dates |
+| **File Date Changer** | Download files with new created and modified dates as a ZIP, or get a PowerShell / Bash script |
 | **Metadata Remover** | Strip GPS, camera info and more from JPEG / PNG / WebP without losing quality |
 | **Character Counter** | Characters with and without spaces, words, bytes, reading time |
 | **JSON Formatter** | Pretty-print, minify, and pinpoint the exact line and column of errors |
