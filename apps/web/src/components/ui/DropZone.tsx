@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { ArrowUp, Plus } from 'lucide-react';
+import { ArrowUp, Lock, Plus } from 'lucide-react';
 import { useT } from '../../i18n';
 
 interface Props {
@@ -9,10 +9,15 @@ interface Props {
   multiple?: boolean;
   hint?: string;
   compact?: boolean;
+  /**
+   * Show "Your files never leave this device" where the user is about to hand over files.
+   * Set to false for tools that process files on a server (processing: 'server').
+   */
+  privacyNote?: boolean;
 }
 
 /** Drag and drop, or click to pick files. Dropping a folder reads every file inside it. */
-export default function DropZone({ onFiles, accept, multiple = true, hint, compact }: Props) {
+export default function DropZone({ onFiles, accept, multiple = true, hint, compact, privacyNote = true }: Props) {
   const t = useT();
   const inputRef = useRef<HTMLInputElement>(null);
   const [over, setOver] = useState(false);
@@ -53,6 +58,12 @@ export default function DropZone({ onFiles, accept, multiple = true, hint, compa
       </span>
       {!compact && <span className="text-[14px] text-accent">{t.dropzone.orClick}</span>}
       {hint && !compact && <span className="mt-1 text-[13px] text-muted">{hint}</span>}
+      {privacyNote && !compact && (
+        <span className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-ok/10 px-3 py-1 text-[12px] font-medium text-ok">
+          <Lock size={12} strokeWidth={2.4} aria-hidden />
+          {t.dropzone.privacy}
+        </span>
+      )}
       <input
         ref={inputRef}
         type="file"

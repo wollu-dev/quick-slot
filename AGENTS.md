@@ -43,6 +43,7 @@ QuickSlot: everyday and developer tools that run right in the browser. See [READ
 - **Current status: not built yet.** It will be built when the service is close to complete. Don't add a `Dockerfile` or an image-publishing workflow before then. The only automation today is CI (`.github/workflows/ci.yml`: type check and build).
 - Direction for when it's built: a two-stage `Dockerfile` (build with Node → serve only the static output with nginx), taking the site URL as `ARG SITE_URL`. Publish images **only when a version tag (`v*`) is pushed**, not on every merge to `main`.
 - **Never hard-code a domain or URL.** The site URL comes only from the build environment variable `SITE_URL` (`astro.config.mjs` → `Astro.site`). When you need an absolute URL use `Astro.site`, and make it work with relative URLs when it's missing.
+- Project links (the GitHub repository) and the author come from the root `package.json` (`repository`, `author`). Read them through `apps/web/src/lib/project.ts` instead of writing the URL in UI code.
 - When you add an environment variable, also document it in `apps/web/.env.example` and in the "Configuration" table of the README (all three languages).
 
 ## Design rules

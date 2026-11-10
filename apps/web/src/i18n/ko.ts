@@ -24,7 +24,14 @@ const ko = {
     zipDownload: (n: number) => `ZIP으로 받기 (${n}개)`,
   },
   header: { home: 'QuickSlot 홈', search: 'QuickSlot 검색', settings: '설정' },
-  footer: { privacy: '브라우저에서 처리하는 툴은 파일을 서버로 보내지 않습니다.' },
+  footer: {
+    /** Author name as shown in each language (the legal name is in LICENSE and package.json) */
+    copyright: (year: number) => `© ${year} 정재윤 (WolLu)`,
+    links: '프로젝트 링크',
+    github: 'GitHub',
+    license: 'MIT 라이선스',
+    issues: '문제 신고',
+  },
   palette: { noResults: '결과 없음' },
   home: { filters: '카테고리 필터', all: '전체' },
   toolPage: {
@@ -54,6 +61,8 @@ const ko = {
     drop: '파일을 여기로 끌어다 놓으세요',
     orClick: '또는 클릭해서 선택',
     addMore: '파일 더 추가하기',
+    /** Shown inside the drop zone of tools that process files on the device */
+    privacy: '파일은 이 기기 밖으로 나가지 않아요',
   },
   settings: {
     title: '설정',

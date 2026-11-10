@@ -21,7 +21,13 @@ const ja: Dict = {
     zipDownload: (n) => `ZIPでダウンロード（${n}件）`,
   },
   header: { home: 'QuickSlot ホーム', search: 'QuickSlot を検索', settings: '設定' },
-  footer: { privacy: 'ブラウザで処理するツールは、ファイルをサーバーに送信しません。' },
+  footer: {
+    copyright: (year) => `© ${year} Jaeyun Jung（WolLu）`,
+    links: 'プロジェクトのリンク',
+    github: 'GitHub',
+    license: 'MITライセンス',
+    issues: '不具合を報告',
+  },
   palette: { noResults: '見つかりません' },
   home: { filters: 'カテゴリフィルター', all: 'すべて' },
   toolPage: {
@@ -51,6 +57,7 @@ const ja: Dict = {
     drop: 'ここにファイルをドロップ',
     orClick: 'またはクリックして選択',
     addMore: 'ファイルを追加',
+    privacy: 'ファイルがこの端末の外に出ることはありません',
   },
   settings: {
     title: '設定',
