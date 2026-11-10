@@ -95,7 +95,7 @@ export const tools: Tool[] = [
 
   // Everyday
   t({ slug: 'date-calculator', category: 'life', icon: CalendarDays, keywords: ['날짜', 'dday', 'd-day', '디데이', '나이', '만나이', '만 나이', '계산', '기념일', '평일', '영업일', 'date', 'days between', 'age', 'business days', '日付', '年齢'], status: 'ready' }),
-  t({ slug: 'unit-converter', category: 'life', icon: Ruler, keywords: ['단위', '변환', '평', '길이', '무게'], status: 'soon' }),
+  t({ slug: 'unit-converter', category: 'life', icon: Ruler, keywords: ['단위', '변환', '평', '길이', '무게', '넓이', '부피', '온도', '섭씨', '화씨', '인치', '파운드', '근', '돈', 'unit', 'convert', 'pyeong', 'inch', 'mile', 'pound', 'fahrenheit', '単位', '坪'], status: 'ready' }),
   t({ slug: 'dutch-pay', category: 'life', icon: Receipt, keywords: ['더치페이', 'n빵', '정산', '나누기'], status: 'soon' }),
 ];
 

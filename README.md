@@ -51,9 +51,10 @@ Renaming a batch of files, stripping GPS data from a photo, pretty-printing JSON
 | **JWT Decoder** | Read a token's header and payload, with expiry status and readable times (signature not verified) |
 | **Color Converter** | Pick or paste a color and copy it as HEX, RGB, HSL, Unity, Unreal (linear) or Godot code, with a WCAG contrast check |
 | **Date Calculator** | Days between dates (D-day, weekdays), age, and adding days, weeks, months or weekdays to a date |
+| **Unit Converter** | Length, weight, area (incl. pyeong), volume, temperature, speed and data size, all units at once |
 
 <details>
-<summary><b>Coming soon</b> (16 tools)</summary>
+<summary><b>Coming soon</b> (15 tools)</summary>
 
 | Category | Tools |
 |---|---|
@@ -63,7 +64,7 @@ Renaming a batch of files, stripping GPS data from a photo, pretty-printing JSON
 | Video & Audio | Video → GIF · Screen Recorder |
 | Text | Text Diff · Korean ↔ English Keyboard Fix |
 | Developer | Normal Map Green Flip |
-| Everyday | Unit Converter · Bill Splitter |
+| Everyday | Bill Splitter |
 
 </details>
 
