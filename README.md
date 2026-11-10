@@ -47,9 +47,10 @@ Renaming a batch of files, stripping GPS data from a photo, pretty-printing JSON
 | **Base64 Encode / Decode** | Text and files, URL-safe and data-URL output |
 | **Unix Timestamp** | Convert timestamps ↔ dates with auto-detected units |
 | **UUID Generator** | Generate UUID v4 / v7 in bulk |
+| **Password Generator** | Random passwords with the length and characters you choose, plus a strength meter |
 
 <details>
-<summary><b>Coming soon</b> (20 tools)</summary>
+<summary><b>Coming soon</b> (19 tools)</summary>
 
 | Category | Tools |
 |---|---|
@@ -58,7 +59,7 @@ Renaming a batch of files, stripping GPS data from a photo, pretty-printing JSON
 | Images | Image Compressor · Image Resizer · QR Code |
 | Video & Audio | Video → GIF · Screen Recorder |
 | Text | Text Diff · Korean ↔ English Keyboard Fix |
-| Developer | Password Generator · JWT Decoder · Color Converter · Normal Map Green Flip |
+| Developer | JWT Decoder · Color Converter · Normal Map Green Flip |
 | Everyday | Date Calculator · Unit Converter · Bill Splitter |
 
 </details>

@@ -88,7 +88,7 @@ export const tools: Tool[] = [
   t({ slug: 'base64', category: 'dev', icon: Binary, keywords: ['base64', '인코딩', '디코딩', 'encode', 'decode'], status: 'ready' }),
   t({ slug: 'unix-timestamp', category: 'dev', icon: Clock, keywords: ['timestamp', '타임스탬프', 'unix', 'epoch', '시간'], status: 'ready' }),
   t({ slug: 'uuid-generator', category: 'dev', icon: Hash, keywords: ['uuid', 'guid', '생성', 'id'], status: 'ready' }),
-  t({ slug: 'password-generator', category: 'dev', icon: KeyRound, keywords: ['비밀번호', 'password', '랜덤'], status: 'soon' }),
+  t({ slug: 'password-generator', category: 'dev', icon: KeyRound, keywords: ['비밀번호', 'password', '랜덤', 'random', 'generator', 'パスワード'], status: 'ready' }),
   t({ slug: 'jwt-decoder', category: 'dev', icon: Ticket, keywords: ['jwt', 'token', '토큰'], status: 'soon' }),
   t({ slug: 'color-converter', category: 'dev', icon: Palette, keywords: ['색상', 'color', 'hex', 'rgb', 'hsl', 'unity', 'unreal'], status: 'soon' }),
   t({ slug: 'normal-map-flip', category: 'dev', icon: Layers, keywords: ['노멀맵', 'normal', 'unity', 'unreal', '게임', 'texture'], status: 'soon', accepts: ['image/*'] }),

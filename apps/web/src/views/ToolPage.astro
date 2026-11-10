@@ -20,6 +20,7 @@ import Base64Tool from '../tools/dev/Base64Tool';
 import JsonFormatter from '../tools/dev/JsonFormatter';
 import UnixTimestamp from '../tools/dev/UnixTimestamp';
 import UuidGenerator from '../tools/dev/UuidGenerator';
+import PasswordGenerator from '../tools/dev/PasswordGenerator';
 
 interface Props {
   lang: Lang;
@@ -74,6 +75,7 @@ const tt = toolText(lang, tool.slug);
   {slug === 'base64' && <Base64Tool client:load lang={lang} />}
   {slug === 'unix-timestamp' && <UnixTimestamp client:only="react" lang={lang} />}
   {slug === 'uuid-generator' && <UuidGenerator client:only="react" lang={lang} />}
+  {slug === 'password-generator' && <PasswordGenerator client:only="react" lang={lang} />}
 
   {
     tool.status === 'soon' && (
