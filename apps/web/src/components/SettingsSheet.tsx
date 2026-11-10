@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { Check, Settings } from 'lucide-react';
-import { LANG_KEY, LANG_NAMES, LOCALES, localizePath, splitLocale, useLang, useT, withI18n, type Lang } from '../i18n';
+import { LANG_NAMES, LOCALES, goToLang, saveLang, useLang, useT, withI18n, type Lang } from '../i18n';
 import { useDockSettings, type DockPosition, type DockSize } from '../lib/dock';
 import { useTheme, type ThemePref } from '../lib/theme';
 import Segmented from './ui/Segmented';
@@ -63,14 +63,8 @@ function Sheet({ onClose }: { onClose: () => void }) {
   }, [onClose]);
 
   const changeLang = (next: Lang) => {
-    try {
-      localStorage.setItem(LANG_KEY, next);
-    } catch {
-      /* 저장소 사용 불가: 이동만 */
-    }
-    if (next === lang) return;
-    const { path } = splitLocale(location.pathname);
-    location.href = localizePath(next, path) + location.search + location.hash;
+    saveLang(next);
+    if (next !== lang) goToLang(next);
   };
 
   return (

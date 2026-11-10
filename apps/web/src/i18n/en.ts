@@ -71,6 +71,11 @@ const en: Dict = {
     dockNote: 'On narrow screens, the slots always appear small at the bottom.',
     language: 'Language',
   },
+  langSuggest: {
+    message: 'This page is also available in English.',
+    switchTo: 'View in English',
+    close: 'Dismiss',
+  },
   categories: {
     file: { name: 'Files', description: 'Names, extensions, dates, metadata' },
     pdf: { name: 'PDF & Docs', description: 'Merge, split, convert' },
