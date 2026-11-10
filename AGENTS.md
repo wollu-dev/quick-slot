@@ -13,6 +13,8 @@ QuickSlot: everyday and developer tools that run right in the browser. See [READ
 - npm workspaces monorepo. The website is `apps/web` (Astro 7 + React 19 islands + Tailwind 4). There is no backend (`apps/api`) yet.
 - The single source of truth for tools is `apps/web/src/tools/registry.ts`. Adding a tool or changing its status starts there.
 - Principle: tools process everything in the browser (`processing: 'client'`). Never send user files to a server. Mark a tool `'server'` only when it truly needs one.
+- Heavy engines (WebAssembly such as ffmpeg.wasm, HEIC and AVIF codecs) are loaded only when needed with dynamic `import()`, and served from this site, never from a CDN.
+- File conversion must never produce a file whose extension doesn't match its content. Read the real format from the bytes (`lib/convert/formats.ts`), rename only when the format already matches, and refuse what can't be converted.
 
 ## Languages of the repository
 

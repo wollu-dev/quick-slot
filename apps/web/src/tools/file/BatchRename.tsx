@@ -6,14 +6,9 @@ import { LANG_TAGS, useLang, useT, withI18n, type Dict } from '../../i18n';
 import Rich from '../../i18n/Rich';
 import { dedupeNames, downloadBlob, formatBytes, makeZip, readBytes, splitName, timestampForFilename } from '../../lib/files';
 
-type Mode = 'extension' | 'rename';
 type CaseMode = 'none' | 'lower' | 'upper';
 
 interface Options {
-  // Extension mode
-  newExt: string;
-  onlyExts: string;
-  // Name mode
   find: string;
   replace: string;
   useRegex: boolean;
@@ -27,8 +22,6 @@ interface Options {
 }
 
 const DEFAULTS: Options = {
-  newExt: '',
-  onlyExts: '',
   find: '',
   replace: '',
   useRegex: false,
@@ -41,18 +34,8 @@ const DEFAULTS: Options = {
   extLower: false,
 };
 
-function buildName(file: File, index: number, mode: Mode, o: Options, t: Dict): { name: string; error?: string } {
+function buildName(file: File, index: number, o: Options, t: Dict): { name: string; error?: string } {
   const { base, ext } = splitName(file.name);
-
-  if (mode === 'extension') {
-    const filter = o.onlyExts
-      .split(/[,\s]+/)
-      .map((s) => s.replace(/^\./, '').toLowerCase())
-      .filter(Boolean);
-    if (filter.length && !filter.includes(ext.toLowerCase())) return { name: file.name };
-    const next = o.newExt.trim().replace(/^\.+/, '');
-    return { name: next ? `${base}.${next}` : base };
-  }
 
   let b = base;
   if (o.find) {
@@ -76,7 +59,7 @@ function buildName(file: File, index: number, mode: Mode, o: Options, t: Dict): 
 
 const INVALID = /[\\/:*?"<>|]/;
 
-function BatchRename({ mode }: { mode: Mode }) {
+function BatchRename() {
   const t = useT();
   const lang = useLang();
   const [files, setFiles] = useState<File[]>([]);
@@ -85,7 +68,7 @@ function BatchRename({ mode }: { mode: Mode }) {
   const set = <K extends keyof Options>(k: K, v: Options[K]) => setO((prev) => ({ ...prev, [k]: v }));
 
   const rows = useMemo(() => {
-    const built = files.map((f, i) => buildName(f, i, mode, o, t));
+    const built = files.map((f, i) => buildName(f, i, o, t));
     const finalNames = dedupeNames(built.map((b) => b.name));
     return files.map((file, i) => ({
       file,
@@ -93,7 +76,7 @@ function BatchRename({ mode }: { mode: Mode }) {
       deduped: finalNames[i] !== built[i].name,
       error: built[i].error ?? (INVALID.test(built[i].name) ? t.rename.invalidChars : !built[i].name.trim() ? t.rename.emptyName : undefined),
     }));
-  }, [files, o, mode, t]);
+  }, [files, o, t]);
 
   const changed = rows.filter((r) => r.next !== r.file.name).length;
   const hasError = rows.some((r) => r.error);
@@ -110,7 +93,7 @@ function BatchRename({ mode }: { mode: Mode }) {
         const entries = await Promise.all(
           rows.map(async (r) => ({ name: r.next, data: await readBytes(r.file), mtime: new Date(r.file.lastModified) })),
         );
-        downloadBlob(makeZip(entries), `quickslot-${mode === 'extension' ? 'ext' : 'rename'}-${timestampForFilename()}.zip`);
+        downloadBlob(makeZip(entries), `quickslot-rename-${timestampForFilename()}.zip`);
       }
     } finally {
       setBusy(false);
@@ -124,70 +107,52 @@ function BatchRename({ mode }: { mode: Mode }) {
   return (
     <div className="grid gap-4 lg:grid-cols-[320px_1fr]">
       <aside className="panel space-y-4 self-start p-4">
-        {mode === 'extension' ? (
-          <>
-            <div>
-              <label className="label" htmlFor="newExt">{t.rename.newExt}</label>
-              <input id="newExt" className="input font-mono" placeholder={t.rename.newExtPlaceholder} value={o.newExt} onChange={(e) => set('newExt', e.target.value)} />
+          <div>
+            <label className="label" htmlFor="find">{t.rename.find}</label>
+            <input id="find" className="input font-mono" value={o.find} onChange={(e) => set('find', e.target.value)} />
+            <div className="mt-1.5 flex gap-3 text-xs text-muted">
+              <label className="flex items-center gap-1"><input type="checkbox" checked={o.useRegex} onChange={(e) => set('useRegex', e.target.checked)} /> {t.rename.regex}</label>
+              <label className="flex items-center gap-1"><input type="checkbox" checked={o.ignoreCase} onChange={(e) => set('ignoreCase', e.target.checked)} /> {t.rename.ignoreCase}</label>
             </div>
-            <div>
-              <label className="label" htmlFor="onlyExts">{t.rename.onlyExts}</label>
-              <input id="onlyExts" className="input font-mono" placeholder={t.rename.onlyExtsPlaceholder} value={o.onlyExts} onChange={(e) => set('onlyExts', e.target.value)} />
-            </div>
-            <p className="rounded-2xl bg-panel-2 p-3 text-xs leading-relaxed text-muted">
-              <Rich text={t.rename.extNote} />
+          </div>
+          <div>
+            <label className="label" htmlFor="replace">{t.rename.replace}</label>
+            <input id="replace" className="input font-mono" value={o.replace} onChange={(e) => set('replace', e.target.value)} />
+          </div>
+          <div>
+            <label className="label" htmlFor="pattern">{t.rename.pattern}</label>
+            <input id="pattern" className="input font-mono" value={o.pattern} onChange={(e) => set('pattern', e.target.value)} />
+            <p className="mt-1 text-xs text-muted">
+              <Rich text={t.rename.patternHelp} codeClassName="font-mono text-fg" />
             </p>
-          </>
-        ) : (
-          <>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="label" htmlFor="find">{t.rename.find}</label>
-              <input id="find" className="input font-mono" value={o.find} onChange={(e) => set('find', e.target.value)} />
-              <div className="mt-1.5 flex gap-3 text-xs text-muted">
-                <label className="flex items-center gap-1"><input type="checkbox" checked={o.useRegex} onChange={(e) => set('useRegex', e.target.checked)} /> {t.rename.regex}</label>
-                <label className="flex items-center gap-1"><input type="checkbox" checked={o.ignoreCase} onChange={(e) => set('ignoreCase', e.target.checked)} /> {t.rename.ignoreCase}</label>
-              </div>
+              <label className="label" htmlFor="start">{t.rename.start}</label>
+              <input id="start" type="number" className="input" value={o.start} onChange={(e) => set('start', Number(e.target.value) || 0)} />
             </div>
             <div>
-              <label className="label" htmlFor="replace">{t.rename.replace}</label>
-              <input id="replace" className="input font-mono" value={o.replace} onChange={(e) => set('replace', e.target.value)} />
+              <label className="label" htmlFor="pad">{t.rename.pad}</label>
+              <input id="pad" type="number" min={0} max={10} className="input" value={o.pad} onChange={(e) => set('pad', Math.min(10, Math.max(0, Number(e.target.value) || 0)))} />
             </div>
-            <div>
-              <label className="label" htmlFor="pattern">{t.rename.pattern}</label>
-              <input id="pattern" className="input font-mono" value={o.pattern} onChange={(e) => set('pattern', e.target.value)} />
-              <p className="mt-1 text-xs text-muted">
-                <Rich text={t.rename.patternHelp} codeClassName="font-mono text-fg" />
-              </p>
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-              <div>
-                <label className="label" htmlFor="start">{t.rename.start}</label>
-                <input id="start" type="number" className="input" value={o.start} onChange={(e) => set('start', Number(e.target.value) || 0)} />
-              </div>
-              <div>
-                <label className="label" htmlFor="pad">{t.rename.pad}</label>
-                <input id="pad" type="number" min={0} max={10} className="input" value={o.pad} onChange={(e) => set('pad', Math.min(10, Math.max(0, Number(e.target.value) || 0)))} />
-              </div>
-            </div>
-            <div>
-              <label className="label" htmlFor="case">{t.rename.caseLabel}</label>
-              <Select
-                id="case"
-                value={o.caseMode}
-                onChange={(v) => set('caseMode', v)}
-                options={[
-                  ['none', t.rename.caseNone],
-                  ['lower', t.rename.caseLower],
-                  ['upper', t.rename.caseUpper],
-                ]}
-              />
-            </div>
-            <div className="space-y-1.5 text-sm">
-              <label className="flex items-center gap-2"><input type="checkbox" checked={o.spaceToUnderscore} onChange={(e) => set('spaceToUnderscore', e.target.checked)} /> {t.rename.spaceToUnderscore}</label>
-              <label className="flex items-center gap-2"><input type="checkbox" checked={o.extLower} onChange={(e) => set('extLower', e.target.checked)} /> {t.rename.extLower}</label>
-            </div>
-          </>
-        )}
+          </div>
+          <div>
+            <label className="label" htmlFor="case">{t.rename.caseLabel}</label>
+            <Select
+              id="case"
+              value={o.caseMode}
+              onChange={(v) => set('caseMode', v)}
+              options={[
+                ['none', t.rename.caseNone],
+                ['lower', t.rename.caseLower],
+                ['upper', t.rename.caseUpper],
+              ]}
+            />
+          </div>
+          <div className="space-y-1.5 text-sm">
+            <label className="flex items-center gap-2"><input type="checkbox" checked={o.spaceToUnderscore} onChange={(e) => set('spaceToUnderscore', e.target.checked)} /> {t.rename.spaceToUnderscore}</label>
+            <label className="flex items-center gap-2"><input type="checkbox" checked={o.extLower} onChange={(e) => set('extLower', e.target.checked)} /> {t.rename.extLower}</label>
+          </div>
 
         <div className="space-y-2 border-t border-line pt-4">
           <button type="button" className="btn btn-primary w-full" disabled={busy || hasError || changed === 0} onClick={download}>
