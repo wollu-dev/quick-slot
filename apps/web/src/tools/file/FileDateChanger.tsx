@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { CheckCircle2, ChevronDown, Download, Info } from 'lucide-react';
 import DropZone from '../../components/ui/DropZone';
 import CopyButton from '../../components/ui/CopyButton';
 import Segmented from '../../components/ui/Segmented';
@@ -107,10 +108,23 @@ function FileDateChanger() {
     downloadBlob(blob, shell === 'powershell' ? 'change-dates.ps1' : 'change-dates.sh');
   };
 
+  /**
+   * Browsers always stamp downloaded files with the current time, so the dates travel inside a ZIP
+   * and are applied when it is extracted. Unchecked dates: the modified date stays as the file's
+   * original one; created and accessed fall back to the modified date (what Windows Explorer does anyway).
+   */
   const downloadZip = async () => {
     setBusy(true);
     try {
-      const entries = await Promise.all(files.map(async (file, i) => ({ name: file.name, data: await readBytes(file), mtime: items[i].date })));
+      const entries = await Promise.all(
+        files.map(async (file, i) => ({
+          name: file.name,
+          data: await readBytes(file),
+          mtime: targets.modified ? items[i].date : new Date(file.lastModified),
+          ctime: targets.created ? items[i].date : undefined,
+          atime: targets.accessed ? items[i].date : undefined,
+        })),
+      );
       downloadBlob(makeZip(entries), `quickslot-dated-${timestampForFilename()}.zip`);
     } finally {
       setBusy(false);
@@ -133,7 +147,7 @@ function FileDateChanger() {
   const steps = shell === 'powershell' ? f.winSteps : f.unixSteps;
 
   return (
-    <div className="grid gap-4 lg:grid-cols-[320px_1fr]">
+    <div className="grid grid-cols-1 gap-4 lg:grid-cols-[320px_minmax(0,1fr)]">
       <aside className="panel space-y-4 self-start p-4">
         <div>
           <label className="label" htmlFor="date">{f.date}</label>
@@ -152,53 +166,95 @@ function FileDateChanger() {
             </label>
           ))}
         </fieldset>
-        <div className="space-y-2 border-t border-line pt-4">
+        <div className="border-t border-line pt-4">
           <button type="button" className="btn w-full" onClick={() => setFiles([])}>
             {t.common.reset}
           </button>
-          <button type="button" className="btn w-full" disabled={busy || !valid} onClick={downloadZip} title={f.zipTitle}>
-            {busy ? t.common.working : f.zip}
-          </button>
-          <p className="text-xs text-muted">
-            <Rich text={f.zipNote} />
-          </p>
         </div>
       </aside>
 
-      <section className="space-y-3">
-        <div className="flex flex-wrap items-center gap-2">
-          <Segmented
-            label={f.os}
-            value={shell}
-            onChange={setShell}
-            options={[
-              ['powershell', 'Windows'],
-              ['bash', 'macOS / Linux'],
-            ]}
-          />
-          <div className="ml-auto flex gap-2">
-            <CopyButton text={script} label={f.copyScript} />
-            <button type="button" className="btn btn-primary" disabled={!script} onClick={downloadScript}>
-              {f.downloadScript}
+      <section className="min-w-0 space-y-3">
+        {noTarget && <p className="rounded-2xl bg-danger/10 p-3 text-sm text-danger">{f.noTarget}</p>}
+
+        {/* Default: download a ZIP that carries the dates */}
+        <div className="panel space-y-4 p-5">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div className="min-w-0 flex-1 basis-60">
+              <h2 className="text-[17px] font-semibold">{f.zipTitle}</h2>
+              <p className="mt-0.5 text-sm text-muted">{f.zipDesc}</p>
+            </div>
+            <button type="button" className="btn btn-primary" disabled={busy || !valid || noTarget} onClick={downloadZip}>
+              <Download size={15} strokeWidth={2.2} />
+              {busy ? t.common.working : f.zipButton(files.length)}
             </button>
           </div>
+          <ul className="space-y-1.5 border-t border-line pt-4 text-sm">
+            <li className="flex items-start gap-2">
+              <CheckCircle2 size={15} className="mt-0.5 shrink-0 text-ok" />
+              <span>
+                <Rich text={f.extractAll} />
+              </span>
+            </li>
+            <li className="flex items-start gap-2">
+              <Info size={15} className="mt-0.5 shrink-0 text-muted" />
+              <span className="text-muted">
+                <Rich text={f.extractExplorer} />
+              </span>
+            </li>
+            <li className="flex items-start gap-2">
+              <Info size={15} className="mt-0.5 shrink-0 text-muted" />
+              <span className="text-muted">
+                <Rich text={f.extractOther} />
+              </span>
+            </li>
+          </ul>
         </div>
 
-        {dupNames && <p className="rounded-2xl bg-danger/10 p-3 text-sm text-danger">{f.dupNames}</p>}
-        {noTarget && <p className="text-sm text-danger">{f.noTarget}</p>}
+        {/* Advanced: change the files in place with a script */}
+        <details className="panel group">
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-3 p-5 [&::-webkit-details-marker]:hidden">
+            <div className="min-w-0">
+              <h2 className="text-[15px] font-semibold">{f.scriptTitle}</h2>
+              <p className="mt-0.5 text-sm text-muted">{f.scriptDesc}</p>
+            </div>
+            <ChevronDown size={18} className="shrink-0 text-muted transition group-open:rotate-180" />
+          </summary>
 
-        <ol className="panel space-y-2 p-4 text-sm leading-relaxed">
-          {steps.map((s, i) => (
-            <li key={i}>
-              {i + 1}. <Rich text={s} />
-            </li>
-          ))}
-          <li className="text-xs text-muted">
-            <Rich text={shell === 'powershell' ? f.winFileNote : f.unixNote} codeClassName="font-mono" />
-          </li>
-        </ol>
+          <div className="space-y-3 border-t border-line p-5">
+            <div className="flex flex-wrap items-center gap-2">
+              <Segmented
+                label={f.os}
+                value={shell}
+                onChange={setShell}
+                options={[
+                  ['powershell', 'Windows'],
+                  ['bash', 'macOS / Linux'],
+                ]}
+              />
+              <div className="ml-auto flex gap-2">
+                <CopyButton text={script} label={f.copyScript} />
+                <button type="button" className="btn" disabled={!script} onClick={downloadScript}>
+                  {f.downloadScript}
+                </button>
+              </div>
+            </div>
 
-        <pre className="panel max-h-[50vh] overflow-auto p-4 font-mono text-xs leading-relaxed text-muted">{script || '—'}</pre>
+            {dupNames && <p className="rounded-2xl bg-danger/10 p-3 text-sm text-danger">{f.dupNames}</p>}
+
+            <ol className="space-y-2 text-sm leading-relaxed">
+              {steps.map((s, i) => (
+                <li key={i}>
+                  {i + 1}. <Rich text={s} />
+                </li>
+              ))}
+              <li className="text-xs text-muted">
+                <Rich text={shell === 'powershell' ? f.winFileNote : f.unixNote} codeClassName="font-mono" />
+              </li>
+            </ol>
+
+            <pre className="max-h-[50vh] overflow-auto rounded-2xl bg-panel-2 p-4 font-mono text-xs leading-relaxed text-muted">{script || '-'}</pre>
+          </div>
+        </details>
       </section>
     </div>
   );
