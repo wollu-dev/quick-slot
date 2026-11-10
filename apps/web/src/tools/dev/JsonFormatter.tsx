@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import CopyButton from '../../components/ui/CopyButton';
 import Select from '../../components/ui/Select';
+import { useT, withI18n, type Dict } from '../../i18n';
 import { downloadBlob } from '../../lib/files';
 
 type Indent = '2' | '4' | 'tab';
+type HintCode = keyof Dict['json']['hints'];
 
 function sortKeys(v: unknown): unknown {
   if (Array.isArray(v)) return v.map(sortKeys);
@@ -16,10 +18,11 @@ function sortKeys(v: unknown): unknown {
 /**
  * 오류 위치를 직접 찾는 최소 JSON 검사기.
  * 브라우저마다 JSON.parse 오류 메시지 형식이 달라서(Chrome 은 위치를 안 알려줌) 직접 계산한다.
+ * 원인은 코드(HintCode)로 돌려주고 화면에서 언어별 문구로 바꾼다.
  */
-function findErrorAt(src: string): { pos: number; hint: string } {
+function findErrorAt(src: string): { pos: number; hint?: HintCode } {
   let i = 0;
-  const fail = (hint: string): never => {
+  const fail = (hint: HintCode): never => {
     throw { pos: i, hint };
   };
   const ws = () => {
@@ -34,18 +37,21 @@ function findErrorAt(src: string): { pos: number; hint: string } {
       if (src[i] === '}') return void i++;
       for (;;) {
         ws();
-        if (src[i] === '}') fail('마지막 항목 뒤에 쉼표(,)가 있어요');
-        if (src[i] === "'") fail('키는 큰따옴표(")로 감싸야 해요');
-        if (src[i] !== '"') fail('키는 큰따옴표로 감싼 문자열이어야 해요');
+        if (src[i] === '}') fail('trailingComma');
+        if (src[i] === "'") fail('keySingleQuote');
+        if (src[i] !== '"') fail('keyNotString');
         string();
         ws();
-        if (src[i] !== ':') fail('키 뒤에 콜론(:)이 필요해요');
+        if (src[i] !== ':') fail('missingColon');
         i++;
         value();
         ws();
-        if (src[i] === ',') { i++; continue; }
+        if (src[i] === ',') {
+          i++;
+          continue;
+        }
         if (src[i] === '}') return void i++;
-        fail('쉼표(,) 또는 닫는 괄호(})가 필요해요');
+        fail('objectSeparator');
       }
     }
     if (c === '[') {
@@ -54,43 +60,46 @@ function findErrorAt(src: string): { pos: number; hint: string } {
       if (src[i] === ']') return void i++;
       for (;;) {
         ws();
-        if (src[i] === ']') fail('마지막 항목 뒤에 쉼표(,)가 있어요');
+        if (src[i] === ']') fail('trailingComma');
         value();
         ws();
-        if (src[i] === ',') { i++; continue; }
+        if (src[i] === ',') {
+          i++;
+          continue;
+        }
         if (src[i] === ']') return void i++;
-        fail('쉼표(,) 또는 닫는 괄호(])가 필요해요');
+        fail('arraySeparator');
       }
     }
     if (c === '"') return string();
-    if (c === "'") fail('문자열은 큰따옴표(")로 감싸야 해요');
+    if (c === "'") fail('stringSingleQuote');
     const lit = src.slice(i).match(/^(true|false|null|-?(0|[1-9]\d*)(\.\d+)?([eE][+-]?\d+)?)/);
     if (lit) return void (i += lit[0].length);
-    if (i >= src.length) fail('내용이 중간에 끝났어요 (괄호가 닫히지 않음)');
-    fail('알 수 없는 값이에요');
+    if (i >= src.length) fail('unexpectedEnd');
+    fail('unknownValue');
   };
   const string = () => {
     i++;
     while (i < src.length && src[i] !== '"') {
       if (src[i] === '\\') i++;
-      else if (src[i] === '\n') fail('문자열 안에 줄바꿈이 있어요 (\\n 으로 쓰세요)');
+      else if (src[i] === '\n') fail('newlineInString');
       i++;
     }
-    if (i >= src.length) fail('문자열의 닫는 따옴표가 없어요');
+    if (i >= src.length) fail('unterminatedString');
     i++;
   };
   try {
     value();
     ws();
-    if (i < src.length) fail('JSON 값 뒤에 불필요한 내용이 있어요');
+    if (i < src.length) fail('trailingContent');
   } catch (e) {
-    if (e && typeof e === 'object' && 'pos' in e) return e as { pos: number; hint: string };
+    if (e && typeof e === 'object' && 'pos' in e) return e as { pos: number; hint: HintCode };
     throw e;
   }
-  return { pos: -1, hint: '' };
+  return { pos: -1 };
 }
 
-function describeError(src: string, e: Error): { message: string; hint?: string; line?: number; col?: number } {
+function describeError(src: string, e: Error): { message: string; hint?: HintCode; line?: number; col?: number } {
   const { pos, hint } = findErrorAt(src);
   if (pos < 0) return { message: e.message };
   const before = src.slice(0, pos);
@@ -99,7 +108,9 @@ function describeError(src: string, e: Error): { message: string; hint?: string;
   return { message: e.message, hint, line, col };
 }
 
-export default function JsonFormatter() {
+function JsonFormatter() {
+  const t = useT();
+  const j = t.json;
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
   const [indent, setIndent] = useState<Indent>('2');
@@ -125,32 +136,39 @@ export default function JsonFormatter() {
   return (
     <div className="space-y-3">
       <div className="flex flex-wrap items-center gap-2">
-        <button type="button" className="btn btn-primary" onClick={() => run('pretty')} disabled={!input.trim()}>정렬하기</button>
-        <button type="button" className="btn" onClick={() => run('minify')} disabled={!input.trim()}>한 줄로 압축</button>
+        <button type="button" className="btn btn-primary" onClick={() => run('pretty')} disabled={!input.trim()}>
+          {j.format}
+        </button>
+        <button type="button" className="btn" onClick={() => run('minify')} disabled={!input.trim()}>
+          {j.minify}
+        </button>
         <Select
           id="indent"
-          label="들여쓰기"
+          label={j.indent}
           className="w-auto min-w-28"
           value={indent}
           onChange={setIndent}
           options={[
-            ['2', '공백 2칸'],
-            ['4', '공백 4칸'],
-            ['tab', '탭'],
+            ['2', j.spaces(2)],
+            ['4', j.spaces(4)],
+            ['tab', j.tab],
           ]}
         />
         <label className="flex items-center gap-1.5 text-sm">
-          <input type="checkbox" checked={sorted} onChange={(e) => setSorted(e.target.checked)} /> 키 이름순 정렬
+          <input type="checkbox" checked={sorted} onChange={(e) => setSorted(e.target.checked)} /> {j.sortKeys}
         </label>
-        <span className="ml-auto text-xs text-muted"><span className="kbd">Ctrl Enter</span> 정렬</span>
+        <span className="ml-auto text-xs text-muted">
+          <span className="kbd">Ctrl Enter</span> {j.shortcut}
+        </span>
       </div>
 
       {error && (
         <div className="rounded-2xl bg-danger/10 p-3 text-sm text-danger">
           <p className="font-medium">
-            JSON 오류{error.line && ` — ${error.line}번째 줄, ${error.col}번째 칸`}
+            {j.errorTitle}
+            {error.line && error.col && j.errorAt(error.line, error.col)}
           </p>
-          {error.hint && <p className="mt-0.5">{error.hint}</p>}
+          {error.hint && <p className="mt-0.5">{j.hints[error.hint]}</p>}
           <p className="mt-0.5 text-xs opacity-60">{error.message}</p>
           {errorLine !== undefined && error.col && (
             <pre className="mt-2 overflow-x-auto font-mono text-xs text-fg">
@@ -170,15 +188,17 @@ export default function JsonFormatter() {
             if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') run('pretty');
           }}
           spellCheck={false}
-          placeholder='{"여기에": "JSON을 붙여넣으세요"}'
+          placeholder={j.placeholder}
           className="input min-h-[60vh] resize-y font-mono text-[13px]"
         />
         <div className="relative">
-          <textarea readOnly value={output} spellCheck={false} placeholder="결과" className="input min-h-[60vh] resize-y bg-panel font-mono text-[13px]" />
+          <textarea readOnly value={output} spellCheck={false} placeholder={t.common.result} className="input min-h-[60vh] resize-y bg-panel font-mono text-[13px]" />
           {output && (
-            <div className="absolute right-3 top-3 flex gap-2">
+            <div className="absolute top-3 right-3 flex gap-2">
               <CopyButton text={output} />
-              <button type="button" className="btn" onClick={() => downloadBlob(new Blob([output], { type: 'application/json' }), 'formatted.json')}>저장</button>
+              <button type="button" className="btn" onClick={() => downloadBlob(new Blob([output], { type: 'application/json' }), 'formatted.json')}>
+                {t.common.save}
+              </button>
             </div>
           )}
         </div>
@@ -186,3 +206,5 @@ export default function JsonFormatter() {
     </div>
   );
 }
+
+export default withI18n(JsonFormatter);

@@ -10,27 +10,38 @@ QuickSlot: 설치 없이 브라우저에서 바로 쓰는 생활·개발 도구 
 - npm workspaces 모노레포. 프론트는 `apps/web` (Astro 7 + React 19 islands + Tailwind 4). 백엔드 `apps/api` 는 아직 없음.
 - 툴의 단일 진실 공급원은 `apps/web/src/tools/registry.ts`. 툴 추가·상태 변경은 여기부터.
 - 원칙: 툴은 기본적으로 브라우저 안에서만 처리(`processing: 'client'`). 사용자 파일을 서버로 보내지 않는다. 서버가 꼭 필요한 툴만 `'server'` 로 표시.
-- UI 문구는 한국어.
+## 다국어 (한국어 · English · 日本語)
+
+- **UI 문구를 코드에 직접 쓰지 않는다.** 모든 문구는 `apps/web/src/i18n/ko.ts` 에 먼저 넣고, `en.ts`·`ja.ts` 에 같은 키로 번역한다 (키가 빠지면 타입 오류). React 에서는 `useT()`, `.astro` 에서는 `getDict(lang)`.
+- 문구 안 강조는 `**굵게**`, `` `코드` `` 로 쓰고 `<Rich>` 로 그린다. 문장을 조각내서 이어 붙이지 않는다 (언어마다 어순이 다름).
+- 숫자·날짜는 `LANG_TAGS[lang]` 로 지역 형식에 맞춘다. 숫자가 들어가는 문구는 사전에 함수로 둔다 (예: `summary: (n) => …`).
+- 라이브러리(`lib/`)는 문구 대신 코드를 돌려주고 화면에서 번역한다 (예: `metadata.ts` 의 `ItemKind`, `MetadataError.code`).
+- 내부 링크는 `localizePath(lang, path)` / `toolUrl(slug, lang)` 로 만든다. `/tools/…` 를 직접 쓰지 않는다.
+- React 섬(island) 최상위 컴포넌트는 `withI18n` 으로 감싸고, Astro 에서 `lang={lang}` 을 넘긴다.
+- 커밋 메시지·주석·문서는 한국어.
 
 ## 디자인 규칙
 
 무채색 배경 위의 반투명 유리(글래스) 표면. 기준은 `apps/web/src/styles/global.css`.
 
-- **테마**: 헤더에서 라이트 / 시스템 / 다크를 고른다 (기본: 시스템). 적용은 `<html data-theme="light|dark">` 하나로만 한다. CSS 에 `@media (prefers-color-scheme)` 를 쓰지 말고, 다크 스타일은 `[data-theme="dark"]` 토큰이나 Tailwind `dark:` 변형으로 만든다. 첫 화면 적용은 `Layout.astro` 의 `<head>` 인라인 스크립트, 이후 변경은 `src/lib/theme.ts` — 둘의 저장 키·규칙을 같이 고칠 것.
+- **설정**: 헤더 오른쪽 톱니바퀴 → 설정 시트(`SettingsSheet`, iOS 설정 같은 묶음 목록). 화면 모드 · 퀵슬롯 위치/크기 · 언어. 사용자 설정은 여기에만 모은다.
+- **첫 화면 적용**: 테마(`data-theme`), 독 위치·크기(`data-dock`, `data-dock-size`), 언어 이동은 `Layout.astro` 의 `<head>` 인라인 스크립트가 그리기 전에 한다. 이후 변경은 `src/lib/theme.ts`, `src/lib/dock.ts`, `src/i18n` — **저장 키·기본값을 양쪽 같이 고칠 것.**
+- **테마**: 라이트 / 다크 / 자동(기본). 적용은 `<html data-theme="light|dark">` 하나로만 한다. CSS 에 `@media (prefers-color-scheme)` 를 쓰지 말고, 다크 스타일은 `[data-theme="dark"]` 토큰이나 Tailwind `dark:` 변형으로 만든다.
+- **독**: 배치·크기·확대 효과는 `global.css` 의 `.dock*` 규칙이 `html[data-dock]` 을 보고 정한다. 640px 미만에서는 설정과 상관없이 아래에 작게. 독에 가려지면 안 되는 페이지 맨 아래 요소에는 `.dock-safe`.
 
 - **배경**: `global.css` 의 `body::before` 하나로만 그린다 — 무채색 위→아래 명암(`bg-top` → `bg-bottom`) + 고운 노이즈 질감. 색이 들어간 그라데이션·색 번짐·패턴 배경은 넣지 않는다. 페이지마다 따로 배경을 깔지 않는다.
 
-- **색**: 토큰만 사용 — `bg`, `panel`, `panel-2`, `line`, `fg`, `muted`, `accent`, `accent-fg`, `danger`, `ok`. 하드코딩 색 금지 (예외: `registry.ts` 의 카테고리 타일 색).
-- **표면**: 카드·패널은 `panel`(= `glass` + 둥근 모서리), 위에 뜨는 창은 `glass-strong`. 넓은 `textarea.input` 은 자동으로 유리 표면이 된다.
+- **색**: 토큰만 사용 — `bg`, `panel`, `panel-2`, `line`, `fg`, `muted`, `accent`, `accent-fg`, `danger`, `ok`. 하드코딩 색 금지 (예외: `registry.ts` 의 카테고리 타일 색, 설정의 화면 모드 미리보기 그림).
+- **표면**: 카드·패널은 `panel`(= `glass` + 둥근 모서리), 검색 창은 `glass-strong`, 메뉴·설정 시트처럼 글을 읽어야 하는 떠 있는 창은 `glass-menu`(더 불투명). 넓은 `textarea.input` 은 자동으로 유리 표면이 된다.
 - **컨트롤**: 버튼 `btn` / `btn-primary` / `btn-tinted`, 입력 `input`, 라벨 `label`, 선택지 2~3개는 `Segmented`, 그 이상은 `Select` 컴포넌트. **브라우저 기본 `<select>` 는 쓰지 않는다** (펼친 목록을 꾸밀 수 없음). 체크박스는 CSS 로 자동으로 스위치 모양이 된다.
 - **높이**: 한 줄짜리 컨트롤(버튼, 입력, Select, Segmented)은 모두 36px(`h-9`)로 맞춘다.
 - **아이콘**: `lucide-react` 선 아이콘만. **이모지를 UI 아이콘으로 쓰지 않는다.** 툴 아이콘은 `AppIcon` (카테고리 색 타일).
 - **모서리**: 카드 22px, 큰 영역 26px, 버튼·뱃지는 완전히 둥글게(pill). `rounded-sm/md/lg` 처럼 각진 모서리는 쓰지 않는다.
 - **주의**: `backdrop-filter` 가 걸린 요소 안의 `position: fixed` 자식은 화면이 아니라 그 요소 기준으로 배치된다. 모달·오버레이는 `createPortal(…, document.body)` 로 띄운다.
-- **레이아웃**: 헤더는 왼쪽 로고 · 오른쪽 검색 하나, 화면 하단에 퀵슬롯 독(`Dock`)이 모든 페이지에 고정된다. 검색 창을 여는 버튼을 페이지마다 따로 만들지 않는다. 검색 관련 문구는 모두 **"QuickSlot 검색"** 으로 통일한다.
+- **레이아웃**: 헤더는 왼쪽 로고 · 오른쪽 검색과 설정 버튼. 퀵슬롯 독(`Dock`)은 모든 페이지에 고정된다. 검색 창을 여는 버튼을 페이지마다 따로 만들지 않는다. 검색 관련 문구는 사전의 `header.search` 하나로 통일한다.
 - **정렬**: 본문 요소는 왼쪽 정렬로 카드 그리드와 같은 선에 맞춘다. 가운데 정렬된 요소를 세로로 여러 개 쌓지 않는다 (아래로 갈수록 넓어지는 피라미드 모양이 됨).
 - **그리드**: 카드 그리드에는 `grid-cols-1` 처럼 열 수를 명시한다 (안 하면 긴 텍스트 때문에 모바일에서 화면 밖으로 넘친다).
-- 변경 후 라이트·다크, 그리고 모바일 폭(390px)에서 확인한다.
+- 변경 후 라이트·다크, 모바일 폭(390px), 그리고 세 언어(특히 문구가 긴 영어·일본어)에서 확인한다.
 
 ## 명령어
 

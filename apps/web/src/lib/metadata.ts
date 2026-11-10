@@ -1,13 +1,35 @@
 /**
  * 이미지 메타데이터를 재인코딩 없이(화질 손실 0) 바이트 단위로 제거한다.
  * 지원: JPEG, PNG, WebP
+ *
+ * 화면 문구는 여기서 만들지 않는다. 항목 종류·설명·오류를 코드로 돌려주고,
+ * 화면(MetadataRemover)이 언어별 사전으로 바꿔서 보여준다.
  */
 
+export type ItemKind = 'exif' | 'xmp' | 'icc' | 'iptc' | 'app' | 'comment' | 'text' | 'time';
+export type ItemDetail = 'exif' | 'exifOrientationKept' | 'xmp' | 'iptc' | 'app' | 'aiPrompt';
+
 export interface FoundItem {
-  kind: string;
-  detail?: string;
+  kind: ItemKind;
+  /** kind='app' 일 때 APPn 번호, kind='text' 일 때 PNG 텍스트 키 */
+  param?: string | number;
+  /** 언어별 사전으로 바꿀 설명 */
+  detail?: ItemDetail;
+  /** 파일에 실제로 들어 있던 내용 일부 (주석·텍스트) */
+  preview?: string;
   bytes: number;
   removed: boolean;
+}
+
+export type MetadataErrorCode = 'unsupported' | 'corruptJpeg' | 'corruptPng';
+
+export class MetadataError extends Error {
+  code: MetadataErrorCode;
+  constructor(code: MetadataErrorCode) {
+    super(code);
+    this.code = code;
+    this.name = 'MetadataError';
+  }
 }
 
 export interface ExifSummary {
@@ -45,7 +67,7 @@ export function stripMetadata(bytes: Uint8Array, opts: StripOptions): StripResul
   if (format === 'jpeg') return stripJpeg(bytes, opts);
   if (format === 'png') return stripPng(bytes, opts);
   if (format === 'webp') return stripWebp(bytes, opts);
-  throw new Error('지원하지 않는 형식이에요 (JPEG, PNG, WebP만 가능)');
+  throw new MetadataError('unsupported');
 }
 
 // ───────────────────────── JPEG ─────────────────────────
@@ -57,7 +79,7 @@ function stripJpeg(b: Uint8Array, opts: StripOptions): StripResult {
   let pos = 2;
 
   while (pos < b.length) {
-    if (b[pos] !== 0xff) throw new Error('손상된 JPEG 파일이에요');
+    if (b[pos] !== 0xff) throw new MetadataError('corruptJpeg');
     let mpos = pos + 1;
     while (b[mpos] === 0xff) mpos++; // 채움 바이트
     const marker = b[mpos];
@@ -76,17 +98,19 @@ function stripJpeg(b: Uint8Array, opts: StripOptions): StripResult {
     }
     const len = (b[mpos + 1] << 8) | b[mpos + 2];
     const end = mpos + 1 + len;
-    if (end > b.length) throw new Error('손상된 JPEG 파일이에요');
+    if (end > b.length) throw new MetadataError('corruptJpeg');
     const payload = b.subarray(mpos + 3, end);
     const seg = b.subarray(segStart, end);
 
     let remove = false;
-    let kind = '';
-    let detail: string | undefined;
+    let kind: ItemKind | undefined;
+    let detail: ItemDetail | undefined;
+    let param: number | undefined;
+    let preview: string | undefined;
 
     if (marker === 0xe1 && ascii(payload, 0, 6) === 'Exif\0\0') {
-      kind = 'EXIF';
-      detail = '촬영 기기, 날짜, GPS 위치 등';
+      kind = 'exif';
+      detail = 'exif';
       remove = true;
       try {
         exif = parseExif(payload.subarray(6));
@@ -94,29 +118,30 @@ function stripJpeg(b: Uint8Array, opts: StripOptions): StripResult {
         /* 요약만 실패, 제거는 진행 */
       }
     } else if (marker === 0xe1) {
-      kind = 'XMP';
-      detail = '편집 프로그램 기록, 작성자 등';
+      kind = 'xmp';
+      detail = 'xmp';
       remove = true;
     } else if (marker === 0xe2 && ascii(payload, 0, 11) === 'ICC_PROFILE') {
-      kind = 'ICC 색상 프로필';
+      kind = 'icc';
       remove = !opts.keepIcc;
     } else if (marker === 0xed) {
-      kind = 'IPTC / Photoshop';
-      detail = '저작권, 캡션, 키워드 등';
+      kind = 'iptc';
+      detail = 'iptc';
       remove = true;
     } else if (marker === 0xee) {
       // APP14 Adobe: 색 변환 방식 정보라 지우면 색이 깨질 수 있음 → 유지
     } else if (marker >= 0xe3 && marker <= 0xef) {
-      kind = `APP${marker - 0xe0}`;
-      detail = '제조사 전용 정보';
+      kind = 'app';
+      param = marker - 0xe0;
+      detail = 'app';
       remove = true;
     } else if (marker === 0xfe) {
-      kind = '주석 (COM)';
-      detail = decodeText(payload).slice(0, 80);
+      kind = 'comment';
+      preview = decodeText(payload).slice(0, 80);
       remove = true;
     }
 
-    if (kind) items.push({ kind, detail, bytes: seg.length, removed: remove });
+    if (kind) items.push({ kind, param, detail, preview, bytes: seg.length, removed: remove });
     if (!remove) out.push(seg);
     pos = end;
   }
@@ -125,8 +150,8 @@ function stripJpeg(b: Uint8Array, opts: StripOptions): StripResult {
     // SOI 바로 뒤(또는 JFIF 뒤)에 회전 정보만 담은 최소 EXIF 삽입
     const insertAt = out.length > 1 && isJfif(out[1]) ? 2 : 1;
     out.splice(insertAt, 0, minimalOrientationApp1(exif.orientation));
-    const it = items.find((i) => i.kind === 'EXIF');
-    if (it) it.detail += ' (회전 정보만 남김)';
+    const it = items.find((i) => i.kind === 'exif');
+    if (it) it.detail = 'exifOrientationKept';
   }
 
   return { format: 'jpeg', data: concat(out), items, exif };
@@ -163,7 +188,7 @@ function stripPng(b: Uint8Array, opts: StripOptions): StripResult {
     const len = dv.getUint32(pos);
     const type = ascii(b, pos + 4, 4);
     const end = pos + 12 + len;
-    if (end > b.length) throw new Error('손상된 PNG 파일이에요');
+    if (end > b.length) throw new MetadataError('corruptPng');
     const chunk = b.subarray(pos, end);
     const data = b.subarray(pos + 8, pos + 8 + len);
 
@@ -172,20 +197,22 @@ function stripPng(b: Uint8Array, opts: StripOptions): StripResult {
       const key = ascii(data, 0, Math.max(0, data.indexOf(0)));
       remove = true;
       items.push({
-        kind: `텍스트 (${key || type})`,
-        detail: key === 'parameters' ? 'AI 이미지 생성 프롬프트일 수 있어요' : pngTextPreview(type, data),
+        kind: 'text',
+        param: key || type,
+        detail: key === 'parameters' ? 'aiPrompt' : undefined,
+        preview: key === 'parameters' ? undefined : pngTextPreview(type, data),
         bytes: chunk.length,
         removed: true,
       });
     } else if (type === 'eXIf') {
       remove = true;
-      items.push({ kind: 'EXIF', detail: '촬영 기기, 날짜, GPS 위치 등', bytes: chunk.length, removed: true });
+      items.push({ kind: 'exif', detail: 'exif', bytes: chunk.length, removed: true });
     } else if (type === 'tIME') {
       remove = true;
-      items.push({ kind: '수정 시각 (tIME)', bytes: chunk.length, removed: true });
+      items.push({ kind: 'time', bytes: chunk.length, removed: true });
     } else if (type === 'iCCP') {
       remove = !opts.keepIcc;
-      items.push({ kind: 'ICC 색상 프로필', bytes: chunk.length, removed: remove });
+      items.push({ kind: 'icc', bytes: chunk.length, removed: remove });
     }
 
     if (!remove) out.push(chunk);
@@ -226,13 +253,13 @@ function stripWebp(b: Uint8Array, opts: StripOptions): StripResult {
       } catch {
         /* 무시 */
       }
-      items.push({ kind: 'EXIF', detail: '촬영 기기, 날짜, GPS 위치 등', bytes: chunk.length, removed: true });
+      items.push({ kind: 'exif', detail: 'exif', bytes: chunk.length, removed: true });
     } else if (fourcc === 'XMP ') {
       remove = true;
-      items.push({ kind: 'XMP', detail: '편집 프로그램 기록, 작성자 등', bytes: chunk.length, removed: true });
+      items.push({ kind: 'xmp', detail: 'xmp', bytes: chunk.length, removed: true });
     } else if (fourcc === 'ICCP') {
       remove = !opts.keepIcc;
-      items.push({ kind: 'ICC 색상 프로필', bytes: chunk.length, removed: remove });
+      items.push({ kind: 'icc', bytes: chunk.length, removed: remove });
     }
     if (!remove) {
       if (fourcc === 'VP8X') vp8xIndex = kept.length;

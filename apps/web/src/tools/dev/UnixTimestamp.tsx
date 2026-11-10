@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
 import CopyButton from '../../components/ui/CopyButton';
+import { LANG_TAGS, useLang, useT, withI18n, type Lang } from '../../i18n';
 
 const pad = (n: number) => String(n).padStart(2, '0');
 const toLocalInput = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
 
-const rtf = new Intl.RelativeTimeFormat('ko', { numeric: 'auto' });
-function relative(d: Date): string {
+function relative(d: Date, lang: Lang): string {
+  const rtf = new Intl.RelativeTimeFormat(LANG_TAGS[lang], { numeric: 'auto' });
   const diff = (d.getTime() - Date.now()) / 1000;
   const units: [Intl.RelativeTimeFormatUnit, number][] = [
     ['year', 31536000],
@@ -29,7 +30,10 @@ function Row({ label, value }: { label: string; value: string }) {
   );
 }
 
-export default function UnixTimestamp() {
+function UnixTimestamp() {
+  const t = useT();
+  const s = t.timestamp;
+  const lang = useLang();
   const [now, setNow] = useState(() => Date.now());
   const [ts, setTs] = useState('');
   const [dateInput, setDateInput] = useState('');
@@ -42,15 +46,15 @@ export default function UnixTimestamp() {
   }, []);
 
   const parsed = useMemo(() => {
-    const s = ts.trim();
-    if (!/^-?\d+(\.\d+)?$/.test(s)) return null;
-    const n = Number(s);
-    // 자릿수로 단위 추정: 13자리 이상 = 밀리초, 16자리 이상 = 마이크로초
-    const digits = s.replace(/^-/, '').split('.')[0].length;
-    const unit = digits >= 16 ? 'µs' : digits >= 12 ? 'ms' : 's';
+    const v = ts.trim();
+    if (!/^-?\d+(\.\d+)?$/.test(v)) return null;
+    const n = Number(v);
+    // 자릿수로 단위 추정: 12자리 이상 = 밀리초, 16자리 이상 = 마이크로초
+    const digits = v.replace(/^-/, '').split('.')[0].length;
+    const unit = digits >= 16 ? 'us' : digits >= 12 ? 'ms' : 's';
     const ms = unit === 's' ? n * 1000 : unit === 'ms' ? n : n / 1000;
     const d = new Date(ms);
-    return Number.isNaN(d.getTime()) ? null : { d, unit };
+    return Number.isNaN(d.getTime()) ? null : { d, unit: unit as keyof typeof s.units };
   }, [ts]);
 
   const fromDate = useMemo(() => {
@@ -64,8 +68,8 @@ export default function UnixTimestamp() {
     <div className="space-y-4">
       <div className="panel flex flex-wrap items-center gap-4 p-4">
         <div>
-          <div className="text-xs text-muted">지금</div>
-          <div className="text-[34px] leading-tight font-semibold tracking-tight tabular-nums text-accent">{Math.floor(now / 1000)}</div>
+          <div className="text-xs text-muted">{s.now}</div>
+          <div className="text-[34px] leading-tight font-semibold tracking-tight text-accent tabular-nums">{Math.floor(now / 1000)}</div>
         </div>
         <div className="font-mono text-sm text-muted tabular-nums">{now} ms</div>
         <CopyButton text={String(Math.floor(now / 1000))} className="ml-auto" />
@@ -73,29 +77,29 @@ export default function UnixTimestamp() {
 
       <div className="grid gap-4 lg:grid-cols-2">
         <section className="panel p-4">
-          <h2 className="mb-3 text-sm font-semibold">타임스탬프 → 날짜</h2>
-          <input className="input font-mono" value={ts} onChange={(e) => setTs(e.target.value)} placeholder="예: 1700000000" />
+          <h2 className="mb-3 text-sm font-semibold">{s.tsToDate}</h2>
+          <input className="input font-mono" value={ts} onChange={(e) => setTs(e.target.value)} placeholder={s.tsPlaceholder} />
           {parsed ? (
             <div className="mt-3">
-              <p className="mb-1 text-xs text-muted">단위: {parsed.unit === 's' ? '초' : parsed.unit === 'ms' ? '밀리초' : '마이크로초'} (자동 감지)</p>
-              <Row label={`현지 (${tz})`} value={parsed.d.toLocaleString('ko-KR', { dateStyle: 'full', timeStyle: 'medium' })} />
+              <p className="mb-1 text-xs text-muted">{s.unit(s.units[parsed.unit])}</p>
+              <Row label={s.local(tz)} value={parsed.d.toLocaleString(LANG_TAGS[lang], { dateStyle: 'full', timeStyle: 'medium' })} />
               <Row label="UTC" value={parsed.d.toUTCString()} />
               <Row label="ISO 8601" value={parsed.d.toISOString()} />
-              <Row label="상대 시간" value={relative(parsed.d)} />
+              <Row label={s.relative} value={relative(parsed.d, lang)} />
             </div>
           ) : (
-            ts && <p className="mt-2 text-sm text-danger">숫자만 입력하세요</p>
+            ts && <p className="mt-2 text-sm text-danger">{s.numbersOnly}</p>
           )}
         </section>
 
         <section className="panel p-4">
-          <h2 className="mb-3 text-sm font-semibold">날짜 → 타임스탬프</h2>
+          <h2 className="mb-3 text-sm font-semibold">{s.dateToTs}</h2>
           <input type="datetime-local" step={1} className="input" value={dateInput} onChange={(e) => setDateInput(e.target.value)} />
           {fromDate && (
             <div className="mt-3">
-              <p className="mb-1 text-xs text-muted">입력한 시각은 {tz} 기준이에요</p>
-              <Row label="초 (s)" value={String(Math.floor(fromDate.getTime() / 1000))} />
-              <Row label="밀리초 (ms)" value={String(fromDate.getTime())} />
+              <p className="mb-1 text-xs text-muted">{s.tzNote(tz)}</p>
+              <Row label={s.seconds} value={String(Math.floor(fromDate.getTime() / 1000))} />
+              <Row label={s.millis} value={String(fromDate.getTime())} />
               <Row label="ISO 8601" value={fromDate.toISOString()} />
             </div>
           )}
@@ -104,3 +108,5 @@ export default function UnixTimestamp() {
     </div>
   );
 }
+
+export default withI18n(UnixTimestamp);

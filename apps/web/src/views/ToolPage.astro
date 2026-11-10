@@ -1,0 +1,113 @@
+---
+/**
+ * 툴 페이지. 언어별 페이지(src/pages/tools/[slug].astro, src/pages/[lang]/tools/[slug].astro)가 이 템플릿을 쓴다.
+ * status: 'ready' 인 툴은 아래 "툴 화면 연결"에 컴포넌트를 한 줄 추가한다.
+ * 현재 시각·랜덤 값·브라우저 정보를 첫 화면에 쓰는 툴은 client:only="react" (서버 렌더 결과와 달라지는 문제 방지).
+ */
+import { ChevronLeft, Cloud, Hammer, Lock } from 'lucide-react';
+import Layout from '../layouts/Layout.astro';
+import SlotButton from '../components/SlotButton';
+import AppIcon from '../components/ui/AppIcon';
+import { getDict, localizePath, type Lang } from '../i18n';
+import { getTool, toolText } from '../tools/registry';
+
+import BatchRename from '../tools/file/BatchRename';
+import FileDateChanger from '../tools/file/FileDateChanger';
+import MetadataRemover from '../tools/file/MetadataRemover';
+import CharCounter from '../tools/text/CharCounter';
+import Base64Tool from '../tools/dev/Base64Tool';
+import JsonFormatter from '../tools/dev/JsonFormatter';
+import UnixTimestamp from '../tools/dev/UnixTimestamp';
+import UuidGenerator from '../tools/dev/UuidGenerator';
+
+interface Props {
+  lang: Lang;
+  slug: string;
+}
+
+const { lang, slug } = Astro.props;
+const tool = getTool(slug);
+if (!tool) throw new Error(`registry.ts 에 없는 툴: ${slug}`);
+const t = getDict(lang);
+const tt = toolText(lang, tool.slug);
+---
+
+<Layout lang={lang} path={`/tools/${slug}`} title={tt.name} description={tt.description} currentSlug={slug}>
+  <!-- 홈에서 마지막으로 고른 필터로 돌아간다 (아래 스크립트가 href 를 채움) -->
+  <a href={localizePath(lang, '/')} data-back-link class="mb-6 inline-flex items-center gap-0.5 text-[15px] text-accent hover:opacity-80">
+    <ChevronLeft size={19} strokeWidth={2.4} />
+    {t.toolPage.back}
+  </a>
+
+  <div class="mb-8 flex flex-wrap items-center gap-x-4 gap-y-4">
+    <AppIcon tool={tool} size="lg" />
+    <div class="min-w-0 flex-1 basis-56">
+      <h1 class="text-[26px] leading-tight font-bold tracking-tight break-keep sm:text-[32px]">{tt.name}</h1>
+      <p class="mt-1 text-[15px] break-keep text-muted">{tt.description}</p>
+    </div>
+    <div class="flex w-full items-center gap-2 sm:w-auto">
+      {
+        tool.processing === 'client' ? (
+          <span class="inline-flex h-9 items-center gap-1.5 rounded-full bg-ok/12 px-3.5 text-[13px] font-medium text-ok" title={t.toolPage.localTitle}>
+            <Lock size={13} strokeWidth={2.4} />
+            {t.toolPage.local}
+          </span>
+        ) : (
+          <span class="inline-flex h-9 items-center gap-1.5 rounded-full bg-accent/12 px-3.5 text-[13px] font-medium text-accent" title={t.toolPage.serverTitle}>
+            <Cloud size={13} strokeWidth={2.4} />
+            {t.toolPage.server}
+          </span>
+        )
+      }
+      <SlotButton client:load lang={lang} slug={slug} />
+    </div>
+  </div>
+
+  {/* ───── 툴 화면 연결 ───── */}
+  {slug === 'extension-changer' && <BatchRename client:load lang={lang} mode="extension" />}
+  {slug === 'batch-rename' && <BatchRename client:load lang={lang} mode="rename" />}
+  {slug === 'file-date-changer' && <FileDateChanger client:only="react" lang={lang} />}
+  {slug === 'metadata-remover' && <MetadataRemover client:load lang={lang} />}
+  {slug === 'char-counter' && <CharCounter client:load lang={lang} />}
+  {slug === 'json-formatter' && <JsonFormatter client:load lang={lang} />}
+  {slug === 'base64' && <Base64Tool client:load lang={lang} />}
+  {slug === 'unix-timestamp' && <UnixTimestamp client:only="react" lang={lang} />}
+  {slug === 'uuid-generator' && <UuidGenerator client:only="react" lang={lang} />}
+
+  {
+    tool.status === 'soon' && (
+      <div class="panel flex flex-col items-center gap-2 px-6 py-20 text-center">
+        <span class="mb-2 grid size-14 place-items-center rounded-full bg-panel-2 text-muted">
+          <Hammer size={26} />
+        </span>
+        <p class="text-[17px] font-semibold">{t.toolPage.soonTitle}</p>
+        <p class="text-[15px] text-muted">{t.toolPage.soonBody}</p>
+      </div>
+    )
+  }
+</Layout>
+
+<script>
+  import { splitLocale, localizePath } from '../i18n';
+  import { readHomeFilter } from '../lib/homeFilter';
+
+  const link = document.querySelector<HTMLAnchorElement>('[data-back-link]');
+  if (link) {
+    const { lang } = splitLocale(location.pathname);
+    const filter = readHomeFilter();
+    link.href = localizePath(lang, '/') + (filter === 'all' ? '' : `#${filter}`);
+
+    // 홈에서 바로 들어온 경우에는 브라우저 뒤로가기로 돌아가서 스크롤 위치까지 그대로 복원
+    link.addEventListener('click', (e) => {
+      try {
+        const ref = new URL(document.referrer);
+        if (ref.origin === location.origin && splitLocale(ref.pathname).path === '/' && history.length > 1) {
+          e.preventDefault();
+          history.back();
+        }
+      } catch {
+        /* referrer 없음 → 기본 링크 이동 */
+      }
+    });
+  }
+</script>

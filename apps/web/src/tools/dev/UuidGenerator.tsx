@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import CopyButton from '../../components/ui/CopyButton';
 import Segmented from '../../components/ui/Segmented';
 import Select from '../../components/ui/Select';
+import { useT, withI18n } from '../../i18n';
 
 type Version = 'v4' | 'v7';
 type Format = 'default' | 'upper' | 'nohyphen' | 'braces';
@@ -29,7 +30,8 @@ function format(id: string, f: Format) {
   return id;
 }
 
-export default function UuidGenerator() {
+function UuidGenerator() {
+  const u = useT().uuid;
   const [version, setVersion] = useState<Version>('v4');
   const [count, setCount] = useState(5);
   const [fmt, setFmt] = useState<Format>('default');
@@ -48,40 +50,48 @@ export default function UuidGenerator() {
     <div className="space-y-3">
       <div className="flex flex-wrap items-end gap-3">
         <div>
-          <span className="label">버전</span>
+          <span className="label">{u.version}</span>
           <Segmented
-            label="버전"
+            label={u.version}
             value={version}
             onChange={setVersion}
             options={[
-              ['v4', 'v4 (랜덤)'],
-              ['v7', 'v7 (시간순)'],
+              ['v4', u.v4],
+              ['v7', u.v7],
             ]}
           />
         </div>
         <div>
-          <label className="label" htmlFor="count">개수 (최대 1000)</label>
+          <label className="label" htmlFor="count">
+            {u.count}
+          </label>
           <input id="count" type="number" min={1} max={1000} className="input w-28" value={count} onChange={(e) => setCount(Number(e.target.value) || 1)} />
         </div>
         <div>
-          <label className="label" htmlFor="fmt">형식</label>
+          <label className="label" htmlFor="fmt">
+            {u.format}
+          </label>
           <Select
             id="fmt"
             className="w-auto min-w-36"
             value={fmt}
             onChange={setFmt}
             options={[
-              ['default', '소문자 (기본)'],
-              ['upper', '대문자'],
-              ['nohyphen', '하이픈 없이'],
-              ['braces', '{중괄호} (C#/Windows GUID)'],
+              ['default', u.lower],
+              ['upper', u.upper],
+              ['nohyphen', u.noHyphen],
+              ['braces', u.braces],
             ]}
           />
         </div>
-        <button type="button" className="btn btn-primary" onClick={generate}>새로 생성</button>
-        <CopyButton text={out} label="전체 복사" />
+        <button type="button" className="btn btn-primary" onClick={generate}>
+          {u.generate}
+        </button>
+        <CopyButton text={out} label={u.copyAll} />
       </div>
       <textarea readOnly value={out} spellCheck={false} className="input min-h-[50vh] bg-panel font-mono text-[13px] leading-relaxed" />
     </div>
   );
 }
+
+export default withI18n(UuidGenerator);

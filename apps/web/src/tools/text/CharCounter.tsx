@@ -1,32 +1,42 @@
 import { useEffect, useMemo, useState } from 'react';
+import { LANG_TAGS, useLang, useT, withI18n, type Dict } from '../../i18n';
 
 const DRAFT_KEY = 'quickslot:char-counter:draft';
-const segmenter = typeof Intl !== 'undefined' && 'Segmenter' in Intl ? new Intl.Segmenter('ko', { granularity: 'grapheme' }) : null;
 
-function countGraphemes(s: string) {
+function countGraphemes(segmenter: Intl.Segmenter | null, s: string) {
   if (!segmenter) return [...s].length;
   let n = 0;
   for (const _ of segmenter.segment(s)) n++;
   return n;
 }
 
-function stats(text: string) {
-  const withSpaces = countGraphemes(text.replace(/\r\n/g, '\n'));
-  const noSpaces = countGraphemes(text.replace(/\s/g, ''));
+function stats(text: string, segmenter: Intl.Segmenter | null, extraMode: Dict['charCounter']['extraMode']) {
+  const withSpaces = countGraphemes(segmenter, text.replace(/\r\n/g, '\n'));
+  const noSpaces = countGraphemes(segmenter, text.replace(/\s/g, ''));
   const words = text.trim() ? text.trim().split(/\s+/).length : 0;
   const lines = text ? text.split(/\r\n|\n/).length : 0;
   const paragraphs = text.trim() ? text.trim().split(/\n\s*\n/).length : 0;
   const utf8 = new TextEncoder().encode(text).length;
-  // 한글·한자 등은 2바이트, 영문·숫자·기호는 1바이트로 세는 방식 (일부 자기소개서·문자 서비스 기준)
-  let euckr = 0;
-  for (const ch of text.replace(/\r\n/g, '\n')) euckr += ch.charCodeAt(0) > 0x7f ? 2 : 1;
-  const manuscript = Math.ceil(withSpaces / 200);
-  return { withSpaces, noSpaces, words, lines, paragraphs, utf8, euckr, manuscript };
+  // 한글·한자·가나 등은 2바이트, 영문·숫자·기호는 1바이트로 세는 방식 (EUC-KR / Shift_JIS 기준 서비스용)
+  let dbcs = 0;
+  for (const ch of text.replace(/\r\n/g, '\n')) dbcs += ch.charCodeAt(0) > 0x7f ? 2 : 1;
+  // 여덟 번째 카드: 원고지 매수(한국어 200자, 일본어 400자) 또는 읽는 시간(영어, 분)
+  const extra = extraMode.kind === 'manuscript' ? Math.ceil(withSpaces / extraMode.per) : Math.ceil(words / extraMode.wpm);
+  return { withSpaces, noSpaces, words, lines, paragraphs, utf8, dbcs, extra };
 }
 
-export default function CharCounter() {
+function CharCounter() {
+  const t = useT();
+  const c = t.charCounter;
+  const lang = useLang();
   const [text, setText] = useState('');
   const [limit, setLimit] = useState<number | ''>('');
+
+  const segmenter = useMemo(
+    () => (typeof Intl !== 'undefined' && 'Segmenter' in Intl ? new Intl.Segmenter(LANG_TAGS[lang], { granularity: 'grapheme' }) : null),
+    [lang],
+  );
+  const num = (n: number) => n.toLocaleString(LANG_TAGS[lang]);
 
   useEffect(() => {
     try {
@@ -47,18 +57,18 @@ export default function CharCounter() {
     return () => clearTimeout(id);
   }, [text]);
 
-  const s = useMemo(() => stats(text), [text]);
+  const s = useMemo(() => stats(text, segmenter, c.extraMode), [text, segmenter, c.extraMode]);
   const over = limit !== '' && s.withSpaces > limit;
 
-  const cards: [string, number, string?][] = [
-    ['공백 포함', s.withSpaces, '자'],
-    ['공백 제외', s.noSpaces, '자'],
-    ['단어', s.words, '개'],
-    ['줄', s.lines, '줄'],
-    ['바이트 (UTF-8)', s.utf8, 'B'],
-    ['바이트 (한글 2B)', s.euckr, 'B'],
-    ['문단', s.paragraphs, '개'],
-    ['원고지 (200자)', s.manuscript, '매'],
+  const cards: [string, number, string][] = [
+    [c.withSpaces, s.withSpaces, c.unitChars],
+    [c.noSpaces, s.noSpaces, c.unitChars],
+    [c.words, s.words, c.unitCount],
+    [c.lines, s.lines, c.unitLines],
+    [c.utf8, s.utf8, 'B'],
+    [c.dbcs, s.dbcs, 'B'],
+    [c.paragraphs, s.paragraphs, c.unitCount],
+    [c.extra, s.extra, c.unitExtra],
   ];
 
   return (
@@ -68,8 +78,8 @@ export default function CharCounter() {
           <div key={label} className="panel px-4 py-3.5">
             <div className="text-[13px] font-medium text-muted">{label}</div>
             <div className={`mt-1 text-[28px] leading-none font-semibold tracking-tight tabular-nums ${i === 0 && over ? 'text-danger' : i < 2 ? 'text-accent' : ''}`}>
-              {value.toLocaleString()}
-              <span className="ml-1 text-[15px] font-medium text-muted">{unit}</span>
+              {num(value)}
+              {unit && <span className="ml-1 text-[15px] font-medium text-muted">{unit}</span>}
             </div>
           </div>
         ))}
@@ -77,11 +87,11 @@ export default function CharCounter() {
 
       <div className="flex flex-wrap items-center gap-3 text-sm">
         <label className="flex items-center gap-2">
-          <span className="text-muted">글자 수 제한</span>
+          <span className="text-muted">{c.limit}</span>
           <input
             type="number"
             min={1}
-            placeholder="예: 1000"
+            placeholder={c.limitPlaceholder}
             className="input w-28"
             value={limit}
             onChange={(e) => setLimit(e.target.value ? Math.max(1, Number(e.target.value)) : '')}
@@ -93,20 +103,18 @@ export default function CharCounter() {
               <div className={`h-full transition-all ${over ? 'bg-danger' : 'bg-accent'}`} style={{ width: `${Math.min(100, (s.withSpaces / limit) * 100)}%` }} />
             </div>
             <span className={`text-[13px] font-medium tabular-nums ${over ? 'text-danger' : 'text-muted'}`}>
-              {over ? `${(s.withSpaces - limit).toLocaleString()}자 초과` : `${(limit - s.withSpaces).toLocaleString()}자 남음`}
+              {over ? c.over(num(s.withSpaces - limit)) : c.left(num(limit - s.withSpaces))}
             </span>
           </div>
         )}
-        <button type="button" className="btn ml-auto" onClick={() => setText('')} disabled={!text}>지우기</button>
+        <button type="button" className="btn ml-auto" onClick={() => setText('')} disabled={!text}>
+          {c.clear}
+        </button>
       </div>
 
-      <textarea
-        value={text}
-        onChange={(e) => setText(e.target.value)}
-        placeholder="여기에 글을 붙여넣거나 입력하세요. 쓰던 글은 이 브라우저에 자동 저장돼요."
-        className="input min-h-[50vh] resize-y text-[17px]"
-        autoFocus
-      />
+      <textarea value={text} onChange={(e) => setText(e.target.value)} placeholder={c.placeholder} className="input min-h-[50vh] resize-y text-[17px]" autoFocus />
     </div>
   );
 }
+
+export default withI18n(CharCounter);

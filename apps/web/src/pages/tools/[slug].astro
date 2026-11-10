@@ -1,22 +1,10 @@
 ---
-/** status: 'soon' 인 툴의 "준비 중" 페이지. ready 툴은 각자 전용 .astro 페이지가 있다. */
-import { Hammer } from 'lucide-react';
-import ToolLayout from '../../layouts/ToolLayout.astro';
+import ToolPage from '../../views/ToolPage.astro';
 import { tools } from '../../tools/registry';
 
 export function getStaticPaths() {
-  return tools.filter((t) => t.status === 'soon').map((t) => ({ params: { slug: t.slug } }));
+  return tools.map((t) => ({ params: { slug: t.slug } }));
 }
-
-const { slug } = Astro.params;
 ---
 
-<ToolLayout slug={slug!}>
-  <div class="panel flex flex-col items-center gap-2 px-6 py-20 text-center">
-    <span class="mb-2 grid size-14 place-items-center rounded-full bg-panel-2 text-muted">
-      <Hammer size={26} />
-    </span>
-    <p class="text-[17px] font-semibold">아직 만들고 있는 툴이에요</p>
-    <p class="text-[15px] text-muted">퀵슬롯에 미리 등록해 두면 완성됐을 때 바로 쓸 수 있어요.</p>
-  </div>
-</ToolLayout>
+<ToolPage lang="ko" slug={Astro.params.slug!} />
