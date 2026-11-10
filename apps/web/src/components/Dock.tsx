@@ -51,7 +51,7 @@ export default function Dock({ currentSlug }: { currentSlug?: string }) {
           const tool = slug ? getTool(slug) : undefined;
           const active = !!tool && tool.slug === currentSlug;
           return (
-            <div key={i} className="group flex flex-col items-center">
+            <div key={i} className="group relative flex">
               {tool ? (
                 // 아이콘과 ✕ 를 한 덩어리로 확대해서 ✕ 가 확대된 아이콘을 따라가고,
                 // ✕ 위에 마우스를 올려도 덩어리(group) 위에 있으므로 확대가 풀리지 않는다.
@@ -82,8 +82,10 @@ export default function Dock({ currentSlug }: { currentSlug?: string }) {
                   {i + 1}
                 </div>
               )}
-              {/* 지금 보고 있는 툴 표시 점 */}
-              <span className={`mt-1 size-1 rounded-full ${active ? 'bg-fg/70' : 'bg-transparent'}`} aria-hidden />
+              {/* 지금 보고 있는 툴 표시 점 — 독 안쪽 여백 위에 겹쳐 그려서 점이 없을 때 빈 공간이 생기지 않게 */}
+              {active && (
+                <span className="absolute -bottom-[5px] left-1/2 size-1 -translate-x-1/2 rounded-full bg-fg/70 sm:-bottom-1.5" aria-hidden />
+              )}
             </div>
           );
         })}

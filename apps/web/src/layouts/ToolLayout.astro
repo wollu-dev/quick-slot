@@ -3,7 +3,7 @@ import { ChevronLeft, Cloud, Lock } from 'lucide-react';
 import Layout from './Layout.astro';
 import SlotButton from '../components/SlotButton';
 import AppIcon from '../components/ui/AppIcon';
-import { getTool, getCategory } from '../tools/registry';
+import { getTool } from '../tools/registry';
 
 interface Props {
   slug: string;
@@ -11,13 +11,13 @@ interface Props {
 
 const tool = getTool(Astro.props.slug);
 if (!tool) throw new Error(`registry.ts 에 없는 툴: ${Astro.props.slug}`);
-const category = getCategory(tool.category);
 ---
 
 <Layout title={tool.name} description={tool.description} currentSlug={tool.slug}>
-  <a href={`/#${category.id}`} class="mb-6 inline-flex items-center gap-0.5 text-[15px] text-accent hover:opacity-80">
+  <!-- 홈에서 마지막으로 고른 필터로 돌아간다 (아래 스크립트가 href 를 채움) -->
+  <a href="/" data-back-link class="mb-6 inline-flex items-center gap-0.5 text-[15px] text-accent hover:opacity-80">
     <ChevronLeft size={19} strokeWidth={2.4} />
-    {category.name}
+    툴 목록
   </a>
 
   <div class="mb-8 flex flex-wrap items-center gap-x-4 gap-y-4">
@@ -46,3 +46,26 @@ const category = getCategory(tool.category);
 
   <slot />
 </Layout>
+
+<script>
+  import { readHomeFilter } from '../lib/homeFilter';
+
+  const link = document.querySelector<HTMLAnchorElement>('[data-back-link]');
+  if (link) {
+    const filter = readHomeFilter();
+    link.href = filter === 'all' ? '/' : `/#${filter}`;
+
+    // 홈에서 바로 들어온 경우에는 브라우저 뒤로가기로 돌아가서 스크롤 위치까지 그대로 복원
+    link.addEventListener('click', (e) => {
+      try {
+        const ref = new URL(document.referrer);
+        if (ref.origin === location.origin && ref.pathname === '/' && history.length > 1) {
+          e.preventDefault();
+          history.back();
+        }
+      } catch {
+        /* referrer 없음 → 기본 링크 이동 */
+      }
+    });
+  }
+</script>

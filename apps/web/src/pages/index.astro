@@ -66,13 +66,17 @@ import { categories, tools, toolUrl } from '../tools/registry';
 </Layout>
 
 <script>
-  // 카테고리 필터. 선택은 주소의 #해시로 남겨서 툴 페이지의 "← 파일" 링크로 돌아와도 유지된다.
+  // 카테고리 필터. 선택은 주소의 #해시와 sessionStorage 에 남겨서,
+  // 툴 페이지의 "‹ 툴 목록" 으로 돌아오면 마지막에 고른 필터 그대로 보인다.
+  import { saveHomeFilter } from '../lib/homeFilter';
+
   const chips = [...document.querySelectorAll<HTMLButtonElement>('[data-filter]')];
   const sections = [...document.querySelectorAll<HTMLElement>('[data-category]')];
 
   const apply = (filter: string) => {
     for (const c of chips) c.setAttribute('aria-pressed', String(c.dataset.filter === filter));
     for (const s of sections) s.hidden = filter !== 'all' && s.dataset.category !== filter;
+    saveHomeFilter(filter);
   };
 
   for (const chip of chips) {
