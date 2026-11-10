@@ -1,13 +1,19 @@
 ---
 import '../styles/global.css';
+import { Lock } from 'lucide-react';
 import CommandPalette from '../components/CommandPalette';
+import Dock from '../components/Dock';
+import ThemeToggle from '../components/ThemeToggle';
+import Logo from '../components/Logo.astro';
 
 interface Props {
   title?: string;
   description?: string;
+  /** 지금 열려 있는 툴 (독에 표시 점) */
+  currentSlug?: string;
 }
 
-const { title, description = '설치 없이 브라우저에서 바로 쓰는 생활·개발 도구 모음. 파일은 서버로 올라가지 않습니다.' } = Astro.props;
+const { title, currentSlug, description = '설치 없이 브라우저에서 바로 쓰는 생활·개발 도구 모음. 파일은 서버로 올라가지 않습니다.' } = Astro.props;
 const fullTitle = title ? `${title} · QuickSlot` : 'QuickSlot · 필요한 도구를 바로 꺼내 쓰세요';
 ---
 
@@ -15,9 +21,22 @@ const fullTitle = title ? `${title} · QuickSlot` : 'QuickSlot · 필요한 도�
 <html lang="ko">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="description" content={description} />
     <meta name="generator" content={Astro.generator} />
+    <meta name="theme-color" content="#fafafc" />
+    <!-- 화면을 그리기 전에 테마 적용 (깜빡임 방지). 규칙은 src/lib/theme.ts 와 같다. -->
+    <script is:inline>
+      (function () {
+        var pref = 'system';
+        try {
+          pref = localStorage.getItem('quickslot:theme') || 'system';
+        } catch (e) {}
+        var dark = pref === 'dark' || (pref !== 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+        document.querySelector('meta[name="theme-color"]').setAttribute('content', dark ? '#1c1c1f' : '#fafafc');
+      })();
+    </script>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link
       rel="stylesheet"
@@ -25,25 +44,33 @@ const fullTitle = title ? `${title} · QuickSlot` : 'QuickSlot · 필요한 도�
     />
     <title>{fullTitle}</title>
   </head>
-  <body class="min-h-screen antialiased">
-    <header class="sticky top-0 z-40 border-b border-line bg-bg/85 backdrop-blur">
-      <div class="mx-auto flex max-w-6xl items-center gap-4 px-4 py-3">
-        <a href="/" class="flex shrink-0 items-center gap-2 font-bold tracking-tight">
-          <span class="grid size-7 place-items-center rounded-md bg-accent text-sm text-accent-fg">Q</span>
-          <span>QuickSlot</span>
+  <body class="min-h-screen">
+    <header class="sticky top-0 z-40 px-4 pt-3">
+      <!-- 왼쪽 로고 · 오른쪽 검색 -->
+      <div class="glass mx-auto flex h-14 max-w-6xl items-center justify-between gap-3 rounded-full pr-2 pl-3">
+        <a href="/" class="flex shrink-0 items-center gap-2.5 text-[17px] font-semibold tracking-tight" aria-label="QuickSlot 홈">
+          <Logo size={30} />
+          <span class="hidden sm:inline">QuickSlot</span>
         </a>
-        <div class="flex flex-1 justify-end">
-          <CommandPalette client:load />
+        <div class="flex w-full max-w-[400px] min-w-0 items-center gap-2">
+          <div class="min-w-0 flex-1">
+            <CommandPalette client:load />
+          </div>
+          <ThemeToggle client:load />
         </div>
       </div>
     </header>
 
-    <main class="mx-auto max-w-6xl px-4 py-8">
+    <main class="mx-auto max-w-6xl px-4 pt-8 pb-12 sm:px-6">
       <slot />
     </main>
 
-    <footer class="border-t border-line py-6 text-center text-xs text-muted">
-      🔒 표시된 툴은 모든 처리가 브라우저 안에서 이루어지며, 파일이 서버로 전송되지 않습니다.
+    <!-- 하단 독 높이만큼 여백 -->
+    <footer class="mx-auto flex max-w-6xl items-center justify-center gap-1.5 px-4 pb-28 text-center text-[13px] text-muted sm:pb-32">
+      <Lock size={13} strokeWidth={2.2} />
+      브라우저에서 처리하는 툴은 파일을 서버로 보내지 않습니다.
     </footer>
+
+    <Dock client:load currentSlug={currentSlug} />
   </body>
 </html>

@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import CopyButton from '../../components/ui/CopyButton';
 import DropZone from '../../components/ui/DropZone';
+import Segmented from '../../components/ui/Segmented';
 import { formatBytes } from '../../lib/files';
 
 function bytesToBase64(bytes: Uint8Array): string {
@@ -45,27 +46,25 @@ export default function Base64Tool() {
   return (
     <div className="space-y-3">
       <div className="flex flex-wrap items-center gap-2">
-        <div className="flex rounded-lg border border-line p-0.5 text-sm">
-          {([
+        <Segmented
+          label="입력 종류"
+          value={tab}
+          onChange={setTab}
+          options={[
             ['text', '텍스트'],
             ['file', '파일 → Base64'],
-          ] as const).map(([k, label]) => (
-            <button key={k} type="button" onClick={() => setTab(k)} className={`rounded-md px-3 py-1 ${tab === k ? 'bg-panel-2 text-fg' : 'text-muted'}`}>
-              {label}
-            </button>
-          ))}
-        </div>
+          ]}
+        />
         {tab === 'text' && (
-          <div className="flex rounded-lg border border-line p-0.5 text-sm">
-            {([
+          <Segmented
+            label="방향"
+            value={direction}
+            onChange={setDirection}
+            options={[
               ['encode', '인코딩'],
               ['decode', '디코딩'],
-            ] as const).map(([k, label]) => (
-              <button key={k} type="button" onClick={() => setDirection(k)} className={`rounded-md px-3 py-1 ${direction === k ? 'bg-panel-2 text-fg' : 'text-muted'}`}>
-                {label}
-              </button>
-            ))}
-          </div>
+            ]}
+          />
         )}
         <label className="flex items-center gap-1.5 text-sm">
           <input type="checkbox" checked={urlSafe} onChange={(e) => setUrlSafe(e.target.checked)} /> URL-safe (-_ 사용, = 제거)

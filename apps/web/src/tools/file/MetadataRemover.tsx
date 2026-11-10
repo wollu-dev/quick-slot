@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Camera, CheckCircle2, Clock, MapPin, MinusCircle, Wrench, XCircle, type LucideIcon } from 'lucide-react';
 import DropZone from '../../components/ui/DropZone';
 import { downloadBlob, formatBytes, makeZip, readBytes, timestampForFilename } from '../../lib/files';
 import { stripMetadata, type StripOptions, type StripResult } from '../../lib/metadata';
@@ -98,12 +99,12 @@ export default function MetadataRemover() {
 
             {r.result && (
               r.result.items.length === 0 ? (
-                <p className="text-sm text-ok">✓ 지울 메타데이터가 없어요</p>
+                <p className="flex items-center gap-1.5 text-sm text-ok"><CheckCircle2 size={16} /> 지울 메타데이터가 없어요</p>
               ) : (
-                <ul className="space-y-1 text-sm">
+                <ul className="space-y-1.5 text-sm">
                   {r.result.items.map((it, j) => (
-                    <li key={j} className="flex items-baseline gap-2">
-                      <span className={it.removed ? 'text-danger' : 'text-muted'}>{it.removed ? '✕' : '•'}</span>
+                    <li key={j} className="flex items-center gap-2">
+                      {it.removed ? <XCircle size={16} className="shrink-0 text-danger" /> : <MinusCircle size={16} className="shrink-0 text-muted" />}
                       <span className={it.removed ? '' : 'text-muted'}>
                         {it.kind}
                         {!it.removed && ' (유지)'}
@@ -124,10 +125,11 @@ export default function MetadataRemover() {
 
 function ExifCard({ exif }: { exif: NonNullable<StripResult['exif']> }) {
   const device = [exif.make, exif.model].filter(Boolean).join(' ');
-  const rows: [string, React.ReactNode][] = [];
+  const rows: [LucideIcon, string, React.ReactNode][] = [];
   if (exif.gps) {
     rows.push([
-      '📍 위치',
+      MapPin,
+      '위치',
       exif.gps === 'present' ? (
         'GPS 정보 있음'
       ) : (
@@ -137,16 +139,19 @@ function ExifCard({ exif }: { exif: NonNullable<StripResult['exif']> }) {
       ),
     ]);
   }
-  if (device) rows.push(['📱 기기', device]);
-  if (exif.dateTime) rows.push(['🕒 촬영', exif.dateTime]);
-  if (exif.software) rows.push(['🛠 프로그램', exif.software]);
+  if (device) rows.push([Camera, '기기', device]);
+  if (exif.dateTime) rows.push([Clock, '촬영', exif.dateTime]);
+  if (exif.software) rows.push([Wrench, '프로그램', exif.software]);
   if (!rows.length) return null;
 
   return (
-    <dl className={`mb-3 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 rounded-lg p-3 text-sm ${exif.gps ? 'bg-danger/10' : 'bg-panel-2'}`}>
-      {rows.map(([k, v]) => (
+    <dl className={`mb-3 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1.5 rounded-2xl p-3.5 text-sm ${exif.gps ? 'bg-danger/10' : 'bg-panel-2'}`}>
+      {rows.map(([Icon, k, v]) => (
         <div key={k} className="contents">
-          <dt className="text-muted">{k}</dt>
+          <dt className={`flex items-center gap-1.5 ${Icon === MapPin ? 'text-danger' : 'text-muted'}`}>
+            <Icon size={14} strokeWidth={2.2} />
+            {k}
+          </dt>
           <dd className="min-w-0 truncate">{v}</dd>
         </div>
       ))}

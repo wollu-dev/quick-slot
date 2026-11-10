@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import DropZone from '../../components/ui/DropZone';
 import CopyButton from '../../components/ui/CopyButton';
+import Segmented from '../../components/ui/Segmented';
 import { downloadBlob, makeZip, readBytes, timestampForFilename } from '../../lib/files';
 
 type Shell = 'powershell' | 'bash';
@@ -160,23 +161,22 @@ export default function FileDateChanger() {
 
       <section className="space-y-3">
         <div className="flex flex-wrap items-center gap-2">
-          <div className="flex rounded-lg border border-line p-0.5 text-sm">
-            {([
+          <Segmented
+            label="운영체제"
+            value={shell}
+            onChange={setShell}
+            options={[
               ['powershell', 'Windows'],
               ['bash', 'macOS / Linux'],
-            ] as const).map(([k, label]) => (
-              <button key={k} type="button" onClick={() => setShell(k)} className={`rounded-md px-3 py-1 ${shell === k ? 'bg-panel-2 text-fg' : 'text-muted'}`}>
-                {label}
-              </button>
-            ))}
-          </div>
+            ]}
+          />
           <div className="ml-auto flex gap-2">
             <CopyButton text={script} label="스크립트 복사" />
             <button type="button" className="btn btn-primary" disabled={!script} onClick={downloadScript}>파일로 받기</button>
           </div>
         </div>
 
-        {dupNames && <p className="rounded-lg bg-danger/10 p-3 text-sm text-danger">이름이 같은 파일이 있어요. 스크립트는 실행한 폴더의 파일 이름으로 찾기 때문에 같은 폴더의 파일끼리 나눠서 만드세요.</p>}
+        {dupNames && <p className="rounded-2xl bg-danger/10 p-3 text-sm text-danger">이름이 같은 파일이 있어요. 스크립트는 실행한 폴더의 파일 이름으로 찾기 때문에 같은 폴더의 파일끼리 나눠서 만드세요.</p>}
         {noTarget && <p className="text-sm text-danger">바꿀 항목을 하나 이상 고르세요.</p>}
 
         <ol className="panel space-y-2 p-4 text-sm leading-relaxed">

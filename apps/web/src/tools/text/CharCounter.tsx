@@ -65,11 +65,11 @@ export default function CharCounter() {
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
         {cards.map(([label, value, unit], i) => (
-          <div key={label} className={`panel p-3 ${i < 2 ? 'border-accent/40' : ''}`}>
-            <div className="text-xs text-muted">{label}</div>
-            <div className={`mt-0.5 font-mono text-2xl font-semibold tabular-nums ${i === 0 && over ? 'text-danger' : ''}`}>
+          <div key={label} className="panel px-4 py-3.5">
+            <div className="text-[13px] font-medium text-muted">{label}</div>
+            <div className={`mt-1 text-[28px] leading-none font-semibold tracking-tight tabular-nums ${i === 0 && over ? 'text-danger' : i < 2 ? 'text-accent' : ''}`}>
               {value.toLocaleString()}
-              <span className="ml-1 text-sm font-normal text-muted">{unit}</span>
+              <span className="ml-1 text-[15px] font-medium text-muted">{unit}</span>
             </div>
           </div>
         ))}
@@ -92,7 +92,7 @@ export default function CharCounter() {
             <div className="h-2 flex-1 overflow-hidden rounded-full bg-panel-2">
               <div className={`h-full transition-all ${over ? 'bg-danger' : 'bg-accent'}`} style={{ width: `${Math.min(100, (s.withSpaces / limit) * 100)}%` }} />
             </div>
-            <span className={`font-mono text-xs ${over ? 'text-danger' : 'text-muted'}`}>
+            <span className={`text-[13px] font-medium tabular-nums ${over ? 'text-danger' : 'text-muted'}`}>
               {over ? `${(s.withSpaces - limit).toLocaleString()}자 초과` : `${(limit - s.withSpaces).toLocaleString()}자 남음`}
             </span>
           </div>
@@ -104,7 +104,7 @@ export default function CharCounter() {
         value={text}
         onChange={(e) => setText(e.target.value)}
         placeholder="여기에 글을 붙여넣거나 입력하세요. 쓰던 글은 이 브라우저에 자동 저장돼요."
-        className="input min-h-[50vh] resize-y p-4 text-base leading-relaxed"
+        className="input min-h-[50vh] resize-y text-[17px]"
         autoFocus
       />
     </div>

@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import CopyButton from '../../components/ui/CopyButton';
+import Segmented from '../../components/ui/Segmented';
+import Select from '../../components/ui/Select';
 
 type Version = 'v4' | 'v7';
 type Format = 'default' | 'upper' | 'nohyphen' | 'braces';
@@ -47,16 +49,15 @@ export default function UuidGenerator() {
       <div className="flex flex-wrap items-end gap-3">
         <div>
           <span className="label">버전</span>
-          <div className="flex rounded-lg border border-line p-0.5 text-sm">
-            {([
+          <Segmented
+            label="버전"
+            value={version}
+            onChange={setVersion}
+            options={[
               ['v4', 'v4 (랜덤)'],
               ['v7', 'v7 (시간순)'],
-            ] as const).map(([k, label]) => (
-              <button key={k} type="button" onClick={() => setVersion(k)} className={`rounded-md px-3 py-1 ${version === k ? 'bg-panel-2 text-fg' : 'text-muted'}`}>
-                {label}
-              </button>
-            ))}
-          </div>
+            ]}
+          />
         </div>
         <div>
           <label className="label" htmlFor="count">개수 (최대 1000)</label>
@@ -64,12 +65,18 @@ export default function UuidGenerator() {
         </div>
         <div>
           <label className="label" htmlFor="fmt">형식</label>
-          <select id="fmt" className="input w-auto" value={fmt} onChange={(e) => setFmt(e.target.value as Format)}>
-            <option value="default">소문자 (기본)</option>
-            <option value="upper">대문자</option>
-            <option value="nohyphen">하이픈 없이</option>
-            <option value="braces">{'{중괄호}'} (C#/Windows GUID)</option>
-          </select>
+          <Select
+            id="fmt"
+            className="w-auto min-w-36"
+            value={fmt}
+            onChange={setFmt}
+            options={[
+              ['default', '소문자 (기본)'],
+              ['upper', '대문자'],
+              ['nohyphen', '하이픈 없이'],
+              ['braces', '{중괄호} (C#/Windows GUID)'],
+            ]}
+          />
         </div>
         <button type="button" className="btn btn-primary" onClick={generate}>새로 생성</button>
         <CopyButton text={out} label="전체 복사" />

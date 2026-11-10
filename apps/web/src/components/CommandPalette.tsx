@@ -1,6 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { tools, getCategory, toolUrl, type Tool } from '../tools/registry';
+import { createPortal } from 'react-dom';
+import { CornerDownLeft, Search } from 'lucide-react';
+import { tools, toolUrl, type Tool } from '../tools/registry';
 import { readSlots } from '../lib/slots';
+import AppIcon from './ui/AppIcon';
+
+/** 검색 관련 문구는 모두 이 이름으로 통일 */
+const SEARCH_LABEL = 'QuickSlot 검색';
 
 function score(tool: Tool, q: string): number {
   if (!q) return 1;
@@ -13,6 +19,7 @@ function score(tool: Tool, q: string): number {
   return 0;
 }
 
+/** 헤더 가운데의 검색 버튼 + 스포트라이트형 검색 창 + 전역 단축키 */
 export default function CommandPalette() {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
@@ -89,52 +96,58 @@ export default function CommandPalette() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="flex w-full max-w-xs items-center gap-2 rounded-lg border border-line bg-panel px-3 py-1.5 text-sm text-muted transition hover:border-muted"
+        className="flex h-9 w-full items-center gap-2 rounded-full bg-panel-2 px-4 text-[14px] text-muted transition hover:bg-[color-mix(in_srgb,var(--panel-2)_100%,var(--fg)_6%)]"
       >
-        <span aria-hidden>🔍</span>
-        <span className="flex-1 text-left">툴 검색...</span>
-        <span className="kbd hidden sm:inline">Ctrl K</span>
+        <Search size={16} strokeWidth={2.2} className="shrink-0" />
+        <span className="flex-1 truncate text-left">{SEARCH_LABEL}</span>
+        <span className="kbd hidden bg-transparent sm:inline-flex">Ctrl K</span>
       </button>
 
-      {open && (
+      {/* 헤더의 backdrop-filter 가 fixed 요소의 기준이 되어버리므로 body 로 portal */}
+      {open && createPortal(
         <div
-          className="fixed inset-0 z-50 flex items-start justify-center bg-black/60 px-4 pt-[12vh] backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-start justify-center bg-black/15 px-4 pt-[14vh] backdrop-blur-md dark:bg-black/45"
           onMouseDown={(e) => e.target === e.currentTarget && setOpen(false)}
         >
-          <div className="panel w-full max-w-lg overflow-hidden shadow-2xl" role="dialog" aria-label="툴 검색">
-            <input
-              ref={inputRef}
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              onKeyDown={onInputKey}
-              placeholder="무엇이 필요하세요? (예: 확장자, json, 글자수)"
-              className="w-full border-b border-line bg-transparent px-4 py-3.5 text-base outline-none placeholder:text-muted"
-            />
-            <ul ref={listRef} className="max-h-[50vh] overflow-y-auto p-1.5">
-              {results.length === 0 && <li className="px-3 py-6 text-center text-sm text-muted">검색 결과가 없어요</li>}
+          <div className="glass-strong w-full max-w-[620px] overflow-hidden rounded-[26px] shadow-[0_30px_80px_-20px_rgb(0_0_0/0.45)]" role="dialog" aria-label={SEARCH_LABEL}>
+            <div className="flex items-center gap-3 px-5">
+              <Search size={22} strokeWidth={2.2} className="shrink-0 text-muted" />
+              <input
+                ref={inputRef}
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onKeyDown={onInputKey}
+                placeholder={SEARCH_LABEL}
+                className="h-16 w-full bg-transparent text-[22px] tracking-tight outline-none placeholder:text-muted/70"
+              />
+            </div>
+            {results.length > 0 && <div className="mx-5 h-px bg-line" />}
+            <ul ref={listRef} className="max-h-[52vh] overflow-y-auto p-2">
+              {results.length === 0 && <li className="px-3 py-8 text-center text-[15px] text-muted">결과 없음</li>}
               {results.map((tool, i) => (
                 <li key={tool.slug} data-idx={i}>
                   <button
                     type="button"
-                    onMouseEnter={() => setActive(i)}
+                    onMouseMove={() => setActive(i)}
                     onClick={() => go(tool)}
-                    className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left ${i === active ? 'bg-panel-2' : ''}`}
+                    className={`flex w-full items-center gap-3 rounded-[14px] px-3 py-2 text-left transition-colors ${i === active ? 'bg-accent text-accent-fg' : ''}`}
                   >
-                    <span aria-hidden className="text-lg">{getCategory(tool.category).icon}</span>
+                    <AppIcon tool={tool} size="sm" />
                     <span className="min-w-0 flex-1">
-                      <span className="block truncate text-sm font-medium">
-                        {tool.name}
-                        {tool.status === 'soon' && <span className="ml-2 text-xs font-normal text-muted">준비 중</span>}
+                      <span className="block truncate text-[15px] font-medium">{tool.name}</span>
+                      <span className={`block truncate text-[12px] ${i === active ? 'text-accent-fg/80' : 'text-muted'}`}>
+                        {tool.status === 'soon' ? '준비 중 · ' : ''}
+                        {tool.description}
                       </span>
-                      <span className="block truncate text-xs text-muted">{tool.description}</span>
                     </span>
-                    {i === active && <span className="kbd">Enter</span>}
+                    {i === active && <CornerDownLeft size={16} className="shrink-0 opacity-80" />}
                   </button>
                 </li>
               ))}
             </ul>
           </div>
-        </div>
+        </div>,
+        document.body,
       )}
     </>
   );

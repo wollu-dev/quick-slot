@@ -65,7 +65,7 @@ export default function UnixTimestamp() {
       <div className="panel flex flex-wrap items-center gap-4 p-4">
         <div>
           <div className="text-xs text-muted">지금</div>
-          <div className="font-mono text-2xl font-semibold tabular-nums text-accent">{Math.floor(now / 1000)}</div>
+          <div className="text-[34px] leading-tight font-semibold tracking-tight tabular-nums text-accent">{Math.floor(now / 1000)}</div>
         </div>
         <div className="font-mono text-sm text-muted tabular-nums">{now} ms</div>
         <CopyButton text={String(Math.floor(now / 1000))} className="ml-auto" />

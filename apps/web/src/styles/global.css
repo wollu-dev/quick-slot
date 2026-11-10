@@ -1,49 +1,293 @@
 @import "tailwindcss";
 
-@theme {
-  --font-sans: "Pretendard Variable", Pretendard, system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, "Cascadia Code", Consolas, monospace;
+/*
+ * QuickSlot 디자인 시스템 — 무채색 배경(위→아래 명암 + 고운 질감) 위의 반투명 유리 표면
+ * 색은 아래 토큰만 사용한다: bg, panel, panel-2, line, fg, muted, accent, accent-fg, danger, ok
+ *
+ * 테마: <html data-theme="light|dark"> 로 결정된다. Layout.astro 의 <head> 인라인 스크립트가
+ * 사용자 선택(라이트/다크/시스템)을 읽어 화면을 그리기 전에 설정한다. 다크 스타일은
+ * Tailwind 의 dark: 변형 또는 아래 [data-theme="dark"] 토큰으로만 만든다.
+ */
 
-  --color-bg: #0e0f13;
-  --color-panel: #16181e;
-  --color-panel-2: #1e2028;
-  --color-line: #2a2d37;
-  --color-fg: #e6e7eb;
-  --color-muted: #8b8f9c;
-  --color-accent: #f5b83d;
-  --color-accent-fg: #1a1406;
-  --color-danger: #f06363;
-  --color-ok: #4fcf8a;
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+:root {
+  color-scheme: light;
+
+  --bg: #f3f3f6;
+  /* 배경 명암: 위가 살짝 밝고 아래로 갈수록 어두워짐 */
+  --bg-top: #fafafc;
+  --bg-bottom: #ececf0;
+  --noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .035 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+
+  --fg: #1d1d1f;
+  --muted: #6e6e73;
+  --line: rgb(0 0 0 / 0.08);
+  --panel: rgb(255 255 255 / 0.82);
+  --panel-2: rgb(118 118 128 / 0.1);
+  --accent: #0071e3;
+  --accent-fg: #ffffff;
+  --danger: #ff3b30;
+  --ok: #34c759;
+
+  --glass-border: rgb(0 0 0 / 0.05);
+  --glass-shadow: 0 1px 2px rgb(0 0 0 / 0.04), 0 4px 16px -6px rgb(0 0 0 / 0.06);
+  --raised: #ffffff;
+  --switch-off: rgb(120 120 128 / 0.22);
+}
+
+:root[data-theme="dark"] {
+    color-scheme: dark;
+    --bg: #141416;
+    --bg-top: #1c1c1f;
+    --bg-bottom: #0f0f11;
+    --noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .05 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    --fg: #f5f5f7;
+    --muted: #98989f;
+    --line: rgb(255 255 255 / 0.09);
+    --panel: rgb(36 36 40 / 0.8);
+    --panel-2: rgb(118 118 128 / 0.24);
+    --accent: #0a84ff;
+    --danger: #ff453a;
+    --ok: #30d158;
+
+    --glass-border: rgb(255 255 255 / 0.07);
+    --glass-shadow: inset 0 1px 0 rgb(255 255 255 / 0.04);
+    --raised: #636366;
+    --switch-off: rgb(120 120 128 / 0.36);
+}
+
+@theme inline {
+  --font-sans: -apple-system, BlinkMacSystemFont, "Pretendard Variable", Pretendard, "Segoe UI Variable", "Segoe UI", system-ui, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Consolas, monospace;
+
+  --color-bg: var(--bg);
+  --color-panel: var(--panel);
+  --color-panel-2: var(--panel-2);
+  --color-line: var(--line);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-fg: var(--accent-fg);
+  --color-danger: var(--danger);
+  --color-ok: var(--ok);
 }
 
 html {
-  color-scheme: dark;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 body {
-  background: var(--color-bg);
-  color: var(--color-fg);
+  background: var(--bg);
+  color: var(--fg);
   font-family: var(--font-sans);
+  letter-spacing: -0.01em;
+  /* 한글은 어절 단위로 줄바꿈 */
+  word-break: keep-all;
+  overflow-wrap: break-word;
 }
 
-/* 공통 컴포넌트 클래스 */
+/* 화면에 고정된 배경: 명암 그라데이션 + 고운 노이즈 질감 (iOS 에서 안 되는 background-attachment: fixed 대신) */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: var(--noise), linear-gradient(180deg, var(--bg-top) 0%, var(--bg-bottom) 75%);
+}
+
+::selection {
+  background: color-mix(in srgb, var(--accent) 28%, transparent);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--muted) 45%, transparent) transparent;
+}
+
+/* 반투명 유리 표면 */
+@utility glass {
+  background: var(--panel);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  backdrop-filter: blur(28px) saturate(180%);
+}
+
+/* 위에 떠 있는 창(검색 등)용 — 뒤 내용이 비치지 않도록 더 불투명하게 */
+@utility glass-strong {
+  background: color-mix(in srgb, var(--bg) 78%, transparent);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  -webkit-backdrop-filter: blur(48px) saturate(200%);
+  backdrop-filter: blur(48px) saturate(200%);
+}
+
+/* 드롭다운 메뉴 — 뒤 글자가 비치지 않을 만큼 불투명 */
+@utility glass-menu {
+  background: color-mix(in srgb, var(--bg) 92%, transparent);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  -webkit-backdrop-filter: blur(40px) saturate(200%);
+  backdrop-filter: blur(40px) saturate(200%);
+}
+
 @layer components {
   .panel {
-    @apply rounded-xl border border-line bg-panel;
+    @apply glass rounded-[22px];
   }
+
+  /* 버튼: 기본은 회색 채움, primary 는 강조색 */
   .btn {
-    @apply inline-flex items-center justify-center gap-1.5 rounded-lg border border-line bg-panel-2 px-3 py-1.5 text-sm font-medium text-fg transition hover:border-muted disabled:cursor-not-allowed disabled:opacity-40;
+    @apply inline-flex h-9 items-center justify-center gap-1.5 rounded-full bg-panel-2 px-4 text-[14px] font-medium whitespace-nowrap text-fg transition duration-200 select-none hover:bg-[color-mix(in_srgb,var(--panel-2)_100%,var(--fg)_6%)] active:scale-[0.97] disabled:pointer-events-none disabled:opacity-40;
   }
   .btn-primary {
-    @apply border-transparent bg-accent text-accent-fg hover:brightness-110 hover:border-transparent;
+    @apply bg-accent text-accent-fg shadow-[0_4px_14px_-4px_color-mix(in_srgb,var(--accent)_60%,transparent)] hover:bg-accent hover:brightness-110;
   }
+  .btn-tinted {
+    @apply bg-accent/12 text-accent hover:bg-accent/18;
+  }
+
+  /* 한 줄 입력·드롭다운은 버튼과 같은 높이(36px) */
   .input {
-    @apply w-full rounded-lg border border-line bg-bg px-3 py-2 text-sm text-fg outline-none placeholder:text-muted focus:border-accent;
+    @apply h-9 w-full rounded-[10px] border border-transparent bg-panel-2 px-3 text-[14px] text-fg transition outline-none placeholder:text-muted/80 focus:border-accent/60 focus:ring-4 focus:ring-accent/15;
   }
+
+  /* 넓은 입력 영역은 회색 채움 대신 유리 표면 */
+  textarea.input {
+    @apply glass h-auto rounded-[22px] p-4 text-[15px] leading-relaxed focus:bg-[var(--panel)];
+  }
+
   .label {
-    @apply mb-1 block text-xs font-medium text-muted;
+    @apply mb-1.5 block text-[13px] font-medium text-muted;
   }
+
   .kbd {
-    @apply rounded border border-line bg-panel-2 px-1.5 py-0.5 font-mono text-[11px] text-muted;
+    @apply inline-flex items-center rounded-md bg-panel-2 px-1.5 py-0.5 font-sans text-[11px] font-medium text-muted;
+  }
+
+  /* 세그먼트 컨트롤 */
+  .segmented {
+    @apply inline-flex h-9 rounded-[10px] bg-panel-2 p-[3px];
+  }
+  .segmented > button {
+    @apply rounded-[8px] px-3.5 text-[13px] font-medium text-fg/80 transition duration-200;
+  }
+  .segmented > button[aria-pressed="true"],
+  .segmented > button[aria-checked="true"] {
+    @apply bg-[var(--raised)] text-fg shadow-[0_1px_3px_rgb(0_0_0/0.12),0_1px_1px_rgb(0_0_0/0.04)];
+  }
+
+  /* 필터 칩: 선택되면 글자색·배경색이 뒤집힘 */
+  .chip {
+    @apply inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full bg-panel-2 px-3.5 text-[14px] font-medium whitespace-nowrap text-fg transition duration-200 select-none hover:bg-[color-mix(in_srgb,var(--panel-2)_100%,var(--fg)_6%)] active:scale-[0.97];
+  }
+  .chip[aria-pressed="true"] {
+    @apply bg-fg text-[var(--bg)] hover:bg-fg;
+  }
+  .chip-count {
+    @apply text-[12px] font-medium tabular-nums opacity-50;
+  }
+
+  /* 앱 아이콘 타일 */
+  .app-icon {
+    @apply grid shrink-0 place-items-center text-white shadow-[inset_0_1px_0_rgb(255_255_255/0.35),0_2px_6px_-2px_rgb(0_0_0/0.25)];
+    background: linear-gradient(180deg, color-mix(in srgb, var(--tile) 78%, white), var(--tile));
+  }
+}
+
+/* 체크박스 → 스위치 */
+input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  position: relative;
+  flex-shrink: 0;
+  width: 38px;
+  height: 23px;
+  margin: 0;
+  border-radius: 999px;
+  background: var(--switch-off);
+  cursor: pointer;
+  transition: background 0.25s ease;
+  vertical-align: middle;
+}
+input[type="checkbox"]::before {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 19px;
+  height: 19px;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 2px 4px rgb(0 0 0 / 0.2), 0 0 1px rgb(0 0 0 / 0.1);
+  transition: transform 0.25s cubic-bezier(0.3, 0.7, 0.4, 1.2);
+}
+input[type="checkbox"]:checked {
+  background: var(--ok);
+}
+input[type="checkbox"]:checked::before {
+  transform: translateX(15px);
+}
+input[type="checkbox"]:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--accent) 40%, transparent);
+  outline-offset: 2px;
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* 빈 독 위 말풍선: 천천히 위아래로 */
+/* 가로 가운데 정렬은 Tailwind 의 translate 속성이 맡고, 여기서는 transform 으로 세로만 움직인다 (둘이 겹치면 두 번 밀림) */
+@keyframes dock-hint-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+.dock-hint {
+  animation: dock-hint-float 3s ease-in-out infinite;
+}
+
+/* 드롭다운 메뉴가 열릴 때 */
+@keyframes menu-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.menu-pop {
+  animation: menu-pop 0.16s cubic-bezier(0.2, 0.9, 0.3, 1.1);
+}
+
+/* datetime-local 등 기본 입력의 아이콘 색 맞추기 */
+input.input::-webkit-calendar-picker-indicator {
+  opacity: 0.55;
+  cursor: pointer;
+}
+
+input[type="number"]::-webkit-inner-spin-button {
+  opacity: 0.5;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before {
+    transition: none !important;
+    animation: none !important;
   }
 }

@@ -1,0 +1,21 @@
+---
+/** QuickSlot 로고: 2×2 슬롯 중 한 칸이 채워진 모양 */
+interface Props {
+  size?: number;
+}
+const { size = 28 } = Astro.props;
+---
+
+<svg width={size} height={size} viewBox="0 0 32 32" aria-hidden="true">
+  <defs>
+    <linearGradient id="qs-logo-bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#4aa3ff"></stop>
+      <stop offset="1" stop-color="#0a6cff"></stop>
+    </linearGradient>
+  </defs>
+  <rect width="32" height="32" rx="8.5" fill="url(#qs-logo-bg)"></rect>
+  <rect x="7" y="7" width="8" height="8" rx="2.4" fill="#fff" fill-opacity="0.38"></rect>
+  <rect x="17" y="7" width="8" height="8" rx="2.4" fill="#fff" fill-opacity="0.38"></rect>
+  <rect x="7" y="17" width="8" height="8" rx="2.4" fill="#fff" fill-opacity="0.38"></rect>
+  <rect x="17" y="17" width="8" height="8" rx="2.4" fill="#fff"></rect>
+</svg>
