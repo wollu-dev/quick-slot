@@ -26,6 +26,7 @@ QuickSlot: ブラウザですぐ使える日常・開発ツール集。構成と
 
 - `README.md` や `AGENTS.md` を変更したら、`.ko.md`・`.ja.md` の翻訳も**同じ PR で**更新し、内容がずれないようにする。
 - 製品データとしての韓国語はコードにあってよい: 韓国語辞書 `i18n/ko.ts`、`registry.ts` の韓国語検索 `keywords`。
+- ドキュメント、コミットメッセージ、PR の説明は、飾らない率直な文章で書く。ダッシュ（—、——）はなるべく使わず、句点・読点・コロン・括弧で代える。
 
 ## 多言語対応（韓国語 · English · 日本語）
 
@@ -35,12 +36,12 @@ QuickSlot: ブラウザですぐ使える日常・開発ツール集。構成と
 - ライブラリ（`lib/`）は文言ではなくコードを返し、画面側で翻訳する（例: `metadata.ts` の `ItemKind`、`MetadataError.code`）。
 - 内部リンクは `localizePath(lang, path)` / `toolUrl(slug, lang)` で作る。`/tools/…` を直接書かない。
 - React アイランドの最上位コンポーネントは `withI18n` で包み、Astro から `lang={lang}` を渡す。
-- **ブラウザの言語で自動リダイレクトしない** — 検索エンジンが他の言語のページを収集できなくなる。`LanguageSuggest` バナーは言語を「提案」するだけで、移動はユーザーが自分で選んだ言語（`quickslot:lang` の保存値）があるときだけ。クローラーにだけ違う内容を見せない（User-Agent 判定は禁止）。
+- **ブラウザの言語で自動リダイレクトしない。** そうすると検索エンジンが他の言語のページを収集できなくなる。`LanguageSuggest` バナーは言語を「提案」するだけで、移動はユーザーが自分で選んだ言語（`quickslot:lang` の保存値）があるときだけ。クローラーにだけ違う内容を見せない（User-Agent 判定は禁止）。
 
 ## デプロイ
 
 - **デプロイ方式: Docker イメージ → GitHub Container Registry（`ghcr.io`）→ セルフホスト。** 他のホスティング（GitHub Pages、Vercel、Netlify、Cloudflare Pages など）は使わないので、提案も設定もしない。
-- **現状: まだ構築していない。** サービスが完成に近づいたら構築する — それまでに `Dockerfile` やイメージ公開のワークフローを追加しない。現在の自動化は CI（`.github/workflows/ci.yml`: 型チェックとビルド）だけ。
+- **現状: まだ構築していない。** サービスが完成に近づいたら構築する。それまでに `Dockerfile` やイメージ公開のワークフローを追加しない。現在の自動化は CI（`.github/workflows/ci.yml`: 型チェックとビルド）だけ。
 - 構築するときの方針: 2段階の `Dockerfile`（Node でビルド → nginx で静的な成果物だけを配信）、サイトURLは `ARG SITE_URL`。イメージの公開は `main` へのマージごとではなく、**バージョンタグ（`v*`）を push したときだけ**。
 - **ドメインやURLをコードに書かない。** サイトURLはビルド環境変数 `SITE_URL` からのみ受け取る（`astro.config.mjs` → `Astro.site`）。絶対URLが必要なら `Astro.site` を使い、未設定のときは相対URLで動くようにする。
 - 環境変数を追加したら、`apps/web/.env.example` と README の「設定（Configuration）」表（3言語すべて）にも書く。
@@ -50,11 +51,11 @@ QuickSlot: ブラウザですぐ使える日常・開発ツール集。構成と
 無彩色の背景の上に、半透明のガラスの面。基準は `apps/web/src/styles/global.css`。
 
 - **設定**: ヘッダー右の歯車 → 設定シート（`SettingsSheet`、iOS の設定のようなグループ化リスト）: 外観モード · クイックスロットの位置/サイズ · 言語。ユーザー設定はここにだけまとめる。
-- **最初の描画前に適用**: テーマ（`data-theme`）、ドックの位置・サイズ（`data-dock`、`data-dock-size`）、言語のリダイレクトは `Layout.astro` の `<head>` インラインスクリプトが描画前に行う。その後の変更は `src/lib/theme.ts`、`src/lib/dock.ts`、`src/i18n` — **保存キーとデフォルト値を両方そろえて直すこと。**
+- **最初の描画前に適用**: テーマ（`data-theme`）、ドックの位置・サイズ（`data-dock`、`data-dock-size`）、言語のリダイレクトは `Layout.astro` の `<head>` インラインスクリプトが描画前に行う。その後の変更は `src/lib/theme.ts`、`src/lib/dock.ts`、`src/i18n` で行う。**保存キーとデフォルト値を両方そろえて直すこと。**
 - **テーマ**: ライト / ダーク / 自動（デフォルト）。適用は `<html data-theme="light|dark">` だけ。CSS で `@media (prefers-color-scheme)` を使わず、ダークのスタイルは `[data-theme="dark"]` のトークンか Tailwind の `dark:` バリアントで作る。
 - **ドック**: 配置・サイズ・拡大効果は `global.css` の `.dock*` ルールが `html[data-dock]` を見て決める。640px 未満では設定に関係なく下に小さく表示。ドックに隠れてはいけないページ最下部の要素には `.dock-safe`。
-- **背景**: `global.css` の `body::before` だけで描く — 無彩色の上から下への濃淡（`bg-top` → `bg-bottom`）+ 細かいノイズの質感。色のついたグラデーション・色のにじみ・パターンは入れない。ページごとに背景を敷かない。
-- **色**: トークンだけを使う — `bg`、`panel`、`panel-2`、`line`、`fg`、`muted`、`accent`、`accent-fg`、`danger`、`ok`。色のハードコード禁止（例外: `registry.ts` のカテゴリタイルの色、設定の外観プレビュー）。
+- **背景**: `global.css` の `body::before` だけで描く：無彩色の上から下への濃淡（`bg-top` → `bg-bottom`）+ 細かいノイズの質感。色のついたグラデーション・色のにじみ・パターンは入れない。ページごとに背景を敷かない。
+- **色**: トークンだけを使う：`bg`、`panel`、`panel-2`、`line`、`fg`、`muted`、`accent`、`accent-fg`、`danger`、`ok`。色のハードコード禁止（例外: `registry.ts` のカテゴリタイルの色、設定の外観プレビュー）。
 - **面**: カード・パネルは `panel`（= `glass` + 角丸）、検索ウィンドウは `glass-strong`、文字を読む浮いたウィンドウ（メニュー、設定シート）は `glass-menu`（より不透明）。大きな `textarea.input` は自動でガラスの面になる。
 - **コントロール**: ボタン `btn` / `btn-primary` / `btn-tinted`、入力 `input`、ラベル `label`。選択肢が2〜3個なら `Segmented`、それ以上は `Select` コンポーネント。**ブラウザ標準の `<select>` は使わない**（開いたリストを装飾できない）。チェックボックスは CSS で自動的にスイッチの見た目になる。
 - **高さ**: 1行のコントロール（ボタン、入力、`Select`、`Segmented`）はすべて 36px（`h-9`）。
@@ -70,8 +71,8 @@ QuickSlot: ブラウザですぐ使える日常・開発ツール集。構成と
 
 ```bash
 npm install
-npm run check    # 型チェック — 変更後は必ず実行
-npm run build    # ビルド — 変更後は必ず実行
+npm run check    # 型チェック（変更後は必ず実行）
+npm run build    # ビルド（変更後は必ず実行）
 npm run dev      # 開発サーバー（http://localhost:4321）
 ```
 
@@ -102,11 +103,11 @@ npm run dev      # 開発サーバー（http://localhost:4321）
 ```
 <type>(<scope>): <summary>
 
-<body — 何を、なぜ（任意）>
+<body: 何を、なぜ（任意）>
 ```
 
 - 種類: `feat`、`fix`、`refactor`、`docs`、`chore`、`test`、`style`、`perf`
-- スコープ（任意）: ツールの slug や領域 — 例: `feat(qr-code): add QR code generator`、`fix(json-formatter): fix error position calculation`
+- スコープ（任意）: ツールの slug や領域。例: `feat(qr-code): add QR code generator`、`fix(json-formatter): fix error position calculation`
 - 要約は**英語**、命令形、50文字以内、末尾にピリオドなし。
 
 ### プルリクエスト
