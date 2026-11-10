@@ -157,4 +157,4 @@ Docker イメージを GitHub Container Registry に公開し、セルフホス�
 
 ## ライセンス
 
-[MIT](LICENSE) © 2026 WolLu
+[MIT](LICENSE) © 2026 Jaeyun Jung (WolLu)
