@@ -10,11 +10,11 @@ import { LOCALES, getDict, localizePath, type Lang } from '../i18n';
 
 interface Props {
   lang: Lang;
-  /** 언어 접두사 없는 경로 (예: '/', '/tools/base64') — 다른 언어 페이지 링크(hreflang)에 사용 */
+  /** Path without the language prefix (e.g. '/', '/tools/base64') — used for alternate-language links (hreflang) */
   path: string;
   title?: string;
   description?: string;
-  /** 지금 열려 있는 툴 (독에 표시 점) */
+  /** The currently open tool (marked with a dot in the dock) */
   currentSlug?: string;
 }
 
@@ -23,7 +23,7 @@ const t = getDict(lang);
 const description = Astro.props.description ?? t.meta.siteDescription;
 const fullTitle = title ? `${title} · QuickSlot` : t.meta.siteTitle;
 
-/** 검색엔진용 주소: SITE_URL 이 있으면 전체 주소(https://…), 없으면 상대 주소 (astro.config.mjs 참고) */
+/** URLs for search engines: absolute (https://…) if SITE_URL is set, otherwise relative (see astro.config.mjs) */
 const absolute = (p: string) => (Astro.site ? new URL(p, Astro.site).href : p);
 ---
 
@@ -36,8 +36,8 @@ const absolute = (p: string) => (Astro.site ? new URL(p, Astro.site).href : p);
     <meta name="generator" content={Astro.generator} />
     <meta name="theme-color" content="#fafafc" />
     <!--
-      화면을 그리기 전에 실행: 테마, 독 위치·크기 적용 + 고른 언어가 따로 있으면 그 언어 주소로 이동.
-      규칙은 src/lib/theme.ts, src/lib/dock.ts, src/i18n/index.tsx 와 같다 (저장 키·기본값을 함께 고칠 것).
+      Runs before first paint: applies theme and dock position/size, and redirects to the chosen language if one is set.
+      The rules mirror src/lib/theme.ts, src/lib/dock.ts and src/i18n/index.tsx (keep storage keys and defaults in sync).
     -->
     <script is:inline>
       (function () {
@@ -50,7 +50,7 @@ const absolute = (p: string) => (Astro.site ? new URL(p, Astro.site).href : p);
           }
         }
 
-        // 언어: 사용자가 설정에서 고른 언어가 지금 페이지 언어와 다르면 같은 페이지의 그 언어 주소로
+        // Language: if the language chosen in settings differs from the page language, go to this page in that language
         var want = get('quickslot:lang');
         var page = root.lang;
         if ((want === 'ko' || want === 'en' || want === 'ja') && want !== page) {
@@ -59,13 +59,13 @@ const absolute = (p: string) => (Astro.site ? new URL(p, Astro.site).href : p);
           return;
         }
 
-        // 테마
+        // Theme
         var pref = get('quickslot:theme') || 'system';
         var dark = pref === 'dark' || (pref !== 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches);
         root.dataset.theme = dark ? 'dark' : 'light';
         document.querySelector('meta[name="theme-color"]').setAttribute('content', dark ? '#1c1c1f' : '#fafafc');
 
-        // 독 위치·크기
+        // Dock position/size
         try {
           var dock = JSON.parse(get('quickslot:dock') || '{}');
           if (/^(left|bottom|right)$/.test(dock.position)) root.dataset.dock = dock.position;
@@ -85,7 +85,7 @@ const absolute = (p: string) => (Astro.site ? new URL(p, Astro.site).href : p);
   </head>
   <body class="min-h-screen">
     <header class="sticky top-0 z-40 px-4 pt-3">
-      <!-- 왼쪽 로고 · 오른쪽 검색 + 설정 -->
+      <!-- Logo on the left · search + settings on the right -->
       <div class="glass mx-auto flex h-14 max-w-6xl items-center justify-between gap-3 rounded-full pr-2.5 pl-3">
         <a href={localizePath(lang, '/')} class="flex shrink-0 items-center gap-2.5 text-[17px] font-semibold tracking-tight" aria-label={t.header.home}>
           <Logo size={30} />
@@ -101,12 +101,12 @@ const absolute = (p: string) => (Astro.site ? new URL(p, Astro.site).href : p);
     </header>
 
     <main class="mx-auto max-w-6xl px-4 pt-8 pb-12 sm:px-6">
-      <!-- 브라우저 언어가 다르면 그 언어로 보기를 "제안"만 한다 (자동 이동은 검색엔진 수집을 막아서 하지 않음) -->
+      <!-- If the browser language differs, only "suggest" viewing in it (no auto-redirect, since that would block search engine indexing) -->
       <LanguageSuggest client:only="react" lang={lang} />
       <slot />
     </main>
 
-    <!-- 독에 가리지 않도록 아래 여백 (.dock-safe) -->
+    <!-- Bottom padding so content is not hidden behind the dock (.dock-safe) -->
     <footer class="dock-safe mx-auto flex max-w-6xl items-center justify-center gap-1.5 px-4 text-center text-[13px] text-muted">
       <Lock size={13} strokeWidth={2.2} />
       {t.footer.privacy}

@@ -1,102 +1,115 @@
 # AGENTS.md
 
-이 저장소에서 작업하는 모든 AI 에이전트(Claude Code, Codex, Cursor, Gemini, Copilot 등)와 사람을 위한 공통 규칙이다.
-도구별 설정 파일(`CLAUDE.md`, `GEMINI.md`, `.github/copilot-instructions.md`)은 이 파일을 가리키기만 한다. **규칙은 여기에만 쓴다.**
+**English** · [한국어](AGENTS.ko.md) · [日本語](AGENTS.ja.md)
 
-## 프로젝트
+Shared rules for everyone working in this repository — humans and AI agents alike (Claude Code, Codex, Cursor, Gemini, Copilot, …).
+Tool-specific files (`CLAUDE.md`, `GEMINI.md`, `.github/copilot-instructions.md`) only point here. **Rules live in this file only.**
+This English file is the source of truth; `AGENTS.ko.md` and `AGENTS.ja.md` are translations for readers.
 
-QuickSlot: 설치 없이 브라우저에서 바로 쓰는 생활·개발 도구 모음. 구조와 툴 추가 방법은 [README.md](README.md) 참고.
+## Project
 
-- npm workspaces 모노레포. 프론트는 `apps/web` (Astro 7 + React 19 islands + Tailwind 4). 백엔드 `apps/api` 는 아직 없음.
-- 툴의 단일 진실 공급원은 `apps/web/src/tools/registry.ts`. 툴 추가·상태 변경은 여기부터.
-- 원칙: 툴은 기본적으로 브라우저 안에서만 처리(`processing: 'client'`). 사용자 파일을 서버로 보내지 않는다. 서버가 꼭 필요한 툴만 `'server'` 로 표시.
-- 커밋 메시지·주석·문서는 한국어.
+QuickSlot: everyday and developer tools that run right in the browser. See [README.md](README.md) for the structure and how to add a tool.
 
-## 다국어 (한국어 · English · 日本語)
+- npm workspaces monorepo. The website is `apps/web` (Astro 7 + React 19 islands + Tailwind 4). There is no backend (`apps/api`) yet.
+- The single source of truth for tools is `apps/web/src/tools/registry.ts`. Adding a tool or changing its status starts there.
+- Principle: tools process everything in the browser (`processing: 'client'`). Never send user files to a server. Mark a tool `'server'` only when it truly needs one.
 
-- **UI 문구를 코드에 직접 쓰지 않는다.** 모든 문구는 `apps/web/src/i18n/ko.ts` 에 먼저 넣고, `en.ts`·`ja.ts` 에 같은 키로 번역한다 (키가 빠지면 타입 오류). React 에서는 `useT()`, `.astro` 에서는 `getDict(lang)`.
-- 문구 안 강조는 `**굵게**`, `` `코드` `` 로 쓰고 `<Rich>` 로 그린다. 문장을 조각내서 이어 붙이지 않는다 (언어마다 어순이 다름).
-- 숫자·날짜는 `LANG_TAGS[lang]` 로 지역 형식에 맞춘다. 숫자가 들어가는 문구는 사전에 함수로 둔다 (예: `summary: (n) => …`).
-- 라이브러리(`lib/`)는 문구 대신 코드를 돌려주고 화면에서 번역한다 (예: `metadata.ts` 의 `ItemKind`, `MetadataError.code`).
-- 내부 링크는 `localizePath(lang, path)` / `toolUrl(slug, lang)` 로 만든다. `/tools/…` 를 직접 쓰지 않는다.
-- React 섬(island) 최상위 컴포넌트는 `withI18n` 으로 감싸고, Astro 에서 `lang={lang}` 을 넘긴다.
-- **브라우저 언어로 자동 이동시키지 않는다** (검색엔진이 다른 언어 페이지를 수집하지 못함). 브라우저 언어는 `LanguageSuggest` 배너로 "제안"만 하고, 이동은 사용자가 직접 고른 언어(`quickslot:lang` 저장값)가 있을 때만 한다. 로봇에게만 다르게 보여주는 처리(User-Agent 판별 등)도 하지 않는다.
+## Languages of the repository
 
-## 배포 설정
+| What | Language |
+|---|---|
+| Code, identifiers, comments, developer-facing messages (build warnings, thrown errors) | **English** |
+| Commit messages, PR titles and descriptions, branch names | **English** |
+| Documentation (`README`, `AGENTS`) | **English is the source** (`*.md`), with Korean (`*.ko.md`) and Japanese (`*.ja.md`) translations |
+| UI text shown to users | Korean · English · Japanese, through the i18n dictionaries (see below) |
 
-- **배포 방식: Docker 이미지 → GitHub Container Registry(`ghcr.io`) → 직접 호스팅(셀프 호스팅).** GitHub Pages·Vercel·Netlify·Cloudflare Pages 등 다른 호스팅은 쓰지 않으므로 제안하거나 설정하지 않는다.
-- **현재 상태: 아직 만들지 않음.** 서비스가 완성 단계에 가까워지면 만든다 — 그 전에 `Dockerfile` 이나 이미지 게시 워크플로를 먼저 추가하지 않는다. 지금 자동화는 CI(`.github/workflows/ci.yml`, 타입 검사·빌드)뿐이다.
-- 만들 때의 방향: `Dockerfile` 은 Node 로 빌드 → nginx 에 정적 결과물만 담는 2단계 빌드. 사이트 주소는 `ARG SITE_URL` 로 받는다. 이미지 게시는 `main` 머지마다가 아니라 **버전 태그(`v*`)를 push 할 때만** 한다.
-- **도메인·주소를 코드에 쓰지 않는다.** 사이트 주소는 빌드 환경 변수 `SITE_URL` 로만 받는다 (`astro.config.mjs` → `Astro.site`). 전체 주소가 필요하면 `Astro.site` 를 쓰고, 없을 때는 상대 주소로 동작하게 만든다.
-- 새 환경 변수를 추가하면 `apps/web/.env.example` 과 README 의 "환경 변수" 표에 같이 적는다.
+- When you change `README.md` or `AGENTS.md`, update the `.ko.md` and `.ja.md` translations **in the same PR** so they never drift apart.
+- Korean that is product data is fine in code: the Korean dictionary `i18n/ko.ts` and the Korean search `keywords` in `registry.ts`.
 
-## 디자인 규칙
+## Internationalization (Korean · English · Japanese)
 
-무채색 배경 위의 반투명 유리(글래스) 표면. 기준은 `apps/web/src/styles/global.css`.
+- **Never write UI text directly in code.** Add every string to `apps/web/src/i18n/ko.ts` first, then translate it under the same key in `en.ts` and `ja.ts` (a missing key is a type error). Use `useT()` in React and `getDict(lang)` in `.astro`.
+- Emphasis inside a string uses `**bold**` and `` `code` `` and is rendered with `<Rich>`. Don't split a sentence into fragments and concatenate them — word order differs between languages.
+- Format numbers and dates with `LANG_TAGS[lang]`. Strings that contain numbers are functions in the dictionary (e.g. `summary: (n) => …`).
+- Libraries (`lib/`) return codes instead of text, and the UI translates them (e.g. `ItemKind` and `MetadataError.code` in `metadata.ts`).
+- Build internal links with `localizePath(lang, path)` / `toolUrl(slug, lang)`. Never hard-code `/tools/…`.
+- Wrap the top-level component of every React island with `withI18n`, and pass `lang={lang}` from Astro.
+- **Never redirect based on the browser language** — search engines would then fail to crawl the other language versions. The `LanguageSuggest` banner only *suggests* a language; redirects happen only when the user has explicitly chosen one (the `quickslot:lang` stored value). Never show crawlers something different (no User-Agent sniffing).
 
-- **설정**: 헤더 오른쪽 톱니바퀴 → 설정 시트(`SettingsSheet`, iOS 설정 같은 묶음 목록). 화면 모드 · 퀵슬롯 위치/크기 · 언어. 사용자 설정은 여기에만 모은다.
-- **첫 화면 적용**: 테마(`data-theme`), 독 위치·크기(`data-dock`, `data-dock-size`), 언어 이동은 `Layout.astro` 의 `<head>` 인라인 스크립트가 그리기 전에 한다. 이후 변경은 `src/lib/theme.ts`, `src/lib/dock.ts`, `src/i18n` — **저장 키·기본값을 양쪽 같이 고칠 것.**
-- **테마**: 라이트 / 다크 / 자동(기본). 적용은 `<html data-theme="light|dark">` 하나로만 한다. CSS 에 `@media (prefers-color-scheme)` 를 쓰지 말고, 다크 스타일은 `[data-theme="dark"]` 토큰이나 Tailwind `dark:` 변형으로 만든다.
-- **독**: 배치·크기·확대 효과는 `global.css` 의 `.dock*` 규칙이 `html[data-dock]` 을 보고 정한다. 640px 미만에서는 설정과 상관없이 아래에 작게. 독에 가려지면 안 되는 페이지 맨 아래 요소에는 `.dock-safe`.
+## Deployment
 
-- **배경**: `global.css` 의 `body::before` 하나로만 그린다 — 무채색 위→아래 명암(`bg-top` → `bg-bottom`) + 고운 노이즈 질감. 색이 들어간 그라데이션·색 번짐·패턴 배경은 넣지 않는다. 페이지마다 따로 배경을 깔지 않는다.
+- **Deployment method: Docker image → GitHub Container Registry (`ghcr.io`) → self-hosted.** Other hosting (GitHub Pages, Vercel, Netlify, Cloudflare Pages, …) is not used — don't suggest or set it up.
+- **Current status: not built yet.** It will be built when the service is close to complete — don't add a `Dockerfile` or an image-publishing workflow before then. The only automation today is CI (`.github/workflows/ci.yml`: type check and build).
+- Direction for when it's built: a two-stage `Dockerfile` (build with Node → serve only the static output with nginx), taking the site URL as `ARG SITE_URL`. Publish images **only when a version tag (`v*`) is pushed**, not on every merge to `main`.
+- **Never hard-code a domain or URL.** The site URL comes only from the build environment variable `SITE_URL` (`astro.config.mjs` → `Astro.site`). When you need an absolute URL use `Astro.site`, and make it work with relative URLs when it's missing.
+- When you add an environment variable, also document it in `apps/web/.env.example` and in the "Configuration" table of the README (all three languages).
 
-- **색**: 토큰만 사용 — `bg`, `panel`, `panel-2`, `line`, `fg`, `muted`, `accent`, `accent-fg`, `danger`, `ok`. 하드코딩 색 금지 (예외: `registry.ts` 의 카테고리 타일 색, 설정의 화면 모드 미리보기 그림).
-- **표면**: 카드·패널은 `panel`(= `glass` + 둥근 모서리), 검색 창은 `glass-strong`, 메뉴·설정 시트처럼 글을 읽어야 하는 떠 있는 창은 `glass-menu`(더 불투명). 넓은 `textarea.input` 은 자동으로 유리 표면이 된다.
-- **컨트롤**: 버튼 `btn` / `btn-primary` / `btn-tinted`, 입력 `input`, 라벨 `label`, 선택지 2~3개는 `Segmented`, 그 이상은 `Select` 컴포넌트. **브라우저 기본 `<select>` 는 쓰지 않는다** (펼친 목록을 꾸밀 수 없음). 체크박스는 CSS 로 자동으로 스위치 모양이 된다.
-- **높이**: 한 줄짜리 컨트롤(버튼, 입력, Select, Segmented)은 모두 36px(`h-9`)로 맞춘다.
-- **아이콘**: `lucide-react` 선 아이콘만. **이모지를 UI 아이콘으로 쓰지 않는다.** 툴 아이콘은 `AppIcon` (카테고리 색 타일).
-- **모서리**: 카드 22px, 큰 영역 26px, 버튼·뱃지는 완전히 둥글게(pill). `rounded-sm/md/lg` 처럼 각진 모서리는 쓰지 않는다.
-- **주의**: `backdrop-filter` 가 걸린 요소 안의 `position: fixed` 자식은 화면이 아니라 그 요소 기준으로 배치된다. 모달·오버레이는 `createPortal(…, document.body)` 로 띄운다.
-- **레이아웃**: 헤더는 왼쪽 로고 · 오른쪽 검색과 설정 버튼. 퀵슬롯 독(`Dock`)은 모든 페이지에 고정된다. 검색 창을 여는 버튼을 페이지마다 따로 만들지 않는다. 검색 관련 문구는 사전의 `header.search` 하나로 통일한다.
-- **정렬**: 본문 요소는 왼쪽 정렬로 카드 그리드와 같은 선에 맞춘다. 가운데 정렬된 요소를 세로로 여러 개 쌓지 않는다 (아래로 갈수록 넓어지는 피라미드 모양이 됨).
-- **그리드**: 카드 그리드에는 `grid-cols-1` 처럼 열 수를 명시한다 (안 하면 긴 텍스트 때문에 모바일에서 화면 밖으로 넘친다).
-- 변경 후 라이트·다크, 모바일 폭(390px), 그리고 세 언어(특히 문구가 긴 영어·일본어)에서 확인한다.
+## Design rules
 
-## 명령어
+Translucent glass surfaces over a neutral background. The reference is `apps/web/src/styles/global.css`.
+
+- **Settings**: the gear button at the right of the header opens the settings sheet (`SettingsSheet`, an iOS-style inset grouped list): appearance · Quick Slot position/size · language. All user preferences live here.
+- **Applied before first paint**: theme (`data-theme`), dock position and size (`data-dock`, `data-dock-size`) and the language redirect are applied by the inline `<head>` script in `Layout.astro` before anything is drawn. Later changes go through `src/lib/theme.ts`, `src/lib/dock.ts` and `src/i18n` — **keep the storage keys and defaults in sync on both sides.**
+- **Theme**: Light / Dark / Auto (default). Applied only through `<html data-theme="light|dark">`. Don't use `@media (prefers-color-scheme)` in CSS; build dark styles with the `[data-theme="dark"]` tokens or Tailwind's `dark:` variant.
+- **Dock**: placement, size and magnification are decided by the `.dock*` rules in `global.css` based on `html[data-dock]`. Below 640px it is always small and at the bottom, regardless of the setting. Elements at the very bottom of a page that must not be covered by the dock get `.dock-safe`.
+- **Background**: drawn only by `body::before` in `global.css` — a neutral top-to-bottom shade (`bg-top` → `bg-bottom`) plus a fine noise texture. No colorful gradients, color blobs or patterns. Don't add per-page backgrounds.
+- **Color**: tokens only — `bg`, `panel`, `panel-2`, `line`, `fg`, `muted`, `accent`, `accent-fg`, `danger`, `ok`. No hard-coded colors (exceptions: category tile colors in `registry.ts`, and the appearance previews in settings).
+- **Surfaces**: cards and panels use `panel` (= `glass` + rounded corners), the search window uses `glass-strong`, and floating windows meant for reading (menus, the settings sheet) use `glass-menu` (more opaque). A large `textarea.input` automatically becomes a glass surface.
+- **Controls**: buttons `btn` / `btn-primary` / `btn-tinted`, inputs `input`, labels `label`; use `Segmented` for 2–3 options and the `Select` component for more. **Never use the native `<select>`** (its open list can't be styled). Checkboxes are automatically styled as switches by CSS.
+- **Height**: single-line controls (buttons, inputs, `Select`, `Segmented`) are all 36px (`h-9`).
+- **Icons**: `lucide-react` line icons only. **Never use emoji as UI icons.** Tool icons use `AppIcon` (a category-colored tile).
+- **Corners**: cards 22px, large areas 26px, buttons and badges fully rounded (pill). Don't use sharp corners like `rounded-sm/md/lg`.
+- **Gotcha**: a `position: fixed` child inside an element with `backdrop-filter` is positioned relative to that element, not the viewport. Render modals and overlays with `createPortal(…, document.body)`.
+- **Layout**: the header has the logo on the left and search plus settings on the right. The Quick Slot dock (`Dock`) is fixed on every page. Don't add extra buttons that open search on individual pages. All search-related wording comes from the single dictionary key `header.search`.
+- **Alignment**: align body content to the left edge of the card grid. Don't stack several centered elements vertically (it turns into a pyramid that widens downward).
+- **Grids**: always specify the column count on card grids, e.g. `grid-cols-1` (otherwise long text overflows the screen on mobile).
+- After a change, check light and dark mode, mobile width (390px), and all three languages (especially the longer English and Japanese strings).
+
+## Commands
 
 ```bash
 npm install
-npm run check    # 타입 검사 — 변경 후 반드시 실행
-npm run build    # 빌드 — 변경 후 반드시 실행
-npm run dev      # 개발 서버 (http://localhost:4321)
+npm run check    # type check — always run after a change
+npm run build    # build — always run after a change
+npm run dev      # dev server (http://localhost:4321)
 ```
 
-에이전트가 개발 서버를 띄울 때는 백그라운드로: `apps/web` 에서 `npx astro dev --background`, 중지는 `npx astro dev stop`.
+When an agent starts the dev server, run it in the background: `npx astro dev --background` in `apps/web`, and stop it with `npx astro dev stop`.
 
-## Git 워크플로 (GitHub Flow)
+## Git workflow (GitHub Flow)
 
-- `main` 은 항상 배포 가능한 상태. **`main` 에 직접 커밋·push 하지 않는다.** 모든 변경은 브랜치 → PR → squash merge.
-- 작업 시작 전 최신 `main` 에서 브랜치를 만든다. 브랜치 하나에 작업 하나(툴 하나)만.
-- 머지된 브랜치는 삭제한다.
+- `main` is always deployable. **Never commit or push directly to `main`.** Every change goes branch → PR → squash merge.
+- Branch from the latest `main` before starting. One task (one tool) per branch.
+- Delete branches after they are merged.
+- Merge pull requests one at a time, and branch new work from the updated `main`. Stacking PRs on top of each other causes conflicts after a squash merge.
 
-### 브랜치 이름: `종류/짧은-설명`
+### Branch names: `type/short-description`
 
-| 접두사 | 용도 | 예시 |
+| Prefix | Use | Example |
 |---|---|---|
-| `feat/` | 새 툴, 새 기능 | `feat/qr-code` |
-| `fix/` | 버그 수정 | `fix/heic-orientation` |
-| `refactor/` | 동작 변화 없는 구조 개선 | `refactor/dropzone` |
-| `docs/` | 문서 | `docs/contributing` |
-| `chore/` | 설정, 의존성, CI | `chore/ci-build` |
+| `feat/` | New tool or feature | `feat/qr-code` |
+| `fix/` | Bug fix | `fix/heic-orientation` |
+| `refactor/` | Restructuring without behavior change | `refactor/dropzone` |
+| `docs/` | Documentation | `docs/contributing` |
+| `chore/` | Config, dependencies, CI | `chore/ci-build` |
 
-- 소문자와 하이픈(-)만 사용.
-- 툴 작업 브랜치는 `registry.ts` 의 slug 와 맞춘다 (`feat/qr-code` ↔ slug `qr-code`).
+- Lowercase letters and hyphens (-) only.
+- Tool branches match the slug in `registry.ts` (`feat/qr-code` ↔ slug `qr-code`).
 
-### 커밋 메시지: Conventional Commits
+### Commit messages: Conventional Commits
 
 ```
-<종류>(<범위>): <요약>
+<type>(<scope>): <summary>
 
-<본문 — 무엇을, 왜 (선택)>
+<body — what and why (optional)>
 ```
 
-- 종류: `feat`, `fix`, `refactor`, `docs`, `chore`, `test`, `style`, `perf`
-- 범위(선택): 툴 slug 또는 영역 — 예: `feat(qr-code): QR 코드 생성기 추가`, `fix(json-formatter): 오류 위치 계산 수정`
-- 요약은 한국어, 50자 이내, 마침표 없음.
+- Types: `feat`, `fix`, `refactor`, `docs`, `chore`, `test`, `style`, `perf`
+- Scope (optional): a tool slug or area — e.g. `feat(qr-code): add QR code generator`, `fix(json-formatter): fix error position calculation`
+- Summary in English, imperative mood, 50 characters or less, no trailing period.
 
-### PR
+### Pull requests
 
-- 제목은 커밋 메시지 형식과 같게 (squash merge 시 그대로 커밋 제목이 됨).
-- 본문에 무엇을 바꿨는지, 어떻게 확인했는지(실행한 명령, 테스트한 화면)를 적는다.
-- CI(`check`, `build`)가 통과해야 머지할 수 있다.
+- The title follows the commit message format (it becomes the commit title on squash merge).
+- The description covers what changed and how it was verified (commands run, screens tested).
+- CI (`check`, `build`) must pass before merging.

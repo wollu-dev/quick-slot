@@ -49,7 +49,7 @@ function UnixTimestamp() {
     const v = ts.trim();
     if (!/^-?\d+(\.\d+)?$/.test(v)) return null;
     const n = Number(v);
-    // 자릿수로 단위 추정: 12자리 이상 = 밀리초, 16자리 이상 = 마이크로초
+    // Guess the unit from the digit count: 12+ digits = milliseconds, 16+ digits = microseconds
     const digits = v.replace(/^-/, '').split('.')[0].length;
     const unit = digits >= 16 ? 'us' : digits >= 12 ? 'ms' : 's';
     const ms = unit === 's' ? n * 1000 : unit === 'ms' ? n : n / 1000;

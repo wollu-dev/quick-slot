@@ -99,7 +99,7 @@ function FileDateChanger() {
   const script = !items.length || noTarget ? '' : shell === 'powershell' ? powershellScript(items, targets, f.script) : bashScript(items, targets, f.script);
 
   const downloadScript = () => {
-    // Windows PowerShell 5.1 은 BOM 이 없으면 한글·일본어 파일명을 깨뜨림 → UTF-8 BOM 으로 저장
+    // Windows PowerShell 5.1 garbles Korean/Japanese file names without a BOM → save as UTF-8 with BOM
     const blob =
       shell === 'powershell'
         ? new Blob(['﻿' + script.replace(/\n/g, '\r\n')], { type: 'text/plain;charset=utf-8' })

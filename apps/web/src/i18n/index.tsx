@@ -1,11 +1,11 @@
 /**
- * 다국어(한국어·English·日本語).
+ * Internationalization (Korean · English · Japanese).
  *
- * - 주소: 한국어는 `/…`, 영어는 `/en/…`, 일본어는 `/ja/…` (언어마다 정적 페이지 생성)
- * - .astro 에서는 `getDict(lang)`, React 섬(island)에서는 `useT()` 로 사전을 쓴다.
- *   섬의 최상위 컴포넌트는 `withI18n` 으로 감싸고 Astro 에서 `lang` 을 넘겨준다.
- * - 사용자가 설정에서 고른 언어는 localStorage 에 저장되고, Layout 의 <head> 스크립트가
- *   다른 언어 주소로 들어왔을 때 고른 언어 주소로 옮겨준다.
+ * - URLs: Korean is `/…`, English `/en/…`, Japanese `/ja/…` (static pages are generated per language)
+ * - Use the dictionary via `getDict(lang)` in .astro files and `useT()` in React islands.
+ *   Wrap an island's top-level component in `withI18n` and pass `lang` from Astro.
+ * - The language the user picks in settings is saved to localStorage, and the <head> script in Layout
+ *   redirects to the chosen language's URL when a page is opened in another language.
  */
 import { createContext, useContext, type ComponentType } from 'react';
 import ko, { type Dict } from './ko';
@@ -18,9 +18,9 @@ export const LOCALES = ['ko', 'en', 'ja'] as const;
 export type Lang = (typeof LOCALES)[number];
 export const DEFAULT_LANG: Lang = 'ko';
 
-/** 언어 선택 메뉴에 보일 이름 (항상 그 언어 자신의 표기) */
+/** Names shown in the language picker (always written in that language itself) */
 export const LANG_NAMES: Record<Lang, string> = { ko: '한국어', en: 'English', ja: '日本語' };
-/** 날짜·숫자 표시용 BCP 47 태그 */
+/** BCP 47 tags for formatting dates and numbers */
 export const LANG_TAGS: Record<Lang, string> = { ko: 'ko-KR', en: 'en-US', ja: 'ja-JP' };
 export const LANG_KEY = 'quickslot:lang';
 
@@ -29,26 +29,26 @@ const DICTS: Record<Lang, Dict> = { ko, en, ja };
 export const isLang = (v: unknown): v is Lang => typeof v === 'string' && (LOCALES as readonly string[]).includes(v);
 export const getDict = (lang: Lang): Dict => DICTS[lang];
 
-/** '/tools/x' → 언어에 맞는 주소 ('/en/tools/x'). 홈은 '/en/' */
+/** '/tools/x' → the URL for the language ('/en/tools/x'). Home is '/en/' */
 export function localizePath(lang: Lang, path: string): string {
   const p = path.startsWith('/') ? path : `/${path}`;
   return lang === DEFAULT_LANG ? p : `/${lang}${p}`;
 }
 
 /**
- * 브라우저 언어 설정(navigator.languages)에서 지원하는 첫 언어. 없으면 null.
- * 예: ['en-GB', 'ko'] → 'en', ['fr', 'de'] → null
+ * The first supported language in the browser preferences (navigator.languages), or null if none.
+ * e.g. ['en-GB', 'ko'] → 'en', ['fr', 'de'] → null
  */
 export function detectBrowserLang(languages: readonly string[]): Lang | null {
   for (const l of languages) {
-    // 'en-US' → 'en'. 일부 환경은 'en;q=0.8' 처럼 우선순위 표기가 붙어 오므로 함께 떼어 낸다
+    // 'en-US' → 'en'. Some environments append a quality value like 'en;q=0.8', so strip that too
     const base = l.toLowerCase().split(';')[0].split('-')[0].trim();
     if (isLang(base)) return base;
   }
   return null;
 }
 
-/** 사용자가 직접 고른 언어 (설정 또는 제안 배너). 없으면 null */
+/** Language the user picked explicitly (settings or the suggestion banner), or null */
 export function readSavedLang(): Lang | null {
   try {
     const v = localStorage.getItem(LANG_KEY);
@@ -62,11 +62,11 @@ export function saveLang(lang: Lang) {
   try {
     localStorage.setItem(LANG_KEY, lang);
   } catch {
-    /* 저장소 사용 불가: 이번 페이지에서만 */
+    /* Storage unavailable: applies to this page only */
   }
 }
 
-/** 지금 페이지와 같은 페이지의 다른 언어 주소로 이동 */
+/** Navigate to this same page in another language */
 export function goToLang(lang: Lang) {
   const { path } = splitLocale(location.pathname);
   location.href = localizePath(lang, path) + location.search + location.hash;
@@ -86,7 +86,7 @@ const LangContext = createContext<Lang>(DEFAULT_LANG);
 export const useLang = () => useContext(LangContext);
 export const useT = () => getDict(useLang());
 
-/** Astro 섬의 최상위 컴포넌트를 감싸서 lang 을 컨텍스트로 내려준다 */
+/** Wraps an Astro island's top-level component and provides lang via context */
 export function withI18n<P extends object>(Component: ComponentType<P>) {
   function WithI18n(props: P & { lang: Lang }) {
     return (

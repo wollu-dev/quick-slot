@@ -10,10 +10,10 @@ type Mode = 'extension' | 'rename';
 type CaseMode = 'none' | 'lower' | 'upper';
 
 interface Options {
-  // 확장자 모드
+  // Extension mode
   newExt: string;
   onlyExts: string;
-  // 이름 모드
+  // Name mode
   find: string;
   replace: string;
   useRegex: boolean;

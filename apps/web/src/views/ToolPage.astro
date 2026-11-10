@@ -1,8 +1,8 @@
 ---
 /**
- * 툴 페이지. 언어별 페이지(src/pages/tools/[slug].astro, src/pages/[lang]/tools/[slug].astro)가 이 템플릿을 쓴다.
- * status: 'ready' 인 툴은 아래 "툴 화면 연결"에 컴포넌트를 한 줄 추가한다.
- * 현재 시각·랜덤 값·브라우저 정보를 첫 화면에 쓰는 툴은 client:only="react" (서버 렌더 결과와 달라지는 문제 방지).
+ * Tool page. The per-language pages (src/pages/tools/[slug].astro, src/pages/[lang]/tools/[slug].astro) use this template.
+ * For a tool with status: 'ready', add one line for its component under "Tool component wiring" below.
+ * Tools that render the current time, random values or browser info on first paint use client:only="react" (avoids mismatches with the server-rendered output).
  */
 import { ChevronLeft, Cloud, Hammer, Lock } from 'lucide-react';
 import Layout from '../layouts/Layout.astro';
@@ -27,13 +27,13 @@ interface Props {
 
 const { lang, slug } = Astro.props;
 const tool = getTool(slug);
-if (!tool) throw new Error(`registry.ts 에 없는 툴: ${slug}`);
+if (!tool) throw new Error(`Unknown tool (not in registry.ts): ${slug}`);
 const t = getDict(lang);
 const tt = toolText(lang, tool.slug);
 ---
 
 <Layout lang={lang} path={`/tools/${slug}`} title={tt.name} description={tt.description} currentSlug={slug}>
-  <!-- 홈에서 마지막으로 고른 필터로 돌아간다 (아래 스크립트가 href 를 채움) -->
+  <!-- Returns to the filter last selected on the home page (the script below fills in href) -->
   <a href={localizePath(lang, '/')} data-back-link class="mb-6 inline-flex items-center gap-0.5 text-[15px] text-accent hover:opacity-80">
     <ChevronLeft size={19} strokeWidth={2.4} />
     {t.toolPage.back}
@@ -63,7 +63,7 @@ const tt = toolText(lang, tool.slug);
     </div>
   </div>
 
-  {/* ───── 툴 화면 연결 ───── */}
+  {/* ───── Tool component wiring ───── */}
   {slug === 'extension-changer' && <BatchRename client:load lang={lang} mode="extension" />}
   {slug === 'batch-rename' && <BatchRename client:load lang={lang} mode="rename" />}
   {slug === 'file-date-changer' && <FileDateChanger client:only="react" lang={lang} />}
@@ -97,7 +97,7 @@ const tt = toolText(lang, tool.slug);
     const filter = readHomeFilter();
     link.href = localizePath(lang, '/') + (filter === 'all' ? '' : `#${filter}`);
 
-    // 홈에서 바로 들어온 경우에는 브라우저 뒤로가기로 돌아가서 스크롤 위치까지 그대로 복원
+    // If we came straight from the home page, go back via browser history so the scroll position is restored too
     link.addEventListener('click', (e) => {
       try {
         const ref = new URL(document.referrer);
@@ -106,7 +106,7 @@ const tt = toolText(lang, tool.slug);
           history.back();
         }
       } catch {
-        /* referrer 없음 → 기본 링크 이동 */
+        /* No referrer → fall back to normal link navigation */
       }
     });
   }

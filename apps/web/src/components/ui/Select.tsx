@@ -7,7 +7,7 @@ interface Props<T extends string> {
   onChange: (v: T) => void;
   options: readonly (readonly [T, string])[];
   id?: string;
-  /** 보이는 라벨이 없을 때 스크린리더용 이름 */
+  /** Accessible name for screen readers when there is no visible label */
   label?: string;
   className?: string;
 }
@@ -15,8 +15,8 @@ interface Props<T extends string> {
 const GAP = 6;
 
 /**
- * 드롭다운. 브라우저 기본 <select> 목록은 스타일을 바꿀 수 없어서 직접 만든다.
- * 메뉴는 body 로 portal 해서 패널의 backdrop-filter·overflow 에 갇히지 않게 한다.
+ * Dropdown. Built by hand because the browser's native <select> list can't be styled.
+ * The menu is portaled to body so it isn't trapped by a panel's backdrop-filter or overflow.
  */
 export default function Select<T extends string>({ value, onChange, options, id, label, className = '' }: Props<T>) {
   const [open, setOpen] = useState(false);
@@ -44,7 +44,7 @@ export default function Select<T extends string>({ value, onChange, options, id,
     setOpen(true);
   };
 
-  // 열릴 때 트리거 기준으로 위치 계산. 아래 공간이 모자라면 위로 띄운다.
+  // On open, position relative to the trigger. Flip above it if there isn't enough room below.
   useLayoutEffect(() => {
     if (!open || !triggerRef.current || !menuRef.current) return;
     const r = triggerRef.current.getBoundingClientRect();
@@ -60,7 +60,7 @@ export default function Select<T extends string>({ value, onChange, options, id,
     menuRef.current.focus({ preventScroll: true });
   }, [open]);
 
-  // 바깥 클릭·스크롤·창 크기 변경 시 닫기
+  // Close on outside click, scroll or window resize
   useEffect(() => {
     if (!open) return;
     const onDown = (e: MouseEvent) => {

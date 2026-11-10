@@ -8,9 +8,9 @@ import Segmented from './ui/Segmented';
 import Select from './ui/Select';
 
 /**
- * 헤더 오른쪽의 설정(톱니바퀴) 버튼과 설정 시트.
- * iOS 설정처럼 묶음 목록(inset grouped) 형태: 화면 모드 · 퀵슬롯 위치/크기 · 언어.
- * 데스크톱은 가운데 시트, 모바일은 아래에서 올라오는 시트.
+ * Settings (gear) button on the right of the header, and the settings sheet.
+ * Inset grouped list like iOS Settings: appearance · Quick Slot position/size · language.
+ * Centered sheet on desktop, bottom sheet that slides up on mobile.
  */
 function SettingsSheet() {
   const t = useT();
@@ -49,7 +49,7 @@ function Sheet({ onClose }: { onClose: () => void }) {
   const [dock, setDock] = useDockSettings();
   const sheetRef = useRef<HTMLDivElement>(null);
 
-  // 열려 있는 동안: Esc 로 닫기, 뒤 페이지 스크롤 막기, 시트로 포커스 이동
+  // While open: close on Esc, lock background page scroll, move focus into the sheet
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
     window.addEventListener('keydown', onKey);
@@ -80,7 +80,7 @@ function Sheet({ onClose }: { onClose: () => void }) {
         tabIndex={-1}
         className="glass-menu sheet-in max-h-[88vh] w-full overflow-y-auto rounded-t-[28px] pb-[max(16px,env(safe-area-inset-bottom))] shadow-[0_30px_80px_-20px_rgb(0_0_0/0.45)] outline-none sm:max-w-[460px] sm:rounded-[28px] sm:pb-4"
       >
-        {/* 모바일 시트 손잡이 */}
+        {/* Mobile sheet grabber */}
         <div className="mx-auto mt-2 h-1 w-9 rounded-full bg-muted/30 sm:hidden" aria-hidden />
 
         <header className="grid grid-cols-[1fr_auto_1fr] items-center px-4 pt-3 pb-2 sm:pt-4">
@@ -146,7 +146,7 @@ function Sheet({ onClose }: { onClose: () => void }) {
   );
 }
 
-/** iOS 설정의 묶음(inset grouped) 한 덩어리 */
+/** One inset grouped section, as in iOS Settings */
 function Group({ title, footer, children }: { title: string; footer?: string; children: ReactNode }) {
   return (
     <section>
@@ -167,8 +167,8 @@ function Row({ label, children }: { label: string; children: ReactNode }) {
 }
 
 /**
- * macOS 의 화면 모드 고르기처럼 미리보기 그림 + 이름.
- * 미리보기는 테마의 모습 자체를 그리는 것이라 토큰 대신 라이트·다크의 실제 색을 쓴다.
+ * Preview thumbnail + label, like the appearance picker in macOS.
+ * The preview depicts the theme itself, so it uses the actual light/dark colors instead of tokens.
  */
 function AppearanceTile({ value, label, selected, onSelect }: { value: ThemePref; label: string; selected: boolean; onSelect: () => void }) {
   const light = { bg: '#ececf0', bar: '#ffffff', card: '#ffffff', line: '#d6d6dc' };

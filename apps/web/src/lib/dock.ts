@@ -1,7 +1,7 @@
 /**
- * 퀵슬롯 독의 위치·크기 설정.
- * 실제 적용은 <html data-dock="left|bottom|right" data-dock-size="s|m|l"> → global.css 의 .dock 규칙.
- * 첫 화면 적용은 Layout.astro 의 <head> 인라인 스크립트가 한다 (같은 키·기본값 사용).
+ * Quick Slot dock position/size settings.
+ * Applied via <html data-dock="left|bottom|right" data-dock-size="s|m|l"> → the .dock rules in global.css.
+ * The initial render is handled by the inline <head> script in Layout.astro (same keys and defaults).
  */
 import { useEffect, useState } from 'react';
 
@@ -43,7 +43,7 @@ export function useDockSettings() {
     try {
       localStorage.setItem(DOCK_KEY, JSON.stringify(next));
     } catch {
-      /* 저장소 사용 불가: 이번 페이지에서만 반영 */
+      /* Storage unavailable: applies to this page only */
     }
   };
 

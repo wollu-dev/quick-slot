@@ -3,7 +3,7 @@ import { Star } from 'lucide-react';
 import { useT, withI18n } from '../i18n';
 import { useSlots, toggleSlot } from '../lib/slots';
 
-/** 툴 페이지의 "퀵슬롯에 추가" 버튼 */
+/** "Add to Quick Slots" button on tool pages */
 function SlotButton({ slug }: { slug: string }) {
   const t = useT();
   const slots = useSlots();

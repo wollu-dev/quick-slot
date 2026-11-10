@@ -5,7 +5,7 @@ interface Props<T extends string> {
   label?: string;
 }
 
-/** 세그먼트 컨트롤 (여러 개 중 하나 고르기) */
+/** Segmented control (pick one of several options) */
 export default function Segmented<T extends string>({ value, onChange, options, label }: Props<T>) {
   return (
     <div className="segmented" role="group" aria-label={label}>

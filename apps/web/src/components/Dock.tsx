@@ -8,7 +8,7 @@ import AppIcon from './ui/AppIcon';
 
 const HINT_DISMISSED_KEY = 'quickslot:dock-hint-dismissed';
 
-/** 말풍선을 닫았는지 (브라우저에 기억). 저장된 값을 읽기 전에는 보이지 않게 해서 깜빡임을 막는다. */
+/** Whether the hint bubble was dismissed (remembered in the browser). Hidden until the stored value is read, to avoid a flash. */
 function useHintVisible() {
   const [state, setState] = useState<'loading' | 'show' | 'hidden'>('loading');
   useEffect(() => {
@@ -16,7 +16,7 @@ function useHintVisible() {
     try {
       dismissed = localStorage.getItem(HINT_DISMISSED_KEY) === '1';
     } catch {
-      /* 저장소 사용 불가 */
+      /* Storage unavailable */
     }
     setState(dismissed ? 'hidden' : 'show');
   }, []);
@@ -25,17 +25,17 @@ function useHintVisible() {
     try {
       localStorage.setItem(HINT_DISMISSED_KEY, '1');
     } catch {
-      /* 저장소 사용 불가: 이번 페이지에서만 닫힘 */
+      /* Storage unavailable: stays dismissed for this page only */
     }
   };
   return [state === 'show', dismiss] as const;
 }
 
 /**
- * 독의 호버 효과를 켜도 되는지.
- * 툴로 갔다가 뒤로가기로 돌아오면 브라우저가 마우스가 아직 클릭했던 독 아이콘 위에 있다고 판단해서
- * (실제 마우스는 다른 곳에 있어도) :hover 가 남는다. 그래서 페이지가 보인 뒤 마우스가 실제로 움직였을 때만 호버를 켠다.
- * 같은 이유로 클릭 때문에 독에 남은 포커스도 풀어준다.
+ * Whether the dock hover effect may be enabled.
+ * After opening a tool and coming back with the Back button, the browser assumes the pointer is still over the dock icon that was clicked,
+ * so :hover sticks (even though the real pointer is elsewhere). So hover is only enabled once the pointer actually moves after the page is shown.
+ * For the same reason, focus left on the dock by the click is also cleared.
  */
 function useHoverReady(navRef: React.RefObject<HTMLElement | null>) {
   const [ready, setReady] = useState(false);
@@ -61,9 +61,9 @@ function useHoverReady(navRef: React.RefObject<HTMLElement | null>) {
 }
 
 /**
- * 퀵슬롯 독 (macOS Dock 처럼). 모든 페이지에 표시된다.
- * 위치(왼쪽/아래/오른쪽)·크기·확대 효과는 global.css 의 .dock 규칙이 맡는다.
- * currentSlug 가 슬롯에 있으면 아이콘 옆에 점을 찍어 "지금 열려 있음"을 표시한다.
+ * Quick Slot dock (like the macOS Dock). Shown on every page.
+ * Position (left/bottom/right), size and magnification are handled by the .dock rules in global.css.
+ * If currentSlug is in a slot, a dot next to its icon marks it as "currently open".
  */
 function Dock({ currentSlug }: { currentSlug?: string }) {
   const t = useT();
@@ -86,8 +86,8 @@ function Dock({ currentSlug }: { currentSlug?: string }) {
           return (
             <div key={i} className="dock-slot">
               {tool ? (
-                // 아이콘과 ✕ 를 한 덩어리(.dock-lift)로 확대해서 ✕ 가 확대된 아이콘을 따라가고,
-                // ✕ 위에 마우스를 올려도 같은 칸(.dock-slot) 위라서 확대가 풀리지 않는다.
+                // The icon and ✕ are magnified together as one unit (.dock-lift) so the ✕ follows the enlarged icon,
+                // and hovering the ✕ keeps the magnification since it is still inside the same cell (.dock-slot).
                 <div className="dock-lift">
                   <a
                     href={toolUrl(tool.slug, lang)}
@@ -124,7 +124,7 @@ function Dock({ currentSlug }: { currentSlug?: string }) {
   );
 }
 
-/** 슬롯이 모두 비어 있을 때 독 옆에 뜨는 말풍선 */
+/** Hint bubble shown next to the dock when all slots are empty */
 function EmptyHint({ onClose }: { onClose: () => void }) {
   const t = useT();
   return (

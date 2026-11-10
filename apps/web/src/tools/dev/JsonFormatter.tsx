@@ -16,9 +16,9 @@ function sortKeys(v: unknown): unknown {
 }
 
 /**
- * 오류 위치를 직접 찾는 최소 JSON 검사기.
- * 브라우저마다 JSON.parse 오류 메시지 형식이 달라서(Chrome 은 위치를 안 알려줌) 직접 계산한다.
- * 원인은 코드(HintCode)로 돌려주고 화면에서 언어별 문구로 바꾼다.
+ * Minimal JSON validator that locates errors itself.
+ * JSON.parse error messages differ between browsers (Chrome doesn't report the position), so we compute it ourselves.
+ * The cause is returned as a code (HintCode) and the UI turns it into localized text.
  */
 function findErrorAt(src: string): { pos: number; hint?: HintCode } {
   let i = 0;

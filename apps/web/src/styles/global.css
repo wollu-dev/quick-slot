@@ -1,12 +1,12 @@
 @import "tailwindcss";
 
 /*
- * QuickSlot 디자인 시스템 — 무채색 배경(위→아래 명암 + 고운 질감) 위의 반투명 유리 표면
- * 색은 아래 토큰만 사용한다: bg, panel, panel-2, line, fg, muted, accent, accent-fg, danger, ok
+ * QuickSlot design system — translucent glass surfaces over a neutral background (top-to-bottom shading + fine grain)
+ * Use only these color tokens: bg, panel, panel-2, line, fg, muted, accent, accent-fg, danger, ok
  *
- * 테마: <html data-theme="light|dark"> 로 결정된다. Layout.astro 의 <head> 인라인 스크립트가
- * 사용자 선택(라이트/다크/시스템)을 읽어 화면을 그리기 전에 설정한다. 다크 스타일은
- * Tailwind 의 dark: 변형 또는 아래 [data-theme="dark"] 토큰으로만 만든다.
+ * Theme: determined by <html data-theme="light|dark">. The inline <head> script in Layout.astro
+ * reads the user's choice (light/dark/system) and sets it before first paint. Dark styles are
+ * built only with Tailwind's dark: variant or the [data-theme="dark"] tokens below.
  */
 
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
@@ -15,7 +15,7 @@
   color-scheme: light;
 
   --bg: #f3f3f6;
-  /* 배경 명암: 위가 살짝 밝고 아래로 갈수록 어두워짐 */
+  /* Background shading: slightly lighter at the top, darker toward the bottom */
   --bg-top: #fafafc;
   --bg-bottom: #ececf0;
   --noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .035 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
@@ -58,7 +58,7 @@
 }
 
 @theme inline {
-  /* 한국어는 Pretendard, 일본어는 Pretendard 에 없는 글자를 Hiragino(맥) · Yu Gothic UI(윈도우) 등으로 */
+  /* Korean uses Pretendard; for Japanese, glyphs missing from Pretendard fall back to Hiragino (Mac), Yu Gothic UI (Windows), etc. */
   --font-sans: -apple-system, BlinkMacSystemFont, "Pretendard Variable", Pretendard, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", Meiryo, "Segoe UI Variable", "Segoe UI", system-ui, sans-serif;
   --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Consolas, monospace;
 
@@ -85,12 +85,12 @@ body {
   color: var(--fg);
   font-family: var(--font-sans);
   letter-spacing: -0.01em;
-  /* 한글은 어절 단위로 줄바꿈 */
+  /* Break Korean text at word boundaries */
   word-break: keep-all;
   overflow-wrap: break-word;
 }
 
-/* 화면에 고정된 배경: 명암 그라데이션 + 고운 노이즈 질감 (iOS 에서 안 되는 background-attachment: fixed 대신) */
+/* Fixed background: shading gradient + fine noise grain (instead of background-attachment: fixed, which doesn't work on iOS) */
 body::before {
   content: "";
   position: fixed;
@@ -109,7 +109,7 @@ body::before {
   scrollbar-color: color-mix(in srgb, var(--muted) 45%, transparent) transparent;
 }
 
-/* 반투명 유리 표면 */
+/* Translucent glass surface */
 @utility glass {
   background: var(--panel);
   border: 1px solid var(--glass-border);
@@ -118,7 +118,7 @@ body::before {
   backdrop-filter: blur(28px) saturate(180%);
 }
 
-/* 위에 떠 있는 창(검색 등)용 — 뒤 내용이 비치지 않도록 더 불투명하게 */
+/* For floating windows (search, etc.) — more opaque so content behind does not show through */
 @utility glass-strong {
   background: color-mix(in srgb, var(--bg) 78%, transparent);
   border: 1px solid var(--glass-border);
@@ -127,7 +127,7 @@ body::before {
   backdrop-filter: blur(48px) saturate(200%);
 }
 
-/* 드롭다운 메뉴 — 뒤 글자가 비치지 않을 만큼 불투명 */
+/* Dropdown menus — opaque enough that text behind does not show through */
 @utility glass-menu {
   background: color-mix(in srgb, var(--bg) 92%, transparent);
   border: 1px solid var(--glass-border);
@@ -141,7 +141,7 @@ body::before {
     @apply glass rounded-[22px];
   }
 
-  /* 버튼: 기본은 회색 채움, primary 는 강조색 */
+  /* Buttons: gray fill by default, accent color for primary */
   .btn {
     @apply inline-flex h-9 items-center justify-center gap-1.5 rounded-full bg-panel-2 px-4 text-[14px] font-medium whitespace-nowrap text-fg transition duration-200 select-none hover:bg-[color-mix(in_srgb,var(--panel-2)_100%,var(--fg)_6%)] active:scale-[0.97] disabled:pointer-events-none disabled:opacity-40;
   }
@@ -152,12 +152,12 @@ body::before {
     @apply bg-accent/12 text-accent hover:bg-accent/18;
   }
 
-  /* 한 줄 입력·드롭다운은 버튼과 같은 높이(36px) */
+  /* Single-line inputs and dropdowns match the button height (36px) */
   .input {
     @apply h-9 w-full rounded-[10px] border border-transparent bg-panel-2 px-3 text-[14px] text-fg transition outline-none placeholder:text-muted/80 focus:border-accent/60 focus:ring-4 focus:ring-accent/15;
   }
 
-  /* 넓은 입력 영역은 회색 채움 대신 유리 표면 */
+  /* Large input areas use a glass surface instead of a gray fill */
   textarea.input {
     @apply glass h-auto rounded-[22px] p-4 text-[15px] leading-relaxed focus:bg-[var(--panel)];
   }
@@ -170,7 +170,7 @@ body::before {
     @apply inline-flex items-center rounded-md bg-panel-2 px-1.5 py-0.5 font-sans text-[11px] font-medium text-muted;
   }
 
-  /* 세그먼트 컨트롤 */
+  /* Segmented control */
   .segmented {
     @apply inline-flex h-9 rounded-[10px] bg-panel-2 p-[3px];
   }
@@ -182,7 +182,7 @@ body::before {
     @apply bg-[var(--raised)] text-fg shadow-[0_1px_3px_rgb(0_0_0/0.12),0_1px_1px_rgb(0_0_0/0.04)];
   }
 
-  /* 필터 칩: 선택되면 글자색·배경색이 뒤집힘 */
+  /* Filter chips: text and background colors invert when selected */
   .chip {
     @apply inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full bg-panel-2 px-3.5 text-[14px] font-medium whitespace-nowrap text-fg transition duration-200 select-none hover:bg-[color-mix(in_srgb,var(--panel-2)_100%,var(--fg)_6%)] active:scale-[0.97];
   }
@@ -193,14 +193,14 @@ body::before {
     @apply text-[12px] font-medium tabular-nums opacity-50;
   }
 
-  /* 앱 아이콘 타일 */
+  /* App icon tile */
   .app-icon {
     @apply grid shrink-0 place-items-center text-white shadow-[inset_0_1px_0_rgb(255_255_255/0.35),0_2px_6px_-2px_rgb(0_0_0/0.25)];
     background: linear-gradient(180deg, color-mix(in srgb, var(--tile) 78%, white), var(--tile));
   }
 }
 
-/* 체크박스 → 스위치 */
+/* Checkbox → switch */
 input[type="checkbox"] {
   appearance: none;
   -webkit-appearance: none;
@@ -245,10 +245,10 @@ input[type="checkbox"]:focus-visible {
   display: none;
 }
 
-/* ───────────── 퀵슬롯 독 ─────────────
- * 위치·크기는 <html data-dock="left|bottom|right" data-dock-size="s|m|l"> 로 정한다 (src/lib/dock.ts).
- * 화면이 좁으면(640px 미만) 설정과 상관없이 항상 아래에 작게 둔다.
- * 위치 정렬은 translate 속성, 움직이는 효과는 transform 으로 나눠서 서로 덮어쓰지 않게 한다.
+/* ───────────── Quick Slot dock ─────────────
+ * Position and size are set by <html data-dock="left|bottom|right" data-dock-size="s|m|l"> (src/lib/dock.ts).
+ * On narrow screens (under 640px) it is always small and at the bottom, regardless of settings.
+ * Positioning uses the translate property and motion effects use transform, so they don't override each other.
  */
 :root {
   --dock-icon: 34px;
@@ -304,7 +304,7 @@ input[type="checkbox"]:focus-visible {
   opacity: 0;
   transition: opacity 0.2s;
 }
-/* 확대: 마우스 호버(돌아온 뒤 마우스가 실제로 움직인 다음부터 — data-hover-ready) 또는 키보드 포커스 */
+/* Magnify on mouse hover (only after the pointer actually moves following a back-navigation — data-hover-ready) or keyboard focus */
 .dock[data-hover-ready] .dock-slot:hover .dock-lift,
 .dock-slot:has(:focus-visible) .dock-lift {
   transform: translateY(-4px) scale(1.15);
@@ -313,7 +313,7 @@ input[type="checkbox"]:focus-visible {
 .dock-slot:has(:focus-visible) .dock-remove {
   opacity: 1;
 }
-/* 지금 열려 있는 툴 표시 점 — 독 안쪽 여백 위에 겹쳐 그림 */
+/* Dot marking the currently open tool — drawn over the dock's inner padding */
 .dock-dot {
   position: absolute;
   left: 50%;
@@ -325,7 +325,7 @@ input[type="checkbox"]:focus-visible {
   translate: -50% 0;
 }
 
-/* 빈 독 위 말풍선 */
+/* Hint bubble over an empty dock */
 .dock-hint {
   position: absolute;
   bottom: 100%;
@@ -378,7 +378,7 @@ input[type="checkbox"]:focus-visible {
     flex-direction: column;
   }
 
-  /* 확대 방향: 화면 안쪽으로 */
+  /* Magnify toward the inside of the screen */
   :root[data-dock="left"] .dock-lift {
     transform-origin: left center;
   }
@@ -394,7 +394,7 @@ input[type="checkbox"]:focus-visible {
     transform: translateX(-4px) scale(1.15);
   }
 
-  /* 점은 화면 가장자리 쪽 */
+  /* Dot sits on the screen-edge side */
   :root[data-dock="left"] .dock-dot,
   :root[data-dock="right"] .dock-dot {
     top: 50%;
@@ -409,7 +409,7 @@ input[type="checkbox"]:focus-visible {
     right: calc(var(--dock-pad) * -1 + 1px);
   }
 
-  /* 말풍선은 독 옆에, 꼬리는 독 쪽으로 */
+  /* Bubble beside the dock, with its tail pointing at the dock */
   :root[data-dock="left"] .dock-hint,
   :root[data-dock="right"] .dock-hint {
     top: 50%;
@@ -448,7 +448,7 @@ input[type="checkbox"]:focus-visible {
     border-left-color: transparent !important;
   }
 
-  /* 본문이 옆 독에 가리지 않도록 */
+  /* Keep content from being hidden behind a side dock */
   :root[data-dock="left"] body {
     padding-left: calc(var(--dock-icon) + var(--dock-icon) * 0.34 + 28px);
   }
@@ -457,7 +457,7 @@ input[type="checkbox"]:focus-visible {
   }
 }
 
-/* 페이지 맨 아래가 하단 독에 가리지 않도록 */
+/* Keep the bottom of the page from being hidden behind the bottom dock */
 .dock-safe {
   padding-bottom: calc(var(--dock-icon) * 1.34 + 48px);
 }
@@ -468,7 +468,7 @@ input[type="checkbox"]:focus-visible {
   }
 }
 
-/* 설정 시트가 열릴 때 */
+/* When the settings sheet opens */
 @keyframes sheet-in {
   from {
     opacity: 0;
@@ -491,7 +491,7 @@ input[type="checkbox"]:focus-visible {
   animation: fade-in 0.2s ease-out;
 }
 
-/* 드롭다운 메뉴가 열릴 때 */
+/* When a dropdown menu opens */
 @keyframes menu-pop {
   from {
     opacity: 0;
@@ -506,7 +506,7 @@ input[type="checkbox"]:focus-visible {
   animation: menu-pop 0.16s cubic-bezier(0.2, 0.9, 0.3, 1.1);
 }
 
-/* datetime-local 등 기본 입력의 아이콘 색 맞추기 */
+/* Match icon colors of native inputs such as datetime-local */
 input.input::-webkit-calendar-picker-indicator {
   opacity: 0.55;
   cursor: pointer;

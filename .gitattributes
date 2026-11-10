@@ -1,12 +1,12 @@
-# 줄바꿈을 저장소에서는 LF 로 통일 (Windows/macOS 혼용 시 diff 오염 방지)
+# Normalize line endings to LF in the repo (keeps diffs clean across Windows/macOS)
 * text=auto eol=lf
 
-# Windows 전용 스크립트는 CRLF 유지
+# Windows-only scripts keep CRLF
 *.cmd text eol=crlf
 *.bat text eol=crlf
 *.ps1 text eol=crlf
 
-# 바이너리 (줄바꿈 변환·diff 금지)
+# Binary files (no line-ending conversion, no diff)
 *.png binary
 *.jpg binary
 *.jpeg binary
@@ -22,5 +22,5 @@
 *.mp3 binary
 *.mp4 binary
 
-# GitHub 언어 통계에서 lock 파일 제외
+# Exclude lock files from GitHub language stats
 package-lock.json linguist-generated=true

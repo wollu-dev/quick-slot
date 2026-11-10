@@ -3,17 +3,17 @@ import { Languages, X } from 'lucide-react';
 import { detectBrowserLang, getDict, goToLang, readSavedLang, saveLang, type Lang } from '../i18n';
 
 /**
- * 언어 제안 배너.
+ * Language suggestion banner.
  *
- * 브라우저 언어로 자동 이동시키면 검색엔진 로봇(대부분 영어·언어 정보 없음)이 항상 다른 언어로 넘어가
- * 한국어·일본어 페이지가 수집되지 않는다. 그래서 이동은 하지 않고 "제안"만 한다 (Google 권장 방식).
+ * Auto-redirecting by browser language would always send search engine crawlers (mostly English or no language info) to another language,
+ * so the Korean and Japanese pages would never get indexed. So we never redirect, only "suggest" (the approach Google recommends).
  *
- * 보여주는 조건: 사용자가 언어를 직접 고른 적이 없고(설정·이 배너), 브라우저 언어가 지원 언어이면서
- * 지금 페이지 언어와 다를 때. 문구는 페이지 언어가 아니라 "감지된 언어"로 보여준다 (그래야 읽을 수 있음).
- * - 보기: 그 언어를 저장하고 이동 → 다음부터는 <head> 스크립트가 알아서 그 언어로
- * - 닫기: 지금 언어를 저장 → 다시 묻지 않음
+ * Shown when: the user has never picked a language explicitly (in settings or this banner), and the browser language is supported
+ * but differs from the current page language. The text is shown in the "detected language", not the page language (so the user can read it).
+ * - View: save that language and navigate → from then on the <head> script switches to it automatically
+ * - Close: save the current language → don't ask again
  *
- * client:only 로 띄운다 (브라우저 언어는 서버에서 알 수 없음).
+ * Rendered with client:only (the browser language is unknown on the server).
  */
 export default function LanguageSuggest({ lang }: { lang: Lang }) {
   const [suggested, setSuggested] = useState<Lang | null>(null);
