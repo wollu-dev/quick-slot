@@ -80,7 +80,7 @@ export const tools: Tool[] = [
 
   // Text
   t({ slug: 'char-counter', category: 'text', icon: Type, keywords: ['글자수', '글자 수', '자소서', '바이트', 'count', '단어'], status: 'ready' }),
-  t({ slug: 'text-diff', category: 'text', icon: Diff, keywords: ['비교', 'diff', '차이'], status: 'soon' }),
+  t({ slug: 'text-diff', category: 'text', icon: Diff, keywords: ['비교', 'diff', '차이', '다른 점', '텍스트 비교', 'compare', 'difference', 'patch', '比較', '差分'], status: 'ready' }),
   t({ slug: 'korean-english-typo', category: 'text', icon: Languages, keywords: ['한영', '한영키', '타자', '오타', '한글', '영타', '두벌식', 'korean', 'keyboard', 'typo', 'hangul', 'ハングル'], status: 'ready' }),
 
   // Dev
