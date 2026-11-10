@@ -21,6 +21,7 @@ import JsonFormatter from '../tools/dev/JsonFormatter';
 import UnixTimestamp from '../tools/dev/UnixTimestamp';
 import UuidGenerator from '../tools/dev/UuidGenerator';
 import PasswordGenerator from '../tools/dev/PasswordGenerator';
+import JwtDecoder from '../tools/dev/JwtDecoder';
 
 interface Props {
   lang: Lang;
@@ -76,6 +77,7 @@ const tt = toolText(lang, tool.slug);
   {slug === 'unix-timestamp' && <UnixTimestamp client:only="react" lang={lang} />}
   {slug === 'uuid-generator' && <UuidGenerator client:only="react" lang={lang} />}
   {slug === 'password-generator' && <PasswordGenerator client:only="react" lang={lang} />}
+  {slug === 'jwt-decoder' && <JwtDecoder client:only="react" lang={lang} />}
 
   {
     tool.status === 'soon' && (
