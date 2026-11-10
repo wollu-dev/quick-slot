@@ -4,7 +4,7 @@ const en: Dict = {
   meta: {
     siteTitle: 'QuickSlot · The tools you need, one click away',
     siteDescription: 'Everyday and developer tools that run right in your browser. No install, and your files never leave your device.',
-    h1: 'QuickSlot — everyday and developer tools that run in your browser',
+    h1: 'QuickSlot: everyday and developer tools that run in your browser',
   },
   common: {
     copy: 'Copy',
@@ -89,7 +89,7 @@ const en: Dict = {
     'extension-changer': { name: 'Bulk Extension Changer', description: 'Change the extension of many files at once and download a ZIP' },
     'batch-rename': { name: 'Batch Rename', description: 'Numbering, find & replace, regex, case conversion' },
     'file-date-changer': { name: 'File Date Changer', description: 'Generate a script that sets created and modified dates' },
-    'metadata-remover': { name: 'Metadata Remover', description: 'Strip GPS, camera info and more from photos — no quality loss' },
+    'metadata-remover': { name: 'Metadata Remover', description: 'Strip GPS, camera info and more from photos without losing quality' },
     'file-hash': { name: 'Hash & Checksum', description: 'Compute MD5, SHA-1, SHA-256 and compare files' },
     zip: { name: 'ZIP & Unzip', description: 'Compress and extract right in your browser' },
     'pdf-merge': { name: 'Merge PDF', description: 'Combine several PDFs into one' },
@@ -133,7 +133,7 @@ const en: Dict = {
     ignoreCase: 'Ignore case',
     replace: 'Replace with',
     pattern: 'Name pattern',
-    patternHelp: '`{name}` original name · `{n}` number — e.g. `photo_{n}`',
+    patternHelp: '`{name}` original name · `{n}` number (e.g. `photo_{n}`)',
     start: 'Start at',
     pad: 'Digits',
     caseLabel: 'Case',
@@ -146,10 +146,10 @@ const en: Dict = {
     downloadZip: (n) => `Download ZIP (${n} changed)`,
     keepDates: 'Files in the ZIP keep their original modified dates.',
     summary: (total, changed) => `${total} files · ${changed} changed`,
-    deduped: '(number added — duplicate name)',
+    deduped: '(numbered to avoid a duplicate name)',
   },
   metadata: {
-    dropHint: 'JPEG · PNG · WebP — same quality, just without the metadata',
+    dropHint: 'JPEG · PNG · WebP. Same quality, just without the metadata',
     intro: 'Phone photos record **where they were taken (GPS)**, the device model and the date. Remove it before posting online or selling something.',
     keepOrientation: 'Keep rotation',
     keepOrientationNote: 'If off, portrait photos may show up sideways',
@@ -193,7 +193,7 @@ const en: Dict = {
   },
   fileDate: {
     dropHint: 'Choose the files whose dates you want to change. File contents are never read.',
-    why: '**Why a script?** For security, browsers can’t change dates on files on your computer. So we build a command that does it for you — just copy and paste.',
+    why: '**Why a script?** For security, browsers can’t change dates on files on your computer. So we build a command that does it for you. Just copy and paste.',
     date: 'New date & time',
     step: 'Add time per file (seconds)',
     stepNote: '0 gives every file the same time. 60 spaces them one minute apart, in order.',
@@ -254,7 +254,7 @@ const en: Dict = {
     sortKeys: 'Sort keys',
     shortcut: 'format',
     errorTitle: 'JSON error',
-    errorAt: (line, col) => ` — line ${line}, column ${col}`,
+    errorAt: (line, col) => ` (line ${line}, column ${col})`,
     placeholder: '{"paste": "your JSON here"}',
     hints: {
       trailingComma: 'There’s a trailing comma after the last item',

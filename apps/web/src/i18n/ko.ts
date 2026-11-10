@@ -7,7 +7,7 @@ const ko = {
   meta: {
     siteTitle: 'QuickSlot · 필요한 도구를 바로 꺼내 쓰세요',
     siteDescription: '설치 없이 브라우저에서 바로 쓰는 생활·개발 도구 모음. 파일은 서버로 올라가지 않습니다.',
-    h1: 'QuickSlot — 브라우저에서 바로 쓰는 생활·개발 도구 모음',
+    h1: 'QuickSlot: 브라우저에서 바로 쓰는 생활·개발 도구 모음',
   },
   common: {
     copy: '복사',
@@ -138,7 +138,7 @@ const ko = {
     ignoreCase: '대소문자 무시',
     replace: '바꾸기',
     pattern: '이름 패턴',
-    patternHelp: '`{name}` 원래 이름 · `{n}` 번호 — 예: `photo_{n}`',
+    patternHelp: '`{name}` 원래 이름 · `{n}` 번호 (예: `photo_{n}`)',
     start: '시작 번호',
     pad: '자릿수',
     caseLabel: '대소문자',
@@ -154,7 +154,7 @@ const ko = {
     deduped: '(이름 중복으로 번호 추가)',
   },
   metadata: {
-    dropHint: 'JPEG · PNG · WebP — 화질은 그대로, 정보만 지워요',
+    dropHint: 'JPEG · PNG · WebP 지원. 화질은 그대로, 정보만 지워요',
     intro: '스마트폰 사진에는 찍은 **위치(GPS)**, 기기 모델, 날짜가 들어 있어요. 중고거래나 SNS에 올리기 전에 지우세요.',
     keepOrientation: '회전 정보 유지',
     keepOrientationNote: '끄면 세로 사진이 눕혀져 보일 수 있어요',
@@ -261,7 +261,7 @@ const ko = {
     sortKeys: '키 이름순 정렬',
     shortcut: '정렬',
     errorTitle: 'JSON 오류',
-    errorAt: (line: number, col: number) => ` — ${line}번째 줄, ${col}번째 칸`,
+    errorAt: (line: number, col: number) => ` (${line}번째 줄, ${col}번째 칸)`,
     placeholder: '{"여기에": "JSON을 붙여넣으세요"}',
     hints: {
       trailingComma: '마지막 항목 뒤에 쉼표(,)가 있어요',

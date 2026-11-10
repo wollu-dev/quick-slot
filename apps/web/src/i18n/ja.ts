@@ -4,7 +4,7 @@ const ja: Dict = {
   meta: {
     siteTitle: 'QuickSlot · 必要なツールを、すぐに',
     siteDescription: 'インストール不要、ブラウザですぐ使える日常・開発ツール集。ファイルがサーバーに送られることはありません。',
-    h1: 'QuickSlot — ブラウザですぐ使える日常・開発ツール集',
+    h1: 'QuickSlot：ブラウザですぐ使える日常・開発ツール集',
   },
   common: {
     copy: 'コピー',
@@ -133,7 +133,7 @@ const ja: Dict = {
     ignoreCase: '大文字・小文字を区別しない',
     replace: '置換',
     pattern: '名前のパターン',
-    patternHelp: '`{name}` 元の名前 · `{n}` 番号 — 例: `photo_{n}`',
+    patternHelp: '`{name}` 元の名前 · `{n}` 番号（例: `photo_{n}`）',
     start: '開始番号',
     pad: '桁数',
     caseLabel: '大文字・小文字',
@@ -149,7 +149,7 @@ const ja: Dict = {
     deduped: '（名前の重複のため番号を追加）',
   },
   metadata: {
-    dropHint: 'JPEG · PNG · WebP — 画質はそのまま、情報だけを削除',
+    dropHint: 'JPEG · PNG · WebP 対応。画質はそのまま、情報だけを削除',
     intro: 'スマホの写真には撮影した**場所（GPS）**、機種、日時が記録されています。フリマやSNSに載せる前に削除しましょう。',
     keepOrientation: '回転情報を残す',
     keepOrientationNote: 'オフにすると縦向きの写真が横に表示されることがあります',
@@ -254,7 +254,7 @@ const ja: Dict = {
     sortKeys: 'キーを名前順に並べる',
     shortcut: '整形',
     errorTitle: 'JSONエラー',
-    errorAt: (line, col) => ` — ${line}行目、${col}文字目`,
+    errorAt: (line, col) => `（${line}行目、${col}文字目）`,
     placeholder: '{"ここに": "JSONを貼り付け"}',
     hints: {
       trailingComma: '最後の項目の後ろにカンマ (,) があります',
