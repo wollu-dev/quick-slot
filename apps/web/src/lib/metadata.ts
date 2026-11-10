@@ -1,9 +1,9 @@
 /**
- * 이미지 메타데이터를 재인코딩 없이(화질 손실 0) 바이트 단위로 제거한다.
- * 지원: JPEG, PNG, WebP
+ * Strips image metadata at the byte level without re-encoding (zero quality loss).
+ * Supported: JPEG, PNG, WebP
  *
- * 화면 문구는 여기서 만들지 않는다. 항목 종류·설명·오류를 코드로 돌려주고,
- * 화면(MetadataRemover)이 언어별 사전으로 바꿔서 보여준다.
+ * No UI text is produced here. Item kinds, descriptions and errors are returned as codes,
+ * and the UI (MetadataRemover) maps them through the per-language dictionary.
  */
 
 export type ItemKind = 'exif' | 'xmp' | 'icc' | 'iptc' | 'app' | 'comment' | 'text' | 'time';
@@ -11,11 +11,11 @@ export type ItemDetail = 'exif' | 'exifOrientationKept' | 'xmp' | 'iptc' | 'app'
 
 export interface FoundItem {
   kind: ItemKind;
-  /** kind='app' 일 때 APPn 번호, kind='text' 일 때 PNG 텍스트 키 */
+  /** APPn number when kind='app', PNG text key when kind='text' */
   param?: string | number;
-  /** 언어별 사전으로 바꿀 설명 */
+  /** Description to be mapped through the per-language dictionary */
   detail?: ItemDetail;
-  /** 파일에 실제로 들어 있던 내용 일부 (주석·텍스트) */
+  /** Excerpt of what the file actually contained (comment/text) */
   preview?: string;
   bytes: number;
   removed: boolean;
@@ -49,9 +49,9 @@ export interface StripResult {
 }
 
 export interface StripOptions {
-  /** EXIF 를 지워도 사진이 돌아가지 않도록 회전(Orientation) 정보만 남김 */
+  /** Keep only the rotation (Orientation) info so the photo doesn't turn sideways after EXIF is removed */
   keepOrientation: boolean;
-  /** 색상 프로필(ICC) 유지. 지우면 색이 달라 보일 수 있음 */
+  /** Keep the color profile (ICC). Removing it can make colors look different */
   keepIcc: boolean;
 }
 
@@ -81,16 +81,16 @@ function stripJpeg(b: Uint8Array, opts: StripOptions): StripResult {
   while (pos < b.length) {
     if (b[pos] !== 0xff) throw new MetadataError('corruptJpeg');
     let mpos = pos + 1;
-    while (b[mpos] === 0xff) mpos++; // 채움 바이트
+    while (b[mpos] === 0xff) mpos++; // fill bytes
     const marker = b[mpos];
     const segStart = pos;
 
-    // SOS 이후는 압축된 이미지 데이터 → 그대로 복사
+    // Everything after SOS is compressed image data → copy as is
     if (marker === 0xda) {
       out.push(b.subarray(segStart));
       break;
     }
-    // 길이가 없는 마커
+    // Markers without a length
     if ((marker >= 0xd0 && marker <= 0xd7) || marker === 0x01) {
       out.push(b.subarray(segStart, mpos + 1));
       pos = mpos + 1;
@@ -115,7 +115,7 @@ function stripJpeg(b: Uint8Array, opts: StripOptions): StripResult {
       try {
         exif = parseExif(payload.subarray(6));
       } catch {
-        /* 요약만 실패, 제거는 진행 */
+        /* Only the summary failed; removal continues */
       }
     } else if (marker === 0xe1) {
       kind = 'xmp';
@@ -129,7 +129,7 @@ function stripJpeg(b: Uint8Array, opts: StripOptions): StripResult {
       detail = 'iptc';
       remove = true;
     } else if (marker === 0xee) {
-      // APP14 Adobe: 색 변환 방식 정보라 지우면 색이 깨질 수 있음 → 유지
+      // APP14 Adobe: holds color transform info, removing it can break colors → keep
     } else if (marker >= 0xe3 && marker <= 0xef) {
       kind = 'app';
       param = marker - 0xe0;
@@ -147,7 +147,7 @@ function stripJpeg(b: Uint8Array, opts: StripOptions): StripResult {
   }
 
   if (opts.keepOrientation && exif?.orientation && exif.orientation !== 1) {
-    // SOI 바로 뒤(또는 JFIF 뒤)에 회전 정보만 담은 최소 EXIF 삽입
+    // Insert a minimal EXIF holding only the orientation right after SOI (or after JFIF)
     const insertAt = out.length > 1 && isJfif(out[1]) ? 2 : 1;
     out.splice(insertAt, 0, minimalOrientationApp1(exif.orientation));
     const it = items.find((i) => i.kind === 'exif');
@@ -162,12 +162,12 @@ function isJfif(seg: Uint8Array) {
 }
 
 function minimalOrientationApp1(orientation: number): Uint8Array {
-  // "Exif\0\0" + TIFF(II) 헤더 + IFD0 (엔트리 1개: 0x0112 SHORT) + next IFD 0
+  // "Exif\0\0" + TIFF (II) header + IFD0 (1 entry: 0x0112 SHORT) + next IFD 0
   const tiff = [
-    0x49, 0x49, 0x2a, 0x00, 0x08, 0x00, 0x00, 0x00, // 헤더, IFD0 오프셋 8
-    0x01, 0x00, // 엔트리 1개
+    0x49, 0x49, 0x2a, 0x00, 0x08, 0x00, 0x00, 0x00, // header, IFD0 offset 8
+    0x01, 0x00, // 1 entry
     0x12, 0x01, 0x03, 0x00, 0x01, 0x00, 0x00, 0x00, orientation & 0xff, 0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00, 0x00, // 다음 IFD 없음
+    0x00, 0x00, 0x00, 0x00, // no next IFD
   ];
   const payload = [...'Exif\0\0'].map((c) => c.charCodeAt(0)).concat(tiff);
   const len = payload.length + 2;
@@ -251,7 +251,7 @@ function stripWebp(b: Uint8Array, opts: StripOptions): StripResult {
         const d = b.subarray(pos + 8, pos + 8 + size);
         exif = parseExif(ascii(d, 0, 6) === 'Exif\0\0' ? d.subarray(6) : d);
       } catch {
-        /* 무시 */
+        /* ignore */
       }
       items.push({ kind: 'exif', detail: 'exif', bytes: chunk.length, removed: true });
     } else if (fourcc === 'XMP ') {
@@ -268,7 +268,7 @@ function stripWebp(b: Uint8Array, opts: StripOptions): StripResult {
     pos = end;
   }
 
-  // VP8X 플래그에서 지운 항목 표시를 끔 (ICC 0x20, EXIF 0x08, XMP 0x04)
+  // Clear the VP8X flags for removed chunks (ICC 0x20, EXIF 0x08, XMP 0x04)
   if (vp8xIndex >= 0) {
     const vp8x = kept[vp8xIndex];
     let flags = vp8x[8];
@@ -284,7 +284,7 @@ function stripWebp(b: Uint8Array, opts: StripOptions): StripResult {
   return { format: 'webp', data: concat([header, body]), items, exif };
 }
 
-// ───────────────────────── EXIF 요약 ─────────────────────────
+// ───────────────────────── EXIF summary ─────────────────────────
 
 function parseExif(tiff: Uint8Array): ExifSummary {
   const dv = new DataView(tiff.buffer, tiff.byteOffset, tiff.byteLength);
@@ -336,14 +336,14 @@ function parseExif(tiff: Uint8Array): ExifSummary {
           if (la || lo) summary.gps = { lat: la, lon: lo };
         }
       } catch {
-        /* 좌표 해석 실패 시 '있음'으로만 표시 */
+        /* If the coordinates can't be parsed, just report them as present */
       }
     }
   }
   return summary;
 }
 
-// ───────────────────────── 유틸 ─────────────────────────
+// ───────────────────────── Utils ─────────────────────────
 
 function ascii(b: Uint8Array, off: number, len: number): string {
   let s = '';

@@ -14,11 +14,11 @@ export function downloadBlob(data: Blob, filename: string) {
 export interface ZipEntry {
   name: string;
   data: Uint8Array;
-  /** ZIP 안에 기록할 수정 시각 (압축을 풀면 이 날짜가 적용됨) */
+  /** Modification time recorded in the ZIP (applied when the archive is extracted) */
   mtime?: Date;
 }
 
-/** 같은 이름이 있으면 "name (2).ext" 처럼 번호를 붙인다 */
+/** If the name is already taken, append a number like "name (2).ext" */
 export function dedupeNames(names: string[]): string[] {
   const seen = new Map<string, number>();
   return names.map((name) => {
@@ -32,8 +32,8 @@ export function dedupeNames(names: string[]): string[] {
 }
 
 /**
- * level 0 = 압축 없이 묶기만 (이미 압축된 이미지·영상은 이게 빠르고 크기도 비슷)
- * ZIP 형식은 1980년 이전 날짜를 표현할 수 없어서 그 경우 1980-01-01로 맞춘다.
+ * level 0 = store only, no compression (faster for already-compressed images/video, with about the same size)
+ * The ZIP format cannot represent dates before 1980, so those are clamped to 1980-01-01.
  */
 export function makeZip(entries: ZipEntry[], level: 0 | 6 = 0): Blob {
   const names = dedupeNames(entries.map((e) => e.name));

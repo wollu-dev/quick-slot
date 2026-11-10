@@ -14,7 +14,7 @@ interface Row {
 
 const MIME = { jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp' } as const;
 
-/** 메타데이터 항목 이름 (코드 → 언어별 문구) */
+/** Metadata item names (code → localized text) */
 function kindLabel(t: Dict, it: FoundItem): string {
   const k = t.metadata.kinds;
   switch (it.kind) {

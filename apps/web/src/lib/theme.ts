@@ -1,6 +1,6 @@
 /**
- * 테마(라이트/다크/시스템). 실제 적용은 <html data-theme="light|dark">.
- * 첫 화면 깜빡임을 막는 초기 적용은 Layout.astro 의 <head> 인라인 스크립트가 한다 (같은 키·규칙 사용).
+ * Theme (light/dark/system). Applied via <html data-theme="light|dark">.
+ * The initial application, which prevents a flash on first paint, is done by the inline <head> script in Layout.astro (same keys and rules).
  */
 import { useEffect, useState } from 'react';
 
@@ -16,7 +16,7 @@ export function readThemePref(): ThemePref {
     const v = localStorage.getItem(THEME_KEY);
     if (v === 'light' || v === 'dark' || v === 'system') return v;
   } catch {
-    /* 저장소 사용 불가 */
+    /* Storage unavailable */
   }
   return 'system';
 }
@@ -32,7 +32,7 @@ export function useTheme() {
 
   useEffect(() => setPref(readThemePref()), []);
 
-  // 시스템 설정을 따를 때는 OS 테마가 바뀌면 바로 반영
+  // When following the system setting, react immediately to OS theme changes
   useEffect(() => {
     if (pref !== 'system') return;
     const mq = media();
@@ -47,7 +47,7 @@ export function useTheme() {
     try {
       localStorage.setItem(THEME_KEY, next);
     } catch {
-      /* 저장소 사용 불가: 이번 페이지에서만 반영 */
+      /* Storage unavailable: applies to this page only */
     }
   };
 

@@ -1,6 +1,6 @@
 /**
- * 퀵슬롯: 즐겨찾는 툴을 1~9번 칸에 고정한다. Alt+숫자로 바로 이동.
- * 브라우저(localStorage)에만 저장되며, 저장소를 쓸 수 없는 환경에서도 동작은 한다.
+ * Quick Slots: pin favorite tools to slots 1–9. Alt+number jumps straight to one.
+ * Stored only in the browser (localStorage); still works where storage is unavailable.
  */
 import { useEffect, useState } from 'react';
 
@@ -15,7 +15,7 @@ export function readSlots(): (string | null)[] {
       return Array.from({ length: SLOT_COUNT }, (_, i) => (typeof raw[i] === 'string' ? raw[i] : null));
     }
   } catch {
-    /* 저장소 사용 불가 */
+    /* Storage unavailable */
   }
   return Array(SLOT_COUNT).fill(null);
 }
@@ -24,12 +24,12 @@ function writeSlots(slots: (string | null)[]) {
   try {
     localStorage.setItem(KEY, JSON.stringify(slots));
   } catch {
-    /* 저장소 사용 불가: 이번 페이지에서만 반영 */
+    /* Storage unavailable: applies to this page only */
   }
   window.dispatchEvent(new CustomEvent(EVENT, { detail: slots }));
 }
 
-/** 슬롯에 있으면 빼고, 없으면 첫 빈칸에 넣는다. 빈칸이 없으면 false */
+/** Removes the tool if it is in a slot, otherwise puts it in the first empty slot. Returns false if there is none */
 export function toggleSlot(slug: string): boolean {
   const slots = readSlots();
   const idx = slots.indexOf(slug);

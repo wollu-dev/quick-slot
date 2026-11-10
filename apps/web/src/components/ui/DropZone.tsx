@@ -4,14 +4,14 @@ import { useT } from '../../i18n';
 
 interface Props {
   onFiles: (files: File[]) => void;
-  /** <input accept> 값 (예: "image/jpeg,image/png") */
+  /** <input accept> value (e.g. "image/jpeg,image/png") */
   accept?: string;
   multiple?: boolean;
   hint?: string;
   compact?: boolean;
 }
 
-/** 드래그 앤 드롭 + 클릭해서 파일 선택. 폴더를 떨어뜨리면 안의 파일을 모두 읽는다. */
+/** Drag and drop, or click to pick files. Dropping a folder reads every file inside it. */
 export default function DropZone({ onFiles, accept, multiple = true, hint, compact }: Props) {
   const t = useT();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -76,7 +76,7 @@ async function readEntry(entry: FileSystemEntry): Promise<File[]> {
   if (entry.isDirectory) {
     const reader = (entry as FileSystemDirectoryEntry).createReader();
     const all: FileSystemEntry[] = [];
-    // readEntries 는 한 번에 최대 100개씩만 돌려주므로 빈 배열이 나올 때까지 반복
+    // readEntries returns at most 100 entries per call, so keep reading until it returns an empty array
     for (;;) {
       const batch = await new Promise<FileSystemEntry[]>((res) => reader.readEntries(res, () => res([])));
       if (!batch.length) break;

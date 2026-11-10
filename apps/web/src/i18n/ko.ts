@@ -1,7 +1,7 @@
 /**
- * 한국어 사전 — 모든 언어 사전의 기준(타입의 원본).
- * en.ts / ja.ts 는 이 구조와 똑같아야 한다 (키가 빠지면 타입 오류).
- * 문자열 안의 **굵게**, `코드` 는 <Rich> 컴포넌트가 서식으로 바꿔 준다.
+ * Korean dictionary — the reference for all language dictionaries (source of the type).
+ * en.ts / ja.ts must match this structure exactly (a missing key is a type error).
+ * **bold** and `code` inside strings are rendered as formatting by the <Rich> component.
  */
 const ko = {
   meta: {
@@ -74,7 +74,7 @@ const ko = {
     dockNote: '화면이 좁은 기기에서는 항상 아래에 작게 표시돼요.',
     language: '언어',
   },
-  /** 브라우저 언어가 페이지 언어와 다를 때 뜨는 제안 배너 — "그 언어 사전"의 문구로 보여준다 */
+  /** Suggestion banner shown when the browser language differs from the page language — its text comes from that language's dictionary */
   langSuggest: {
     message: '이 페이지를 한국어로도 볼 수 있어요.',
     switchTo: '한국어로 보기',
@@ -122,7 +122,7 @@ const ko = {
     'dutch-pay': { name: '더치페이 계산', description: '인원별 금액 나누기' },
   },
 
-  // ───────────── 툴별 화면 ─────────────
+  // ───────────── Per-tool screens ─────────────
   rename: {
     regexError: (msg: string) => `정규식 오류: ${msg}`,
     invalidChars: '파일 이름에 쓸 수 없는 문자 (\\ / : * ? " < > |)',
@@ -218,7 +218,7 @@ const ko = {
     winFileNote: '파일로 받았다면: 그 폴더에 넣고 `powershell -ExecutionPolicy Bypass -File change-dates.ps1`',
     unixSteps: ['터미널에서 파일이 있는 폴더로 이동 (`cd 폴더경로`)', '복사한 스크립트를 붙여넣고 Enter'],
     unixNote: 'macOS는 더 옛날 날짜로 수정일을 바꾸면 생성일도 함께 바뀌어요. Linux는 생성일을 바꿀 수 없어요.',
-    // 스크립트 안에 들어가는 문구 — 따옴표(")나 $ 를 쓰지 말 것
+    // Strings embedded in the script — do not use double quotes (") or $
     script: {
       psTitle: 'QuickSlot 파일 날짜 변경 스크립트 (Windows PowerShell)',
       runHere: '파일이 있는 폴더에서 실행하세요.',
@@ -243,7 +243,7 @@ const ko = {
     unitCount: '개',
     unitLines: '줄',
     unitExtra: '매',
-    /** 여덟 번째 카드: 원고지 매수(글자 수 ÷ n) 또는 읽는 시간(분) */
+    /** Eighth card: manuscript-paper pages (character count ÷ n) or reading time (minutes) */
     extraMode: { kind: 'manuscript', per: 200 } as { kind: 'manuscript'; per: number } | { kind: 'reading'; wpm: number },
     limit: '글자 수 제한',
     limitPlaceholder: '예: 1000',

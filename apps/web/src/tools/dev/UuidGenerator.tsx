@@ -7,7 +7,7 @@ import { useT, withI18n } from '../../i18n';
 type Version = 'v4' | 'v7';
 type Format = 'default' | 'upper' | 'nohyphen' | 'braces';
 
-/** UUID v7: 앞 48비트가 밀리초 시각이라 생성 순서대로 정렬됨 (DB 키로 좋음) */
+/** UUID v7: the first 48 bits are a millisecond timestamp, so IDs sort in creation order (good for DB keys) */
 function uuidv7(): string {
   const b = crypto.getRandomValues(new Uint8Array(16));
   const ms = Date.now();

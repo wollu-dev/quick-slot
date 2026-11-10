@@ -17,10 +17,10 @@ function stats(text: string, segmenter: Intl.Segmenter | null, extraMode: Dict['
   const lines = text ? text.split(/\r\n|\n/).length : 0;
   const paragraphs = text.trim() ? text.trim().split(/\n\s*\n/).length : 0;
   const utf8 = new TextEncoder().encode(text).length;
-  // 한글·한자·가나 등은 2바이트, 영문·숫자·기호는 1바이트로 세는 방식 (EUC-KR / Shift_JIS 기준 서비스용)
+  // Counts Hangul, kanji, kana etc. as 2 bytes and Latin letters, digits and symbols as 1 byte (for services based on EUC-KR / Shift_JIS)
   let dbcs = 0;
   for (const ch of text.replace(/\r\n/g, '\n')) dbcs += ch.charCodeAt(0) > 0x7f ? 2 : 1;
-  // 여덟 번째 카드: 원고지 매수(한국어 200자, 일본어 400자) 또는 읽는 시간(영어, 분)
+  // Eighth card: manuscript-paper pages (200 chars for Korean, 400 for Japanese) or reading time (English, minutes)
   const extra = extraMode.kind === 'manuscript' ? Math.ceil(withSpaces / extraMode.per) : Math.ceil(words / extraMode.wpm);
   return { withSpaces, noSpaces, words, lines, paragraphs, utf8, dbcs, extra };
 }
@@ -42,7 +42,7 @@ function CharCounter() {
     try {
       setText(localStorage.getItem(DRAFT_KEY) ?? '');
     } catch {
-      /* 저장소 사용 불가 */
+      /* Storage unavailable */
     }
   }, []);
 
@@ -51,7 +51,7 @@ function CharCounter() {
       try {
         localStorage.setItem(DRAFT_KEY, text);
       } catch {
-        /* 저장소 사용 불가 */
+        /* Storage unavailable */
       }
     }, 300);
     return () => clearTimeout(id);

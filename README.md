@@ -1,75 +1,160 @@
+<div align="center">
+
+<img src="apps/web/public/favicon.svg" width="72" height="72" alt="QuickSlot logo" />
+
 # QuickSlot
 
-설치 없이 브라우저에서 바로 쓰는 생활·개발 도구 모음.
-기본 원칙은 **파일이 사용자의 PC를 떠나지 않는 것**(모든 처리를 브라우저에서).
+**The tools you need, one click away — right in your browser.**
 
-## 실행
+Everyday and developer utilities that run entirely on your device.<br />
+No install, no sign-up, and your files never leave your computer.
+
+[![CI](https://github.com/wollu-dev/quick-slot/actions/workflows/ci.yml/badge.svg)](https://github.com/wollu-dev/quick-slot/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+![Astro](https://img.shields.io/badge/Astro-7-BC52EE?logo=astro&logoColor=white)
+![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)
+![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white)
+
+**English** · [한국어](README.ko.md) · [日本語](README.ja.md)
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/home-en-dark.png" />
+  <img alt="QuickSlot home screen with the tool list and the Quick Slot dock" src="docs/assets/home-en-light.png" width="860" />
+</picture>
+
+</div>
+
+## Why QuickSlot?
+
+Renaming a batch of files, stripping GPS data from a photo, pretty-printing JSON — small jobs that usually mean hunting for a sketchy website and uploading your files to someone else's server.
+
+- **🔒 Private by design** — Every tool runs in your browser. Files are processed on your device and never uploaded.
+- **⚡ Instant** — Nothing to install or sign up for. Open a tool and drop your files in.
+- **⭐ Quick Slots** — Pin up to 9 favorite tools to a macOS-style dock and open them with <kbd>Alt</kbd>+<kbd>1</kbd>–<kbd>9</kbd>.
+- **🌏 Multilingual** — Korean, English and Japanese, with light, dark and auto appearance.
+
+## Tools
+
+| Tool | What it does |
+|---|---|
+| **Bulk Extension Changer** | Change the extension of many files at once and download a ZIP |
+| **Batch Rename** | Numbering, find & replace, regex, case conversion |
+| **File Date Changer** | Generate a PowerShell / Bash script that sets created and modified dates |
+| **Metadata Remover** | Strip GPS, camera info and more from JPEG / PNG / WebP — no quality loss |
+| **Character Counter** | Characters with and without spaces, words, bytes, reading time |
+| **JSON Formatter** | Pretty-print, minify, and pinpoint the exact line and column of errors |
+| **Base64 Encode / Decode** | Text and files, URL-safe and data-URL output |
+| **Unix Timestamp** | Convert timestamps ↔ dates with auto-detected units |
+| **UUID Generator** | Generate UUID v4 / v7 in bulk |
+
+<details>
+<summary><b>Coming soon</b> (21 tools)</summary>
+
+| Category | Tools |
+|---|---|
+| Files | Hash & Checksum · ZIP & Unzip |
+| PDF & Docs | Merge PDF · Split PDF · Images → PDF · Office → PDF |
+| Images | Image Convert & Compress · Image Resizer · HEIC → JPG · QR Code |
+| Video & Audio | Video → GIF · Screen Recorder |
+| Text | Text Diff · Korean ↔ English Keyboard Fix |
+| Developer | Password Generator · JWT Decoder · Color Converter · Normal Map Green Flip |
+| Everyday | Date Calculator · Unit Converter · Bill Splitter |
+
+</details>
+
+## Features
+
+- **Spotlight-style search** — Press <kbd>Ctrl</kbd>+<kbd>K</kbd> (or <kbd>/</kbd>) to find any tool, even by its name in another language.
+- **Quick Slot dock** — Place it at the bottom, left or right, in three sizes. The tool you're using is marked with a dot, just like a running app.
+- **Settings sheet** — Appearance, dock position and size, and language, in one place. Applied before the first paint, so there's no flicker.
+- **Language suggestions** — If your browser language differs from the page, QuickSlot offers to switch instead of redirecting you, so every language stays crawlable by search engines.
+- **Lossless where it matters** — The metadata remover edits bytes directly instead of re-encoding, and keeps rotation and color profiles unless you say otherwise.
+
+## Getting started
+
+**Requirements:** Node.js 22.23 or later and npm.
 
 ```bash
+git clone https://github.com/wollu-dev/quick-slot.git
+cd quick-slot
 npm install
-npm run dev      # 개발 서버 (http://localhost:4321)
-npm run build    # 정적 사이트 빌드 → apps/web/dist
-npm run check    # 타입 검사
+npm run dev
 ```
 
-## 구조
+Then open <http://localhost:4321>.
 
-```
-apps/
-  web/                  프론트엔드 (Astro + React + Tailwind)
-    src/
-      tools/registry.ts   ★ 툴 목록(매니페스트) — 검색·홈·독이 모두 여기서 읽음
-      tools/<분류>/*.tsx  각 툴의 React 컴포넌트
-      i18n/               언어별 사전 (ko.ts 가 기준, en.ts·ja.ts 는 같은 구조)
-      views/              HomePage.astro, ToolPage.astro — 모든 언어가 같이 쓰는 페이지 템플릿
-      pages/              주소별 페이지 (한국어 `/…`, 영어·일본어 `/[lang]/…`) — 템플릿만 불러옴
-      components/         헤더 검색, 설정 시트, 독, 공용 UI (DropZone, CopyButton, Select …)
-      lib/                files.ts(ZIP·다운로드), metadata.ts, slots.ts, theme.ts, dock.ts
-  api/                  (예정) 서버 처리가 꼭 필요한 툴용 백엔드
-```
+| Command | Description |
+|---|---|
+| `npm run dev` | Start the dev server at `localhost:4321` |
+| `npm run build` | Build the static site into `apps/web/dist` |
+| `npm run preview` | Serve the production build locally |
+| `npm run check` | Type-check the whole project |
 
-## 환경 변수
+## Configuration
 
-| 이름 | 용도 | 없으면 |
+The site URL is never hard-coded. Set it where you build:
+
+| Variable | Purpose | If unset |
 |---|---|---|
-| `SITE_URL` | 사이트 전체 주소 (예: `https://example.com`). 다른 언어 페이지 주소(`hreflang`)·대표 주소(`canonical`)를 만든다 | 상대 주소로 대신 (개발용으로는 충분) |
+| `SITE_URL` | Full site URL, e.g. `https://example.com`. Used for `hreflang` and `canonical` links | Relative URLs are used (fine for development) |
 
-도메인은 코드에 쓰지 않는다. 빌드하는 곳에서 넣는다.
+- **Locally:** copy `apps/web/.env.example` to `apps/web/.env` (git-ignored).
+- **GitHub Actions:** add a repository **variable** named `SITE_URL`.
+- **Docker:** pass `--build-arg SITE_URL=https://…`.
 
-- 내 PC: `apps/web/.env.example` 을 `apps/web/.env` 로 복사해서 값 수정 (`.env` 는 git 에 안 올라감)
-- GitHub Actions: 저장소 Settings → Secrets and variables → Actions → **Variables** 에 `SITE_URL`
-- Docker: `docker build --build-arg SITE_URL=https://… .` (Dockerfile 에서 `ARG SITE_URL` → 빌드 시 환경 변수로)
+## Project structure
 
-## 언어
+```
+quick-slot/
+├─ apps/web/                 # The website (Astro + React islands + Tailwind CSS)
+│  ├─ src/
+│  │  ├─ tools/registry.ts   # ★ Tool manifest — home, search and dock all read from it
+│  │  ├─ tools/<category>/   # One React component per tool
+│  │  ├─ i18n/               # Dictionaries: ko.ts (source of types), en.ts, ja.ts
+│  │  ├─ views/              # Page templates shared by every language
+│  │  ├─ pages/              # Routes: Korean at /…, English and Japanese at /[lang]/…
+│  │  ├─ components/         # Search, settings sheet, dock, shared UI
+│  │  ├─ lib/                # Files/ZIP, metadata stripping, slots, theme, dock settings
+│  │  └─ styles/global.css   # Design tokens and the glass design system
+│  └─ public/
+├─ docs/assets/              # Screenshots for the README
+└─ AGENTS.md                 # Contribution rules for humans and AI agents
+```
 
-한국어(`/`), English(`/en/`), 日本語(`/ja/`). 언어마다 정적 페이지가 따로 만들어진다.
+## Adding a tool
 
-- 브라우저 언어가 페이지 언어와 다르면 상단에 **"이 페이지를 ○○로도 볼 수 있어요"** 제안 배너를 띄운다. 자동으로 이동시키지는 않는다 — 검색엔진 로봇(대부분 영어)이 항상 다른 언어로 넘어가 한국어·일본어 페이지가 수집되지 않기 때문 (Google 권장 방식).
-- 설정이나 배너에서 고른 언어는 브라우저에 저장되고, 다른 언어 주소로 들어오면 고른 언어 주소로 옮겨진다 (로봇은 저장값이 없으므로 영향 없음).
-
-## 새 툴 추가하기
-
-1. `src/tools/registry.ts` 에 항목 추가
-2. `src/i18n/ko.ts`, `en.ts`, `ja.ts` 의 `tools` 에 이름·설명 추가 (빠지면 타입 오류)
-   → `status: 'soon'` 이면 여기서 끝. 준비 중 화면이 세 언어로 자동 생성됨
-3. `src/tools/<분류>/MyTool.tsx` 컴포넌트 작성
-   - 문구는 사전에 넣고 `useT()` 로 꺼내 쓴다. 컴포넌트는 `export default withI18n(MyTool)` 로 내보낸다.
-4. `src/views/ToolPage.astro` 의 "툴 화면 연결"에 한 줄 추가:
+1. Add an entry to `apps/web/src/tools/registry.ts`.
+2. Add its name and description under `tools` in `apps/web/src/i18n/ko.ts`, `en.ts` and `ja.ts` (a missing key is a type error).
+   With `status: 'soon'` you're done — a "coming soon" page is generated in all three languages.
+3. Write the component in `apps/web/src/tools/<category>/MyTool.tsx`.
+   Put every UI string in the dictionaries, read them with `useT()`, and export with `export default withI18n(MyTool)`.
+4. Wire it up in the "Tool component wiring" block of `apps/web/src/views/ToolPage.astro`:
    ```astro
    {slug === 'my-tool' && <MyTool client:load lang={lang} />}
    ```
-   현재 시각·랜덤 값·브라우저 정보를 처음 화면에 그리는 툴은 `client:only="react"` 를 쓴다 (서버 렌더 결과와 달라지는 문제 방지).
-5. registry 의 `status` 를 `'ready'` 로 변경
+   Use `client:only="react"` if the first render depends on the current time, randomness or browser APIs.
+5. Set the tool's `status` to `'ready'`.
 
-## 키보드
+## Internationalization
 
-- `Ctrl K` 또는 `/` : QuickSlot 검색
-- `Alt 1~9` : 퀵슬롯에 등록한 툴 열기
+| Language | URL |
+|---|---|
+| 한국어 (Korean) | `/` |
+| English | `/en/` |
+| 日本語 (Japanese) | `/ja/` |
 
-## 기여하기
+Every language is a separate static page with `hreflang` links. QuickSlot never redirects based on the browser language — that would send search-engine crawlers (which mostly browse in English) away from the Korean and Japanese pages. Instead it shows a suggestion banner, and only redirects once the user has chosen a language.
 
-브랜치·커밋·PR 규칙은 [AGENTS.md](AGENTS.md) 에 있습니다 (사람과 AI 에이전트 공통).
+## Deployment
 
-## 라이선스
+The planned deployment is a Docker image published to the GitHub Container Registry and self-hosted. It isn't set up yet — for now, CI only type-checks and builds every pull request.
 
-[MIT](LICENSE)
+## Contributing
+
+Contributions are welcome! This project follows GitHub Flow: branch from `main`, open a pull request, and squash-merge once CI passes.
+
+Please read **[AGENTS.md](AGENTS.md)** first — it holds the rules for code, design, i18n, commits and pull requests, for humans and AI coding agents alike. ([한국어](AGENTS.ko.md) · [日本語](AGENTS.ja.md))
+
+## License
+
+[MIT](LICENSE) © 2026 WolLu

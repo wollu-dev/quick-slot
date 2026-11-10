@@ -6,7 +6,7 @@ import { tools, toolText, toolUrl, type Tool } from '../tools/registry';
 import { readSlots } from '../lib/slots';
 import AppIcon from './ui/AppIcon';
 
-/** 지금 언어의 이름·설명을 가장 높게, 다른 언어 이름과 키워드도 찾을 수 있게 */
+/** Rank the current language's name/description highest, but also match names in other languages and keywords */
 function score(tool: Tool, q: string, lang: Lang): number {
   if (!q) return 1;
   const { name, description } = toolText(lang, tool.slug);
@@ -20,7 +20,7 @@ function score(tool: Tool, q: string, lang: Lang): number {
   return 0;
 }
 
-/** 헤더의 검색 버튼 + 스포트라이트형 검색 창 + 전역 단축키 */
+/** Header search button + Spotlight-style search dialog + global shortcuts */
 function CommandPalette() {
   const t = useT();
   const lang = useLang();
@@ -40,7 +40,7 @@ function CommandPalette() {
       .map((r) => r.tool);
   }, [query, lang]);
 
-  // 전역 단축키: Ctrl/Cmd+K, '/' 로 열기, Alt+1~9 로 퀵슬롯 이동
+  // Global shortcuts: Ctrl/Cmd+K or '/' to open, Alt+1–9 to jump to a Quick Slot
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement;
@@ -107,7 +107,7 @@ function CommandPalette() {
         <span className="kbd hidden bg-transparent sm:inline-flex">Ctrl K</span>
       </button>
 
-      {/* 헤더의 backdrop-filter 가 fixed 요소의 기준이 되어버리므로 body 로 portal */}
+      {/* Portal to body, since the header's backdrop-filter becomes the containing block for fixed elements */}
       {open &&
         createPortal(
           <div
