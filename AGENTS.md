@@ -16,7 +16,7 @@ QuickSlot: 설치 없이 브라우저에서 바로 쓰는 생활·개발 도구 
 
 단색 배경 위의 반투명 유리(글래스) 표면, 라이트/다크는 시스템 설정을 따른다. 기준은 `apps/web/src/styles/global.css`.
 
-- **배경**: 단색(`bg` 토큰)만. 그라데이션·색 번짐·패턴 배경을 넣지 않는다.
+- **배경**: `global.css` 의 `body::before` 하나로만 그린다 — 무채색 위→아래 명암(`bg-top` → `bg-bottom`) + 고운 노이즈 질감. 색이 들어간 그라데이션·색 번짐·패턴 배경은 넣지 않는다. 페이지마다 따로 배경을 깔지 않는다.
 
 - **색**: 토큰만 사용 — `bg`, `panel`, `panel-2`, `line`, `fg`, `muted`, `accent`, `accent-fg`, `danger`, `ok`. 하드코딩 색 금지 (예외: `registry.ts` 의 카테고리 타일 색).
 - **표면**: 카드·패널은 `panel`(= `glass` + 둥근 모서리), 위에 뜨는 창은 `glass-strong`. 넓은 `textarea.input` 은 자동으로 유리 표면이 된다.
