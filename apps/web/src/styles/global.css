@@ -58,7 +58,8 @@
 }
 
 @theme inline {
-  --font-sans: -apple-system, BlinkMacSystemFont, "Pretendard Variable", Pretendard, "Segoe UI Variable", "Segoe UI", system-ui, sans-serif;
+  /* 한국어는 Pretendard, 일본어는 Pretendard 에 없는 글자를 Hiragino(맥) · Yu Gothic UI(윈도우) 등으로 */
+  --font-sans: -apple-system, BlinkMacSystemFont, "Pretendard Variable", Pretendard, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", Meiryo, "Segoe UI Variable", "Segoe UI", system-ui, sans-serif;
   --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Consolas, monospace;
 
   --color-bg: var(--bg);
@@ -244,19 +245,250 @@ input[type="checkbox"]:focus-visible {
   display: none;
 }
 
-/* 빈 독 위 말풍선: 천천히 위아래로 */
-/* 가로 가운데 정렬은 Tailwind 의 translate 속성이 맡고, 여기서는 transform 으로 세로만 움직인다 (둘이 겹치면 두 번 밀림) */
-@keyframes dock-hint-float {
-  0%,
-  100% {
-    transform: translateY(0);
+/* ───────────── 퀵슬롯 독 ─────────────
+ * 위치·크기는 <html data-dock="left|bottom|right" data-dock-size="s|m|l"> 로 정한다 (src/lib/dock.ts).
+ * 화면이 좁으면(640px 미만) 설정과 상관없이 항상 아래에 작게 둔다.
+ * 위치 정렬은 translate 속성, 움직이는 효과는 transform 으로 나눠서 서로 덮어쓰지 않게 한다.
+ */
+:root {
+  --dock-icon: 34px;
+}
+@media (min-width: 640px) {
+  :root {
+    --dock-icon: 48px;
   }
+  :root[data-dock-size="s"] {
+    --dock-icon: 38px;
+  }
+  :root[data-dock-size="l"] {
+    --dock-icon: 62px;
+  }
+}
+.dock {
+  --dock-pad: calc(var(--dock-icon) * 0.17);
+  position: fixed;
+  z-index: 40;
+  inset-inline: 0;
+  bottom: max(12px, env(safe-area-inset-bottom));
+  display: flex;
+  justify-content: center;
+  padding-inline: 8px;
+  pointer-events: none;
+}
+.dock-bar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: calc(var(--dock-icon) * 0.14);
+  padding: var(--dock-pad);
+  border-radius: calc(var(--dock-icon) * 0.27 + var(--dock-pad));
+  pointer-events: auto;
+  transition: padding 0.2s, gap 0.2s;
+}
+.dock-tile {
+  width: var(--dock-icon);
+  height: var(--dock-icon);
+  border-radius: calc(var(--dock-icon) * 0.27);
+  transition: width 0.2s, height 0.2s;
+}
+.dock-slot {
+  position: relative;
+  display: flex;
+}
+.dock-lift {
+  position: relative;
+  transform-origin: bottom center;
+  transition: transform 0.2s ease-out;
+}
+.dock-remove {
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+/* 확대: 마우스 호버(돌아온 뒤 마우스가 실제로 움직인 다음부터 — data-hover-ready) 또는 키보드 포커스 */
+.dock[data-hover-ready] .dock-slot:hover .dock-lift,
+.dock-slot:has(:focus-visible) .dock-lift {
+  transform: translateY(-4px) scale(1.15);
+}
+.dock[data-hover-ready] .dock-slot:hover .dock-remove,
+.dock-slot:has(:focus-visible) .dock-remove {
+  opacity: 1;
+}
+/* 지금 열려 있는 툴 표시 점 — 독 안쪽 여백 위에 겹쳐 그림 */
+.dock-dot {
+  position: absolute;
+  left: 50%;
+  bottom: calc(var(--dock-pad) * -1 + 1px);
+  width: 4px;
+  height: 4px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--fg) 70%, transparent);
+  translate: -50% 0;
+}
+
+/* 빈 독 위 말풍선 */
+.dock-hint {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  width: max-content;
+  max-width: calc(100vw - 32px);
+  margin-bottom: 12px;
+  translate: -50% 0;
+  animation: dock-hint-float-y 3s ease-in-out infinite;
+}
+.dock-hint-tail {
+  position: absolute;
+  left: 50%;
+  bottom: -6px;
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  translate: -50% 0;
+  rotate: 45deg;
+  border-top-color: transparent !important;
+  border-left-color: transparent !important;
+}
+@keyframes dock-hint-float-y {
   50% {
     transform: translateY(-4px);
   }
 }
-.dock-hint {
-  animation: dock-hint-float 3s ease-in-out infinite;
+@keyframes dock-hint-float-x {
+  50% {
+    transform: translateX(var(--float-x));
+  }
+}
+
+@media (min-width: 640px) {
+  :root[data-dock="left"] .dock,
+  :root[data-dock="right"] .dock {
+    inset-inline: auto;
+    inset-block: 0;
+    align-items: center;
+    padding: 0;
+  }
+  :root[data-dock="left"] .dock {
+    left: 12px;
+  }
+  :root[data-dock="right"] .dock {
+    right: 12px;
+  }
+  :root[data-dock="left"] .dock-bar,
+  :root[data-dock="right"] .dock-bar {
+    flex-direction: column;
+  }
+
+  /* 확대 방향: 화면 안쪽으로 */
+  :root[data-dock="left"] .dock-lift {
+    transform-origin: left center;
+  }
+  :root[data-dock="right"] .dock-lift {
+    transform-origin: right center;
+  }
+  :root[data-dock="left"] .dock[data-hover-ready] .dock-slot:hover .dock-lift,
+  :root[data-dock="left"] .dock-slot:has(:focus-visible) .dock-lift {
+    transform: translateX(4px) scale(1.15);
+  }
+  :root[data-dock="right"] .dock[data-hover-ready] .dock-slot:hover .dock-lift,
+  :root[data-dock="right"] .dock-slot:has(:focus-visible) .dock-lift {
+    transform: translateX(-4px) scale(1.15);
+  }
+
+  /* 점은 화면 가장자리 쪽 */
+  :root[data-dock="left"] .dock-dot,
+  :root[data-dock="right"] .dock-dot {
+    top: 50%;
+    bottom: auto;
+    translate: 0 -50%;
+  }
+  :root[data-dock="left"] .dock-dot {
+    left: calc(var(--dock-pad) * -1 + 1px);
+  }
+  :root[data-dock="right"] .dock-dot {
+    left: auto;
+    right: calc(var(--dock-pad) * -1 + 1px);
+  }
+
+  /* 말풍선은 독 옆에, 꼬리는 독 쪽으로 */
+  :root[data-dock="left"] .dock-hint,
+  :root[data-dock="right"] .dock-hint {
+    top: 50%;
+    bottom: auto;
+    margin: 0;
+    max-width: 320px;
+    translate: 0 -50%;
+    animation-name: dock-hint-float-x;
+  }
+  :root[data-dock="left"] .dock-hint {
+    left: calc(100% + 12px);
+    --float-x: 4px;
+  }
+  :root[data-dock="right"] .dock-hint {
+    left: auto;
+    right: calc(100% + 12px);
+    --float-x: -4px;
+  }
+  :root[data-dock="left"] .dock-hint-tail,
+  :root[data-dock="right"] .dock-hint-tail {
+    top: 50%;
+    bottom: auto;
+    translate: 0 -50%;
+    border-top-color: var(--glass-border) !important;
+    border-left-color: var(--glass-border) !important;
+  }
+  :root[data-dock="left"] .dock-hint-tail {
+    left: -6px;
+    border-top-color: transparent !important;
+    border-right-color: transparent !important;
+  }
+  :root[data-dock="right"] .dock-hint-tail {
+    left: auto;
+    right: -6px;
+    border-bottom-color: transparent !important;
+    border-left-color: transparent !important;
+  }
+
+  /* 본문이 옆 독에 가리지 않도록 */
+  :root[data-dock="left"] body {
+    padding-left: calc(var(--dock-icon) + var(--dock-icon) * 0.34 + 28px);
+  }
+  :root[data-dock="right"] body {
+    padding-right: calc(var(--dock-icon) + var(--dock-icon) * 0.34 + 28px);
+  }
+}
+
+/* 페이지 맨 아래가 하단 독에 가리지 않도록 */
+.dock-safe {
+  padding-bottom: calc(var(--dock-icon) * 1.34 + 48px);
+}
+@media (min-width: 640px) {
+  :root[data-dock="left"] .dock-safe,
+  :root[data-dock="right"] .dock-safe {
+    padding-bottom: 40px;
+  }
+}
+
+/* 설정 시트가 열릴 때 */
+@keyframes sheet-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.sheet-in {
+  animation: sheet-in 0.22s cubic-bezier(0.2, 0.9, 0.3, 1);
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+.fade-in {
+  animation: fade-in 0.2s ease-out;
 }
 
 /* 드롭다운 메뉴가 열릴 때 */

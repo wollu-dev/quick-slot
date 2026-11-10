@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { Check, Copy } from 'lucide-react';
+import { useT } from '../../i18n';
 
-export default function CopyButton({ text, label = '복사', className = '' }: { text: string; label?: string; className?: string }) {
+export default function CopyButton({ text, label, className = '' }: { text: string; label?: string; className?: string }) {
+  const t = useT();
   const [state, setState] = useState<'idle' | 'ok' | 'fail'>('idle');
   return (
     <button
@@ -19,7 +21,7 @@ export default function CopyButton({ text, label = '복사', className = '' }: {
       }}
     >
       {state === 'ok' ? <Check size={15} strokeWidth={2.6} className="text-ok" /> : <Copy size={14} strokeWidth={2.2} />}
-      {state === 'ok' ? '복사됨' : state === 'fail' ? '복사 실패' : label}
+      {state === 'ok' ? t.common.copied : state === 'fail' ? t.common.copyFailed : (label ?? t.common.copy)}
     </button>
   );
 }

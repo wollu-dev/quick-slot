@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import CopyButton from '../../components/ui/CopyButton';
 import DropZone from '../../components/ui/DropZone';
 import Segmented from '../../components/ui/Segmented';
+import { useT, withI18n } from '../../i18n';
 import { formatBytes } from '../../lib/files';
 
 function bytesToBase64(bytes: Uint8Array): string {
@@ -20,7 +21,9 @@ function base64ToBytes(b64: string): Uint8Array {
 
 const toUrlSafe = (s: string) => s.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 
-export default function Base64Tool() {
+function Base64Tool() {
+  const t = useT();
+  const b = t.base64;
   const [tab, setTab] = useState<'text' | 'file'>('text');
   const [direction, setDirection] = useState<'encode' | 'decode'>('encode');
   const [text, setText] = useState('');
@@ -32,14 +35,14 @@ export default function Base64Tool() {
     if (!text) return { value: '' };
     try {
       if (direction === 'encode') {
-        const b = bytesToBase64(new TextEncoder().encode(text));
-        return { value: urlSafe ? toUrlSafe(b) : b };
+        const enc = bytesToBase64(new TextEncoder().encode(text));
+        return { value: urlSafe ? toUrlSafe(enc) : enc };
       }
       return { value: new TextDecoder('utf-8', { fatal: true }).decode(base64ToBytes(text)) };
     } catch {
-      return { value: '', error: direction === 'decode' ? '올바른 Base64가 아니거나, 텍스트가 아닌 파일 데이터예요' : '변환 실패' };
+      return { value: '', error: direction === 'decode' ? b.decodeError : b.encodeError };
     }
-  }, [text, direction, urlSafe]);
+  }, [text, direction, urlSafe, b]);
 
   const fileValue = fileOut ? (asDataUrl ? `data:${fileOut.mime || 'application/octet-stream'};base64,${fileOut.b64}` : urlSafe ? toUrlSafe(fileOut.b64) : fileOut.b64) : '';
 
@@ -47,31 +50,31 @@ export default function Base64Tool() {
     <div className="space-y-3">
       <div className="flex flex-wrap items-center gap-2">
         <Segmented
-          label="입력 종류"
+          label={b.inputKind}
           value={tab}
           onChange={setTab}
           options={[
-            ['text', '텍스트'],
-            ['file', '파일 → Base64'],
+            ['text', b.text],
+            ['file', b.file],
           ]}
         />
         {tab === 'text' && (
           <Segmented
-            label="방향"
+            label={b.direction}
             value={direction}
             onChange={setDirection}
             options={[
-              ['encode', '인코딩'],
-              ['decode', '디코딩'],
+              ['encode', b.encode],
+              ['decode', b.decode],
             ]}
           />
         )}
         <label className="flex items-center gap-1.5 text-sm">
-          <input type="checkbox" checked={urlSafe} onChange={(e) => setUrlSafe(e.target.checked)} /> URL-safe (-_ 사용, = 제거)
+          <input type="checkbox" checked={urlSafe} onChange={(e) => setUrlSafe(e.target.checked)} /> {b.urlSafe}
         </label>
         {tab === 'file' && (
           <label className="flex items-center gap-1.5 text-sm">
-            <input type="checkbox" checked={asDataUrl} onChange={(e) => setAsDataUrl(e.target.checked)} /> data URL 형식
+            <input type="checkbox" checked={asDataUrl} onChange={(e) => setAsDataUrl(e.target.checked)} /> {b.dataUrl}
           </label>
         )}
       </div>
@@ -82,13 +85,13 @@ export default function Base64Tool() {
             value={text}
             onChange={(e) => setText(e.target.value)}
             spellCheck={false}
-            placeholder={direction === 'encode' ? '인코딩할 텍스트' : '디코딩할 Base64'}
+            placeholder={direction === 'encode' ? b.encodePlaceholder : b.decodePlaceholder}
             className="input min-h-[40vh] resize-y font-mono text-[13px]"
           />
           <div className="relative">
-            <textarea readOnly value={result.value} spellCheck={false} placeholder="결과" className="input min-h-[40vh] resize-y bg-panel font-mono text-[13px]" />
+            <textarea readOnly value={result.value} spellCheck={false} placeholder={t.common.result} className="input min-h-[40vh] resize-y bg-panel font-mono text-[13px]" />
             {result.error && <p className="mt-1 text-sm text-danger">{result.error}</p>}
-            {result.value && <CopyButton text={result.value} className="absolute right-3 top-3" />}
+            {result.value && <CopyButton text={result.value} className="absolute top-3 right-3" />}
           </div>
         </div>
       ) : (
@@ -96,7 +99,7 @@ export default function Base64Tool() {
           <DropZone
             multiple={false}
             compact={!!fileOut}
-            hint="이미지를 CSS·HTML에 바로 넣을 때 유용해요"
+            hint={b.fileHint}
             onFiles={async ([f]) => {
               const b64 = bytesToBase64(new Uint8Array(await f.arrayBuffer()));
               setFileOut({ name: f.name, size: f.size, b64, mime: f.type });
@@ -119,3 +122,5 @@ export default function Base64Tool() {
     </div>
   );
 }
+
+export default withI18n(Base64Tool);

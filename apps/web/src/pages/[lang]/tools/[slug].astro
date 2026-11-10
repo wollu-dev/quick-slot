@@ -1,0 +1,13 @@
+---
+import ToolPage from '../../../views/ToolPage.astro';
+import { LOCALES, DEFAULT_LANG, type Lang } from '../../../i18n';
+import { tools } from '../../../tools/registry';
+
+export function getStaticPaths() {
+  return LOCALES.filter((l) => l !== DEFAULT_LANG).flatMap((lang) => tools.map((t) => ({ params: { lang, slug: t.slug } })));
+}
+
+const lang = Astro.params.lang as Lang;
+---
+
+<ToolPage lang={lang} slug={Astro.params.slug!} />
