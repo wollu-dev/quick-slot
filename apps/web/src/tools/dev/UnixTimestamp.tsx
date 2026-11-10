@@ -1,25 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
 import CopyButton from '../../components/ui/CopyButton';
-import { LANG_TAGS, useLang, useT, withI18n, type Lang } from '../../i18n';
+import { LANG_TAGS, useLang, useT, withI18n } from '../../i18n';
+import { relativeTime } from '../../lib/time';
 import DateTimePicker, { toDateTimeValue } from '../../components/ui/DateTimePicker';
 
 const pad = (n: number) => String(n).padStart(2, '0');
 const toLocalInput = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
 
-function relative(d: Date, lang: Lang): string {
-  const rtf = new Intl.RelativeTimeFormat(LANG_TAGS[lang], { numeric: 'auto' });
-  const diff = (d.getTime() - Date.now()) / 1000;
-  const units: [Intl.RelativeTimeFormatUnit, number][] = [
-    ['year', 31536000],
-    ['month', 2592000],
-    ['day', 86400],
-    ['hour', 3600],
-    ['minute', 60],
-    ['second', 1],
-  ];
-  for (const [unit, sec] of units) if (Math.abs(diff) >= sec || unit === 'second') return rtf.format(Math.round(diff / sec), unit);
-  return '';
-}
 
 function Row({ label, value }: { label: string; value: string }) {
   return (
@@ -86,7 +73,7 @@ function UnixTimestamp() {
               <Row label={s.local(tz)} value={parsed.d.toLocaleString(LANG_TAGS[lang], { dateStyle: 'full', timeStyle: 'medium' })} />
               <Row label="UTC" value={parsed.d.toUTCString()} />
               <Row label="ISO 8601" value={parsed.d.toISOString()} />
-              <Row label={s.relative} value={relative(parsed.d, lang)} />
+              <Row label={s.relative} value={relativeTime(parsed.d, lang, now)} />
             </div>
           ) : (
             ts && <p className="mt-2 text-sm text-danger">{s.numbersOnly}</p>
