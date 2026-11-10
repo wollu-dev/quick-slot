@@ -90,7 +90,7 @@ export const tools: Tool[] = [
   t({ slug: 'uuid-generator', category: 'dev', icon: Hash, keywords: ['uuid', 'guid', '생성', 'id'], status: 'ready' }),
   t({ slug: 'password-generator', category: 'dev', icon: KeyRound, keywords: ['비밀번호', 'password', '랜덤', 'random', 'generator', 'パスワード'], status: 'ready' }),
   t({ slug: 'jwt-decoder', category: 'dev', icon: Ticket, keywords: ['jwt', 'token', '토큰', 'decode', '디코드', 'bearer', 'claims', 'トークン'], status: 'ready' }),
-  t({ slug: 'color-converter', category: 'dev', icon: Palette, keywords: ['색상', 'color', 'hex', 'rgb', 'hsl', 'unity', 'unreal'], status: 'soon' }),
+  t({ slug: 'color-converter', category: 'dev', icon: Palette, keywords: ['색상', '색', 'color', 'colour', 'hex', 'rgb', 'hsl', 'hsv', 'picker', 'unity', 'unreal', 'godot', 'linear', 'contrast', '대비', '色', 'カラー'], status: 'ready' }),
   t({ slug: 'normal-map-flip', category: 'dev', icon: Layers, keywords: ['노멀맵', 'normal', 'unity', 'unreal', '게임', 'texture'], status: 'soon', accepts: ['image/*'] }),
 
   // Everyday

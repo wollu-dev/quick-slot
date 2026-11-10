@@ -60,7 +60,7 @@ QuickSlot: ブラウザですぐ使える日常・開発ツール集。構成と
 - **テーマ**: ライト / ダーク / 自動（デフォルト）。適用は `<html data-theme="light|dark">` だけ。CSS で `@media (prefers-color-scheme)` を使わず、ダークのスタイルは `[data-theme="dark"]` のトークンか Tailwind の `dark:` バリアントで作る。
 - **ドック**: 配置・サイズ・拡大効果は `global.css` の `.dock*` ルールが `html[data-dock]` を見て決める。640px 未満では設定に関係なく下に小さく表示。ドックに隠れてはいけないページ最下部の要素には `.dock-safe`。
 - **背景**: `global.css` の `body::before` だけで描く：無彩色の上から下への濃淡（`bg-top` → `bg-bottom`）+ 細かいノイズの質感。色のついたグラデーション・色のにじみ・パターンは入れない。ページごとに背景を敷かない。
-- **色**: トークンだけを使う：`bg`、`panel`、`panel-2`、`line`、`fg`、`muted`、`accent`、`accent-fg`、`danger`、`ok`。色のハードコード禁止（例外: `registry.ts` のカテゴリタイルの色、設定の外観プレビュー）。
+- **色**: トークンだけを使う：`bg`、`panel`、`panel-2`、`line`、`fg`、`muted`、`accent`、`accent-fg`、`danger`、`ok`。色のハードコード禁止（例外: `registry.ts` のカテゴリタイルの色、設定の外観プレビュー、カラー変換の色選択グラデーション）。
 - **面**: カード・パネルは `panel`（= `glass` + 角丸）、検索ウィンドウは `glass-strong`、文字を読む浮いたウィンドウ（メニュー、設定シート）は `glass-menu`（より不透明）。大きな `textarea.input` は自動でガラスの面になる。
 - **コントロール**: ボタン `btn` / `btn-primary` / `btn-tinted`、入力 `input`、ラベル `label`。選択肢が2〜3個なら `Segmented`、それ以上は `Select` コンポーネント。**ブラウザ標準の `<select>` は使わない**（開いたリストを装飾できない）。同様に日付・時刻は `DateTimePicker`、数値は `NumberField` を使い、`<input type="datetime-local">` や `type="number"` は使わない（ポップアップや矢印を装飾できず、サイトの言語にも従わない）。チェックボックスは CSS で自動的にスイッチの見た目になる。
 - **テキストの入力・出力エリア**: `TextPanel` コンポーネントを使う（上のヘッダー行にタイトルとボタン、その下にテキストエリア）。コピーなどのボタンをテキストエリアの上に浮かせない。長い文章がボタンの下を通って重なるため。

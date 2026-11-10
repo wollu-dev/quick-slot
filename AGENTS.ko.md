@@ -60,7 +60,7 @@ QuickSlot: 브라우저에서 바로 쓰는 생활·개발 도구 모음. 구조
 - **테마**: 라이트 / 다크 / 자동(기본). 적용은 `<html data-theme="light|dark">` 로만. CSS 에 `@media (prefers-color-scheme)` 를 쓰지 말고, 다크 스타일은 `[data-theme="dark"]` 토큰이나 Tailwind `dark:` 변형으로.
 - **독**: 배치·크기·확대 효과는 `global.css` 의 `.dock*` 규칙이 `html[data-dock]` 을 보고 정한다. 640px 미만에서는 설정과 상관없이 아래에 작게. 독에 가려지면 안 되는 페이지 맨 아래 요소에는 `.dock-safe`.
 - **배경**: `global.css` 의 `body::before` 로만 그린다: 무채색 위→아래 명암(`bg-top` → `bg-bottom`) + 고운 노이즈 질감. 색이 들어간 그라데이션·색 번짐·패턴은 넣지 않는다. 페이지마다 배경을 따로 깔지 않는다.
-- **색**: 토큰만 사용: `bg`, `panel`, `panel-2`, `line`, `fg`, `muted`, `accent`, `accent-fg`, `danger`, `ok`. 하드코딩 색 금지 (예외: `registry.ts` 의 카테고리 타일 색, 설정의 화면 모드 미리보기).
+- **색**: 토큰만 사용: `bg`, `panel`, `panel-2`, `line`, `fg`, `muted`, `accent`, `accent-fg`, `danger`, `ok`. 하드코딩 색 금지 (예외: `registry.ts` 의 카테고리 타일 색, 설정의 화면 모드 미리보기, 색상 변환기의 색 선택 그라데이션).
 - **표면**: 카드·패널은 `panel`(= `glass` + 둥근 모서리), 검색 창은 `glass-strong`, 글을 읽어야 하는 떠 있는 창(메뉴, 설정 시트)은 `glass-menu`(더 불투명). 넓은 `textarea.input` 은 자동으로 유리 표면이 된다.
 - **컨트롤**: 버튼 `btn` / `btn-primary` / `btn-tinted`, 입력 `input`, 라벨 `label`. 선택지 2~3개는 `Segmented`, 그 이상은 `Select` 컴포넌트. **브라우저 기본 `<select>` 는 쓰지 않는다** (펼친 목록을 꾸밀 수 없음). 마찬가지로 날짜·시간은 `DateTimePicker`, 숫자는 `NumberField` 를 쓰고 `<input type="datetime-local">` · `type="number"` 는 쓰지 않는다 (팝업과 화살표를 꾸밀 수 없고 사이트 언어를 따르지 않음). 체크박스는 CSS 로 자동으로 스위치 모양이 된다.
 - **텍스트 입력·출력 영역**: `TextPanel` 컴포넌트를 쓴다 (위쪽 머리 줄에 제목과 버튼, 그 아래 텍스트 영역). 복사 같은 버튼을 텍스트 영역 위에 띄우지 않는다. 긴 글이 버튼 밑으로 지나가며 겹친다.
