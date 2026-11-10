@@ -1,0 +1,49 @@
+---
+import '../styles/global.css';
+import CommandPalette from '../components/CommandPalette';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const { title, description = '설치 없이 브라우저에서 바로 쓰는 생활·개발 도구 모음. 파일은 서버로 올라가지 않습니다.' } = Astro.props;
+const fullTitle = title ? `${title} · QuickSlot` : 'QuickSlot · 필요한 도구를 바로 꺼내 쓰세요';
+---
+
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <meta name="generator" content={Astro.generator} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
+    />
+    <title>{fullTitle}</title>
+  </head>
+  <body class="min-h-screen antialiased">
+    <header class="sticky top-0 z-40 border-b border-line bg-bg/85 backdrop-blur">
+      <div class="mx-auto flex max-w-6xl items-center gap-4 px-4 py-3">
+        <a href="/" class="flex shrink-0 items-center gap-2 font-bold tracking-tight">
+          <span class="grid size-7 place-items-center rounded-md bg-accent text-sm text-accent-fg">Q</span>
+          <span>QuickSlot</span>
+        </a>
+        <div class="flex flex-1 justify-end">
+          <CommandPalette client:load />
+        </div>
+      </div>
+    </header>
+
+    <main class="mx-auto max-w-6xl px-4 py-8">
+      <slot />
+    </main>
+
+    <footer class="border-t border-line py-6 text-center text-xs text-muted">
+      🔒 표시된 툴은 모든 처리가 브라우저 안에서 이루어지며, 파일이 서버로 전송되지 않습니다.
+    </footer>
+  </body>
+</html>

@@ -1,0 +1,19 @@
+---
+/** status: 'soon' 인 툴의 "준비 중" 페이지. ready 툴은 각자 전용 .astro 페이지가 있다. */
+import ToolLayout from '../../layouts/ToolLayout.astro';
+import { tools } from '../../tools/registry';
+
+export function getStaticPaths() {
+  return tools.filter((t) => t.status === 'soon').map((t) => ({ params: { slug: t.slug } }));
+}
+
+const { slug } = Astro.params;
+---
+
+<ToolLayout slug={slug!}>
+  <div class="panel flex flex-col items-center gap-2 px-6 py-16 text-center">
+    <span class="text-4xl">🛠️</span>
+    <p class="font-medium">아직 만들고 있는 툴이에요</p>
+    <p class="text-sm text-muted">퀵슬롯에 미리 등록해 두면 완성됐을 때 바로 쓸 수 있어요.</p>
+  </div>
+</ToolLayout>

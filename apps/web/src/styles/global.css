@@ -1,0 +1,49 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Pretendard Variable", Pretendard, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "Cascadia Code", Consolas, monospace;
+
+  --color-bg: #0e0f13;
+  --color-panel: #16181e;
+  --color-panel-2: #1e2028;
+  --color-line: #2a2d37;
+  --color-fg: #e6e7eb;
+  --color-muted: #8b8f9c;
+  --color-accent: #f5b83d;
+  --color-accent-fg: #1a1406;
+  --color-danger: #f06363;
+  --color-ok: #4fcf8a;
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-fg);
+  font-family: var(--font-sans);
+}
+
+/* 공통 컴포넌트 클래스 */
+@layer components {
+  .panel {
+    @apply rounded-xl border border-line bg-panel;
+  }
+  .btn {
+    @apply inline-flex items-center justify-center gap-1.5 rounded-lg border border-line bg-panel-2 px-3 py-1.5 text-sm font-medium text-fg transition hover:border-muted disabled:cursor-not-allowed disabled:opacity-40;
+  }
+  .btn-primary {
+    @apply border-transparent bg-accent text-accent-fg hover:brightness-110 hover:border-transparent;
+  }
+  .input {
+    @apply w-full rounded-lg border border-line bg-bg px-3 py-2 text-sm text-fg outline-none placeholder:text-muted focus:border-accent;
+  }
+  .label {
+    @apply mb-1 block text-xs font-medium text-muted;
+  }
+  .kbd {
+    @apply rounded border border-line bg-panel-2 px-1.5 py-0.5 font-mono text-[11px] text-muted;
+  }
+}

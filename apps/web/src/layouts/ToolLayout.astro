@@ -1,0 +1,44 @@
+---
+import Layout from './Layout.astro';
+import SlotButton from '../components/SlotButton';
+import { getTool, getCategory } from '../tools/registry';
+
+interface Props {
+  slug: string;
+}
+
+const tool = getTool(Astro.props.slug);
+if (!tool) throw new Error(`registry.ts 에 없는 툴: ${Astro.props.slug}`);
+const category = getCategory(tool.category);
+---
+
+<Layout title={tool.name} description={tool.description}>
+  <nav class="mb-3 text-xs text-muted">
+    <a href="/" class="hover:text-fg">홈</a>
+    <span class="mx-1">/</span>
+    <a href={`/#${category.id}`} class="hover:text-fg">{category.icon} {category.name}</a>
+  </nav>
+
+  <div class="mb-6 flex flex-wrap items-start justify-between gap-3">
+    <div>
+      <h1 class="text-2xl font-bold tracking-tight">{tool.name}</h1>
+      <p class="mt-1 text-sm text-muted">{tool.description}</p>
+    </div>
+    <div class="flex items-center gap-2">
+      {
+        tool.processing === 'client' ? (
+          <span class="rounded-full bg-ok/10 px-2.5 py-1 text-xs text-ok" title="파일이 서버로 전송되지 않습니다">
+            🔒 브라우저에서 처리
+          </span>
+        ) : (
+          <span class="rounded-full bg-accent/10 px-2.5 py-1 text-xs text-accent" title="서버에서 처리 후 즉시 삭제됩니다">
+            ☁️ 서버에서 처리
+          </span>
+        )
+      }
+      <SlotButton client:load slug={tool.slug} />
+    </div>
+  </div>
+
+  <slot />
+</Layout>
