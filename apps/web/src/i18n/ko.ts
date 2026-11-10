@@ -74,6 +74,12 @@ const ko = {
     dockNote: '화면이 좁은 기기에서는 항상 아래에 작게 표시돼요.',
     language: '언어',
   },
+  /** 브라우저 언어가 페이지 언어와 다를 때 뜨는 제안 배너 — "그 언어 사전"의 문구로 보여준다 */
+  langSuggest: {
+    message: '이 페이지를 한국어로도 볼 수 있어요.',
+    switchTo: '한국어로 보기',
+    close: '닫기',
+  },
   categories: {
     file: { name: '파일', description: '이름, 확장자, 날짜, 메타데이터' },
     pdf: { name: 'PDF·문서', description: '합치기, 나누기, 변환' },

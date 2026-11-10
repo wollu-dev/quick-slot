@@ -71,6 +71,11 @@ const ja: Dict = {
     dockNote: '画面の狭いデバイスでは、常に下に小さく表示されます。',
     language: '言語',
   },
+  langSuggest: {
+    message: 'このページは日本語でもご覧いただけます。',
+    switchTo: '日本語で見る',
+    close: '閉じる',
+  },
   categories: {
     file: { name: 'ファイル', description: '名前、拡張子、日付、メタデータ' },
     pdf: { name: 'PDF・文書', description: '結合、分割、変換' },

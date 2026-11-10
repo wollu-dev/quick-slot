@@ -35,6 +35,43 @@ export function localizePath(lang: Lang, path: string): string {
   return lang === DEFAULT_LANG ? p : `/${lang}${p}`;
 }
 
+/**
+ * 브라우저 언어 설정(navigator.languages)에서 지원하는 첫 언어. 없으면 null.
+ * 예: ['en-GB', 'ko'] → 'en', ['fr', 'de'] → null
+ */
+export function detectBrowserLang(languages: readonly string[]): Lang | null {
+  for (const l of languages) {
+    // 'en-US' → 'en'. 일부 환경은 'en;q=0.8' 처럼 우선순위 표기가 붙어 오므로 함께 떼어 낸다
+    const base = l.toLowerCase().split(';')[0].split('-')[0].trim();
+    if (isLang(base)) return base;
+  }
+  return null;
+}
+
+/** 사용자가 직접 고른 언어 (설정 또는 제안 배너). 없으면 null */
+export function readSavedLang(): Lang | null {
+  try {
+    const v = localStorage.getItem(LANG_KEY);
+    return isLang(v) ? v : null;
+  } catch {
+    return null;
+  }
+}
+
+export function saveLang(lang: Lang) {
+  try {
+    localStorage.setItem(LANG_KEY, lang);
+  } catch {
+    /* 저장소 사용 불가: 이번 페이지에서만 */
+  }
+}
+
+/** 지금 페이지와 같은 페이지의 다른 언어 주소로 이동 */
+export function goToLang(lang: Lang) {
+  const { path } = splitLocale(location.pathname);
+  location.href = localizePath(lang, path) + location.search + location.hash;
+}
+
 /** '/en/tools/x' → { lang: 'en', path: '/tools/x' } */
 export function splitLocale(pathname: string): { lang: Lang; path: string } {
   const m = pathname.match(/^\/(en|ja)(?=\/|$)(.*)$/);

@@ -4,6 +4,7 @@ import { Lock } from 'lucide-react';
 import CommandPalette from '../components/CommandPalette';
 import Dock from '../components/Dock';
 import SettingsSheet from '../components/SettingsSheet';
+import LanguageSuggest from '../components/LanguageSuggest';
 import Logo from '../components/Logo.astro';
 import { LOCALES, getDict, localizePath, type Lang } from '../i18n';
 
@@ -21,6 +22,9 @@ const { lang, path, title, currentSlug } = Astro.props;
 const t = getDict(lang);
 const description = Astro.props.description ?? t.meta.siteDescription;
 const fullTitle = title ? `${title} · QuickSlot` : t.meta.siteTitle;
+
+/** 검색엔진용 주소: SITE_URL 이 있으면 전체 주소(https://…), 없으면 상대 주소 (astro.config.mjs 참고) */
+const absolute = (p: string) => (Astro.site ? new URL(p, Astro.site).href : p);
 ---
 
 <!doctype html>
@@ -70,8 +74,9 @@ const fullTitle = title ? `${title} · QuickSlot` : t.meta.siteTitle;
       })();
     </script>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    {LOCALES.map((l) => <link rel="alternate" hreflang={l} href={localizePath(l, path)} />)}
-    <link rel="alternate" hreflang="x-default" href={localizePath('ko', path)} />
+    <link rel="canonical" href={absolute(localizePath(lang, path))} />
+    {LOCALES.map((l) => <link rel="alternate" hreflang={l} href={absolute(localizePath(l, path))} />)}
+    <link rel="alternate" hreflang="x-default" href={absolute(localizePath('ko', path))} />
     <link
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
@@ -96,6 +101,8 @@ const fullTitle = title ? `${title} · QuickSlot` : t.meta.siteTitle;
     </header>
 
     <main class="mx-auto max-w-6xl px-4 pt-8 pb-12 sm:px-6">
+      <!-- 브라우저 언어가 다르면 그 언어로 보기를 "제안"만 한다 (자동 이동은 검색엔진 수집을 막아서 하지 않음) -->
+      <LanguageSuggest client:only="react" lang={lang} />
       <slot />
     </main>
 

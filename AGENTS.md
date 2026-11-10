@@ -18,6 +18,12 @@ QuickSlot: 설치 없이 브라우저에서 바로 쓰는 생활·개발 도구 
 - 라이브러리(`lib/`)는 문구 대신 코드를 돌려주고 화면에서 번역한다 (예: `metadata.ts` 의 `ItemKind`, `MetadataError.code`).
 - 내부 링크는 `localizePath(lang, path)` / `toolUrl(slug, lang)` 로 만든다. `/tools/…` 를 직접 쓰지 않는다.
 - React 섬(island) 최상위 컴포넌트는 `withI18n` 으로 감싸고, Astro 에서 `lang={lang}` 을 넘긴다.
+- **브라우저 언어로 자동 이동시키지 않는다** (검색엔진이 다른 언어 페이지를 수집하지 못함). 브라우저 언어는 `LanguageSuggest` 배너로 "제안"만 하고, 이동은 사용자가 직접 고른 언어(`quickslot:lang` 저장값)가 있을 때만 한다. 로봇에게만 다르게 보여주는 처리(User-Agent 판별 등)도 하지 않는다.
+
+## 배포 설정
+
+- **도메인·주소를 코드에 쓰지 않는다.** 사이트 주소는 빌드 환경 변수 `SITE_URL` 로만 받는다 (`astro.config.mjs` → `Astro.site`). 전체 주소가 필요하면 `Astro.site` 를 쓰고, 없을 때는 상대 주소로 동작하게 만든다.
+- 새 환경 변수를 추가하면 `apps/web/.env.example` 과 README 의 "환경 변수" 표에 같이 적는다.
 - 커밋 메시지·주석·문서는 한국어.
 
 ## 디자인 규칙
