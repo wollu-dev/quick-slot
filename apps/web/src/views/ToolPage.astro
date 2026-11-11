@@ -15,6 +15,7 @@ import BatchRename from '../tools/file/BatchRename';
 import FileConverter from '../tools/file/FileConverter';
 import FileDateChanger from '../tools/file/FileDateChanger';
 import MetadataRemover from '../tools/file/MetadataRemover';
+import FileHash from '../tools/file/FileHash';
 import CharCounter from '../tools/text/CharCounter';
 import KoreanEnglishTypo from '../tools/text/KoreanEnglishTypo';
 import TextDiff from '../tools/text/TextDiff';
@@ -77,6 +78,7 @@ const tt = toolText(lang, tool.slug);
   {slug === 'batch-rename' && <BatchRename client:load lang={lang} />}
   {slug === 'file-date-changer' && <FileDateChanger client:only="react" lang={lang} />}
   {slug === 'metadata-remover' && <MetadataRemover client:load lang={lang} />}
+  {slug === 'file-hash' && <FileHash client:load lang={lang} />}
   {slug === 'char-counter' && <CharCounter client:load lang={lang} />}
   {slug === 'korean-english-typo' && <KoreanEnglishTypo client:load lang={lang} />}
   {slug === 'text-diff' && <TextDiff client:load lang={lang} />}
