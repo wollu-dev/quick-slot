@@ -13,6 +13,8 @@ import { rateLimit } from './rateLimit.ts';
 import { measure, MeasureFailure } from './serverTime.ts';
 import { checkUrl, createJob, disposition, FORMATS, getJob, info, takeFile, VideoFailure, type VideoFormat } from './video.ts';
 import { Readable } from 'node:stream';
+import { CLIENT_IP_HEADER, providers, type Auth } from './auth.ts';
+import type { Mailer } from './mail.ts';
 
 export type Env = { Variables: { ip: string } };
 
@@ -26,7 +28,13 @@ function clientIp(c: Context): string {
   return info?.remoteAddress ?? 'unknown';
 }
 
-export function createApp() {
+export interface Deps {
+  /** null when accounts are off (no DATABASE_URL) */
+  auth?: Auth | null;
+  mailer?: Mailer | null;
+}
+
+export function createApp({ auth = null, mailer = null }: Deps = {}) {
   const app = new Hono<Env>();
 
   app.use('*', async (c: Context<Env>, next: Next) => {
@@ -138,6 +146,18 @@ export function createApp() {
         'x-content-type-options': 'nosniff',
       },
     });
+  });
+
+  /* Accounts: only for people who want Pro features. Everything above works without them. */
+  app.get('/api/account/providers', (c) => c.json({ enabled: !!auth, ...(auth ? providers(mailer) : { email: false, google: false, apple: false }) }));
+
+  app.on(['GET', 'POST'], '/api/auth/*', (c) => {
+    if (!auth) return c.json({ error: 'accountsDisabled' }, 503);
+    // better-auth reads the client address from this header (for its rate limit). Set it from the address
+    // this app already worked out, and drop any copy the client sent, so it can't be spoofed.
+    const headers = new Headers(c.req.raw.headers);
+    headers.set(CLIENT_IP_HEADER, c.get('ip'));
+    return auth.handler(new Request(c.req.raw, { headers }));
   });
 
   app.notFound((c) => c.json({ error: 'notFound' }, 404));

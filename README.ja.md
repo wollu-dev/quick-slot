@@ -140,6 +140,12 @@ API（`apps/api`、`apps/api/.env.example` を参照）の設定:
 | `VIDEO_PER_HOUR` | クライアントのアドレスごとの1時間あたりの動画ダウンロード回数 | `10` |
 | `VIDEO_WORK_DIR` | 送るまでファイルを置くフォルダー（送った直後に削除） | システムの一時フォルダー、イメージでは `/work` |
 | `YTDLP_PATH` | yt-dlp コマンド | `yt-dlp` |
+| `SITE_URL` | サイトの公開アドレス（Web ビルドと同じ値）。ログインリンクはこのアドレスを指す | `http://localhost:4321` |
+| `DATABASE_URL` | アカウント機能をオンにする: `postgres://…`、またはローカル開発用の `pglite:.data/db` | アカウントはオフ |
+| `AUTH_SECRET` | セッション Cookie に署名する長いランダムな文字列（本番では `DATABASE_URL` と併せて必須） | 起動ごとにランダム（開発） |
+| `SMTP_URL`、`MAIL_FROM` | ログインメールを送る SMTP サーバーと差出人 | リンクをコンソールに表示（開発のみ） |
+| `GOOGLE_CLIENT_ID`、`GOOGLE_CLIENT_SECRET` | Google でログイン | オフ |
+| `APPLE_CLIENT_ID`、`APPLE_CLIENT_SECRET` | Apple でログイン | オフ |
 
 ## プロジェクト構成
 
@@ -198,6 +204,16 @@ docker compose up -d          # http://localhost:8080（QUICKSLOT_PORT で変更
 ```
 
 ポートを公開するのは web コンテナだけで、API には nginx を通してだけアクセスします。バージョンタグ（`v*`）で GitHub Container Registry にイメージを公開する仕組みは今後追加する予定です。
+
+**アカウント（任意、Pro 機能用）。** 無料ツールはすべてアカウントなしで動作します。オンにするには、`accounts` プロファイルで同梱の Postgres を起動し、API にデータベース・シークレット・サイトのアドレスを渡します:
+
+```bash
+COMPOSE_PROFILES=accounts POSTGRES_PASSWORD=… AUTH_SECRET=$(openssl rand -base64 32) \
+SITE_URL=https://example.com DATABASE_URL=postgres://quickslot:…@db:5432/quickslot \
+SMTP_URL=smtps://… docker compose up -d
+```
+
+API は起動時にテーブルを作成します。ローカル開発では `apps/api/.env` に `DATABASE_URL=pglite:.data/db` と書けば Postgres なしで動作し、ログインリンクはコンソールに表示されます。
 
 ## コントリビュート
 
