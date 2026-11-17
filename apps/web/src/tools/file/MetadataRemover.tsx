@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Camera, CheckCircle2, Clock, MapPin, MinusCircle, Wrench, XCircle, type LucideIcon } from 'lucide-react';
 import DropZone from '../../components/ui/DropZone';
+import Segmented from '../../components/ui/Segmented';
+import MetadataEditor from './MetadataEditor';
 import { useT, withI18n, type Dict } from '../../i18n';
 import Rich from '../../i18n/Rich';
 import { downloadBlob, formatBytes, makeZip, readBytes, timestampForFilename } from '../../lib/files';
@@ -31,9 +33,41 @@ function errorLabel(t: Dict, err: string): string {
   return err in t.metadata.errors ? t.metadata.errors[err as MetadataError['code']] : err;
 }
 
+type Mode = 'strip' | 'edit';
+
 function MetadataRemover() {
   const t = useT();
+  const [mode, setMode] = useState<Mode>('strip');
   const [files, setFiles] = useState<File[]>([]);
+  return (
+    <div className="space-y-4">
+      <Segmented
+        label={t.metadata.mode}
+        value={mode}
+        onChange={setMode}
+        options={[
+          ['strip', t.metadata.modes.strip],
+          ['edit', t.metadata.modes.edit],
+        ]}
+      />
+      {!files.length ? (
+        <div className="space-y-4">
+          <DropZone onFiles={setFiles} accept="image/jpeg,image/png,image/webp" hint={mode === 'edit' ? t.metaEdit.dropHint : t.metadata.dropHint} />
+          <p className="text-sm text-muted">
+            <Rich text={mode === 'edit' ? t.metaEdit.intro : t.metadata.intro} />
+          </p>
+        </div>
+      ) : mode === 'strip' ? (
+        <Strip files={files} setFiles={setFiles} />
+      ) : (
+        <MetadataEditor files={files} setFiles={setFiles} />
+      )}
+    </div>
+  );
+}
+
+function Strip({ files, setFiles }: { files: File[]; setFiles: React.Dispatch<React.SetStateAction<File[]>> }) {
+  const t = useT();
   const [rows, setRows] = useState<Row[]>([]);
   const [opts, setOpts] = useState<StripOptions>({ keepOrientation: true, keepIcc: true });
 
@@ -64,17 +98,6 @@ function MetadataRemover() {
       downloadBlob(makeZip(ok.map((r) => ({ name: r.file.name, data: r.result!.data }))), `quickslot-clean-${timestampForFilename()}.zip`);
     }
   };
-
-  if (!files.length) {
-    return (
-      <div className="space-y-4">
-        <DropZone onFiles={setFiles} accept="image/jpeg,image/png,image/webp" hint={t.metadata.dropHint} />
-        <p className="text-sm text-muted">
-          <Rich text={t.metadata.intro} />
-        </p>
-      </div>
-    );
-  }
 
   return (
     <div className="grid gap-4 lg:grid-cols-[300px_1fr]">

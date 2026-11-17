@@ -60,7 +60,7 @@ export const tools: Tool[] = [
   t({ slug: 'unicode-normalize', category: 'file', icon: Combine, keywords: ['자모', '자모 분리', '한글 깨짐', '맥', 'mac', 'nfd', 'nfc', '정규화', 'normalize', 'unicode', '파일 이름', 'ㅎㅏㄴㄱㅡㄹ', 'jamo', '濁点', '分離'], status: 'ready', accepts: ['*'] }),
   t({ slug: 'batch-rename', category: 'file', icon: TextCursorInput, keywords: ['이름', 'rename', '일괄', 'batch', '번호', '정규식', 'regex'], status: 'ready', accepts: ['*'] }),
   t({ slug: 'file-date-changer', category: 'file', icon: CalendarClock, keywords: ['날짜', '생성일', '수정일', 'timestamp', 'date', 'touch'], status: 'ready', accepts: ['*'] }),
-  t({ slug: 'metadata-remover', category: 'file', icon: EyeOff, keywords: ['메타데이터', 'exif', 'gps', '위치', '개인정보', 'metadata'], status: 'ready', accepts: ['image/jpeg', 'image/png', 'image/webp'] }),
+  t({ slug: 'metadata-remover', category: 'file', icon: EyeOff, keywords: ['메타데이터 수정', 'exif 수정', '촬영 날짜', '날짜 변경', '위치 변경', 'gps 수정', '작성자', 'edit exif', 'exif editor', '撮影日時', '메타데이터', 'exif', 'gps', '위치', '개인정보', 'metadata'], status: 'ready', accepts: ['image/jpeg', 'image/png', 'image/webp'] }),
   t({ slug: 'file-hash', category: 'file', icon: FingerprintPattern, keywords: ['해시', 'hash', 'md5', 'sha', 'sha256', 'crc32', 'checksum', '체크섬', '무결성', '검증', '파일 비교', 'ハッシュ', 'チェックサム'], status: 'ready', accepts: ['*'] }),
   t({ slug: 'zip', category: 'file', icon: FileArchive, keywords: ['zip', '압축', '압축 풀기', '해제', '압축 해제', 'unzip', 'compress', 'extract', 'archive', '한글 깨짐', '圧縮', '解凍'], status: 'ready', accepts: ['application/zip', '*'] }),
 
