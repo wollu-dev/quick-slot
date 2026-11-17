@@ -6,7 +6,9 @@ import { useEffect, useState } from 'react';
 
 export const SLOT_COUNT = 9;
 const KEY = 'quickslot:slots';
-const EVENT = 'quickslot:slots-changed';
+/** Fired on window with the new slots as detail whenever they change in this tab */
+export const SLOTS_EVENT = 'quickslot:slots-changed';
+const EVENT = SLOTS_EVENT;
 
 /** Tools that were renamed or merged: old slug → current slug, so saved slots keep working */
 const RENAMED: Record<string, string> = {
@@ -36,6 +38,11 @@ function writeSlots(slots: (string | null)[]) {
     /* Storage unavailable: applies to this page only */
   }
   window.dispatchEvent(new CustomEvent(EVENT, { detail: slots }));
+}
+
+/** Replaces all slots, e.g. with a copy from another device (Pro sync). Keeps the usual shape. */
+export function replaceSlots(next: unknown[]) {
+  writeSlots(Array.from({ length: SLOT_COUNT }, (_, i) => (typeof next[i] === 'string' ? (next[i] as string) : null)));
 }
 
 /** Removes the tool if it is in a slot, otherwise puts it in the first empty slot. Returns false if there is none */

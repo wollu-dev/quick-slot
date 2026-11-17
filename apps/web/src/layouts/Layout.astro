@@ -146,5 +146,11 @@ const absolute = (p: string) => (Astro.site ? new URL(p, Astro.site).href : p);
     </footer>
 
     <Dock client:load lang={lang} currentSlug={currentSlug} />
+      <script>
+      // Paid features (src/ee, QuickSlot Enterprise License). import.meta.glob finds nothing when the folder
+      // isn't there, so the free build works without it.
+      const ee = import.meta.glob<{ init: () => void }>('../ee/index.ts');
+      for (const load of Object.values(ee)) load().then((m) => m.init());
+    </script>
   </body>
 </html>

@@ -9,7 +9,7 @@
     "dev": "node --env-file-if-exists=.env --watch src/index.ts",
     "start": "node src/index.ts",
     "check": "tsc --noEmit",
-    "test": "node --test test/*.test.ts"
+    "test": "node --test \"test/*.test.ts\" \"src/**/*.test.ts\""
   },
   "engines": {
     "node": ">=24"

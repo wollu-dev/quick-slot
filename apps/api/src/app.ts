@@ -36,9 +36,18 @@ export interface Deps {
   mailer?: Mailer | null;
   /** The database behind accounts, for subscriptions */
   db?: Db | null;
+  /** Routes added by paid features (apps/api/src/ee), wired in by index.ts only when that folder exists */
+  plugins?: Plugin[];
 }
 
-export function createApp({ auth = null, mailer = null, db = null }: Deps = {}) {
+/** What a plugin gets: the app to add routes to, the database and a way to read the signed-in user */
+export interface PluginContext {
+  db: Db;
+  session: (headers: Headers) => Promise<{ user: { id: string } } | null>;
+}
+export type Plugin = (app: Hono<Env>, ctx: PluginContext) => void;
+
+export function createApp({ auth = null, mailer = null, db = null, plugins = [] }: Deps = {}) {
   const app = new Hono<Env>();
 
   app.use('*', async (c: Context<Env>, next: Next) => {
@@ -211,6 +220,8 @@ export function createApp({ auth = null, mailer = null, db = null }: Deps = {}) 
     if (!s) return c.json({ error: 'signInRequired' }, 401);
     return c.json(await planOf(db, s.user.id));
   });
+
+  if (auth && db) for (const plugin of plugins) plugin(app, { db, session });
 
   app.notFound((c) => c.json({ error: 'notFound' }, 404));
   app.onError((err, c) => {

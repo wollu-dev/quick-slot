@@ -27,6 +27,27 @@ export interface AccountUser {
   name: string;
 }
 
+/**
+ * A hint that this browser may be signed in (the session cookie itself can't be read from scripts).
+ * Features that need the account check it first, so visitors who never sign in cause no extra requests.
+ */
+const HINT = 'quickslot:account-hint';
+export const maybeSignedIn = () => {
+  try {
+    return localStorage.getItem(HINT) === '1';
+  } catch {
+    return false;
+  }
+};
+function hint(on: boolean) {
+  try {
+    if (on) localStorage.setItem(HINT, '1');
+    else localStorage.removeItem(HINT);
+  } catch {
+    /* storage unavailable */
+  }
+}
+
 /** Fired on window when someone signs in or out in this tab */
 export const ACCOUNT_EVENT = 'quickslot:account';
 const changed = () => window.dispatchEvent(new Event(ACCOUNT_EVENT));
@@ -64,6 +85,7 @@ export async function getProviders(): Promise<Providers | null> {
 export async function getUser(): Promise<AccountUser | null> {
   const res = await call('/api/auth/get-session');
   const body = (await res.json()) as { user?: AccountUser } | null;
+  hint(!!body?.user);
   return body?.user ? { id: body.user.id, email: body.user.email, name: body.user.name } : null;
 }
 
@@ -75,6 +97,7 @@ export const isEmail = (s: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s.trim()
 export async function sendSignInLink(email: string, lang: string): Promise<void> {
   if (!isEmail(email)) throw new AccountFailure('invalidEmail');
   await call('/api/auth/sign-in/magic-link', { email: email.trim(), callbackURL: here(), errorCallbackURL: here(), metadata: { lang } });
+  hint(true);
 }
 
 /** Leaves the page for Google or Apple, which send the user back here signed in */
@@ -82,11 +105,13 @@ export async function signInWith(provider: 'google' | 'apple'): Promise<void> {
   const res = await call('/api/auth/sign-in/social', { provider, callbackURL: here(), errorCallbackURL: here() });
   const { url } = (await res.json()) as { url?: string };
   if (!url) throw new AccountFailure('failed');
+  hint(true);
   location.assign(url);
 }
 
 export async function signOut(): Promise<void> {
   await call('/api/auth/sign-out', {});
+  hint(false);
   changed();
 }
 
@@ -99,5 +124,6 @@ export async function deleteAccount(): Promise<void> {
     if (e instanceof AccountFailure && e.code === 'invalidEmail') throw new AccountFailure('activeSubscription');
     throw e;
   }
+  hint(false);
   changed();
 }

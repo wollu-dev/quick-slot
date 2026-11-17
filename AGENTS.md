@@ -23,7 +23,7 @@ QuickSlot: everyday and developer tools that run right in the browser. See [READ
 ## License
 
 - The project is source-available under the Sustainable Use License (`LICENSE.md`), like n8n. Versions up to commit `7ee6d28` stay MIT.
-- **Code for paid features lives only in files with `.ee.` in the name or in an `ee/` folder**, covered by `LICENSE_EE.md`. Code outside them never imports from them; paid features plug in from the `ee` side.
+- **Code for paid features lives only in files with `.ee.` in the name or in an `ee/` folder**, covered by `LICENSE_EE.md`. Only the entry points load them, and only when the folder exists: `apps/api/src/index.ts` (API plugins and migrations) and `apps/web/src/layouts/Layout.astro` (`import.meta.glob`). No other code imports from `ee`; it talks to it through events. **Deleting the `ee` folders must leave a working free build** (`check`, `test`, `build`), so `ee` tests live inside `ee` too.
 - **Tools that are free today stay free.** Paid plans add new things (AI, sync, higher limits); never move an existing free feature behind a subscription.
 - Outside contributions need the signed Contributor License Agreement (`CLA.md`, English only), checked by the CLA bot on each pull request.
 - Third-party engines keep their own licenses (ffmpeg.wasm is GPL-2.0-or-later, `heic-to` is LGPL-3.0). Load them as separate, unmodified files, as today. Don't copy code from other projects unless its license allows it (MIT, Apache-2.0, BSD and similar are fine).

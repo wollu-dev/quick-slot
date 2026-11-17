@@ -23,7 +23,9 @@ export const MAX_NAME_LENGTH = 40;
 export const SLOT_PREFIX = 'custom:';
 
 const KEY = 'quickslot:custom-tools';
-const EVENT = 'quickslot:custom-tools-changed';
+/** Fired on window with the new list as detail whenever it changes in this tab */
+export const CUSTOM_TOOLS_EVENT = 'quickslot:custom-tools-changed';
+const EVENT = CUSTOM_TOOLS_EVENT;
 
 export const slotIdOf = (tool: CustomTool) => SLOT_PREFIX + tool.id;
 export const isCustomSlot = (slug: string) => slug.startsWith(SLOT_PREFIX);
@@ -77,6 +79,11 @@ function write(list: CustomTool[]) {
     /* Storage unavailable: applies to this page only */
   }
   window.dispatchEvent(new CustomEvent(EVENT, { detail: list }));
+}
+
+/** Replaces the whole list, e.g. with a copy from another device (Pro sync). Invalid entries are dropped. */
+export function replaceCustomTools(next: unknown[]) {
+  write(next.filter(isValid).slice(0, MAX_CUSTOM_TOOLS).map((t) => ({ ...t, color: Number(t.color) || 0 })));
 }
 
 const newId = () => Math.random().toString(36).slice(2, 10);

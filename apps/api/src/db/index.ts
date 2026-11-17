@@ -33,26 +33,33 @@ export function rowsOf<T>(result: unknown): T[] {
   return (Array.isArray(result) ? result : ((result as { rows?: T[] }).rows ?? [])) as T[];
 }
 
-/** Applies the .sql files in ./migrations that haven't run yet, in name order, each in a transaction */
-export async function migrate(db: Db): Promise<string[]> {
+/** The core migrations; paid features (ee/) bring their own folder, applied after these */
+export const CORE_MIGRATIONS = new URL('./migrations/', import.meta.url);
+
+/**
+ * Applies the .sql files that haven't run yet, folder by folder and in name order within a folder,
+ * each in a transaction. File names must be unique across folders (ee files start with "ee_").
+ */
+export async function migrate(db: Db, dirs: URL[] = [CORE_MIGRATIONS]): Promise<string[]> {
   await db.execute(sql`CREATE TABLE IF NOT EXISTS quickslot_migrations (name text PRIMARY KEY, applied_at timestamptz NOT NULL DEFAULT now())`);
   const done = new Set(rowsOf<{ name: string }>(await db.execute(sql`SELECT name FROM quickslot_migrations`)).map((r) => r.name));
-  const dir = new URL('./migrations/', import.meta.url);
-  const files = (await readdir(dir)).filter((f) => f.endsWith('.sql')).sort();
   const applied: string[] = [];
-  for (const file of files) {
-    if (done.has(file)) continue;
-    const text = await readFile(new URL(file, dir), 'utf8');
-    // One statement per execute: prepared statements can't hold several
-    const statements = text
-      .split(/;\s*(?:\n|$)/)
-      .map((s) => s.replace(/^\s*--.*$/gm, '').trim())
-      .filter(Boolean);
-    await db.transaction(async (tx) => {
-      for (const s of statements) await tx.execute(sql.raw(s));
-      await tx.execute(sql`INSERT INTO quickslot_migrations (name) VALUES (${file})`);
-    });
-    applied.push(file);
+  for (const dir of dirs) {
+    const files = (await readdir(dir)).filter((f) => f.endsWith('.sql')).sort();
+    for (const file of files) {
+      if (done.has(file)) continue;
+      const text = await readFile(new URL(file, dir), 'utf8');
+      // One statement per execute: prepared statements can't hold several
+      const statements = text
+        .split(/;\s*(?:\n|$)/)
+        .map((s) => s.replace(/^\s*--.*$/gm, '').trim())
+        .filter(Boolean);
+      await db.transaction(async (tx) => {
+        for (const s of statements) await tx.execute(sql.raw(s));
+        await tx.execute(sql`INSERT INTO quickslot_migrations (name) VALUES (${file})`);
+      });
+      applied.push(file);
+    }
   }
   return applied;
 }

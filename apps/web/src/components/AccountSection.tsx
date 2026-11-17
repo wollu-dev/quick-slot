@@ -18,6 +18,15 @@ export default function AccountSection({ Group }: { Group: (p: { title: string; 
   const [plan, setPlan] = useState<PlanInfo | null>(null);
   const [portal, setPortal] = useState(false);
   const [portalError, setPortalError] = useState(false);
+  /** Reported by the paid sync (src/ee/sync.ts) when it's in the build; null hides the row */
+  const [sync, setSync] = useState<'off' | 'syncing' | 'on' | 'error' | null>(null);
+
+  useEffect(() => {
+    const onStatus = (e: Event) => setSync((e as CustomEvent<{ state: 'off' | 'syncing' | 'on' | 'error' }>).detail.state);
+    window.addEventListener('quickslot:sync-status', onStatus);
+    window.dispatchEvent(new Event('quickslot:sync-status-request'));
+    return () => window.removeEventListener('quickslot:sync-status', onStatus);
+  }, []);
   const [email, setEmail] = useState('');
   const [sentTo, setSentTo] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
@@ -103,6 +112,15 @@ export default function AccountSection({ Group }: { Group: (p: { title: string; 
             )}
           </span>
         </div>
+        {plan?.plan === 'pro' && sync && sync !== 'off' && (
+          <div className="flex min-h-12 items-center justify-between gap-3 py-2 pr-4 pl-4" data-sync-status={sync}>
+            <span className="text-[15px]">{a.sync}</span>
+            <span className={`flex items-center gap-1.5 text-right text-[14px] ${sync === 'error' ? 'text-danger' : 'text-muted'}`}>
+              {sync === 'syncing' && <LoaderCircle size={13} className="animate-spin" />}
+              {a.syncStates[sync]}
+            </span>
+          </div>
+        )}
         {portal && (
           <button
             type="button"
