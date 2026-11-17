@@ -30,6 +30,7 @@ import PdfMerge from '../tools/pdf/PdfMerge';
 import PdfSplit from '../tools/pdf/PdfSplit';
 import ImageToPdf from '../tools/pdf/ImageToPdf';
 import VideoToGif from '../tools/media/VideoToGif';
+import VideoDownloader from '../tools/media/VideoDownloader';
 import ScreenRecorder from '../tools/media/ScreenRecorder';
 import CharCounter from '../tools/text/CharCounter';
 import KoreanEnglishTypo from '../tools/text/KoreanEnglishTypo';
@@ -108,6 +109,7 @@ const tt = toolText(lang, tool.slug);
   {slug === 'pdf-split' && <PdfSplit client:load lang={lang} />}
   {slug === 'image-to-pdf' && <ImageToPdf client:load lang={lang} />}
   {slug === 'video-to-gif' && <VideoToGif client:load lang={lang} />}
+  {slug === 'video-downloader' && <VideoDownloader client:only="react" lang={lang} />}
   {slug === 'screen-recorder' && <ScreenRecorder client:only="react" lang={lang} />}
   {slug === 'char-counter' && <CharCounter client:load lang={lang} />}
   {slug === 'korean-english-typo' && <KoreanEnglishTypo client:load lang={lang} />}

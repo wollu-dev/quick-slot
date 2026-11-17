@@ -36,4 +36,10 @@ services:
     read_only: true
     tmpfs:
       - /tmp
+    # Video downloads are written here until they are sent, then deleted right away
+    volumes:
+      - video-work:/work
     restart: unless-stopped
+
+volumes:
+  video-work:
