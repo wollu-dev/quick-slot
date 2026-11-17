@@ -18,6 +18,7 @@ import MetadataRemover from '../tools/file/MetadataRemover';
 import FileHash from '../tools/file/FileHash';
 import ZipTool from '../tools/file/ZipTool';
 import UnicodeNormalize from '../tools/file/UnicodeNormalize';
+import FileRefinery from '../tools/file/FileRefinery';
 import ImageCompress from '../tools/image/ImageCompress';
 import ImageResize from '../tools/image/ImageResize';
 import QrCode from '../tools/image/QrCode';
@@ -94,6 +95,7 @@ const tt = toolText(lang, tool.slug);
   {slug === 'file-hash' && <FileHash client:load lang={lang} />}
   {slug === 'zip' && <ZipTool client:load lang={lang} />}
   {slug === 'unicode-normalize' && <UnicodeNormalize client:only="react" lang={lang} />}
+  {slug === 'file-refinery' && <FileRefinery client:load lang={lang} />}
   {slug === 'image-compress' && <ImageCompress client:load lang={lang} />}
   {slug === 'image-resize' && <ImageResize client:load lang={lang} />}
   {slug === 'qr-code' && <QrCode client:load lang={lang} />}

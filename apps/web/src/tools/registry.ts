@@ -10,7 +10,7 @@ import {
   ArrowRightLeft, Binary, Braces, Calculator, CalendarClock, CalendarDays, Clapperboard, Clock, Code, Combine, Diff, Dices, EyeOff, FileArchive,
   FileImage, FileText, Film, FingerprintPattern, Folder, Hash, Image, Images, KeyRound, Languages, Layers,
   Merge, Palette, PenLine, QrCode, Receipt, Ruler, Scaling, Scissors, ScreenShare, TextCursorInput, Ticket,
-  Type, type LucideIcon,
+  Type, WandSparkles, type LucideIcon,
 } from 'lucide-react';
 
 export type CategoryId = 'file' | 'pdf' | 'image' | 'media' | 'text' | 'dev' | 'life';
@@ -57,6 +57,7 @@ const t = (tool: Omit<Tool, 'processing'> & { processing?: Tool['processing'] })
 export const tools: Tool[] = [
   // File
   t({ slug: 'file-converter', category: 'file', icon: ArrowRightLeft, keywords: ['변환', '형식', '확장자', 'convert', 'converter', 'format', 'extension', 'heic', 'jpg', 'png', 'webp', 'avif', 'mp3', 'mp4', 'webm', 'gif', 'json', 'yaml', 'csv', 'xml', '変換', '拡張子'], status: 'ready', accepts: ['*'] }),
+  t({ slug: 'file-refinery', category: 'file', icon: WandSparkles, keywords: ['정제', '정리', '일괄', '올인원', '한번에', '파일 정리', '변환', '이름', '날짜', '메타데이터', '해시', 'nfc', 'all in one', 'batch', 'refine', 'cleanup', 'workflow', '一括', '整理'], status: 'ready', accepts: ['*'] }),
   t({ slug: 'unicode-normalize', category: 'file', icon: Combine, keywords: ['자모', '자모 분리', '한글 깨짐', '맥', 'mac', 'nfd', 'nfc', '정규화', 'normalize', 'unicode', '파일 이름', 'ㅎㅏㄴㄱㅡㄹ', 'jamo', '濁点', '分離'], status: 'ready', accepts: ['*'] }),
   t({ slug: 'batch-rename', category: 'file', icon: TextCursorInput, keywords: ['이름', 'rename', '일괄', 'batch', '번호', '정규식', 'regex'], status: 'ready', accepts: ['*'] }),
   t({ slug: 'file-date-changer', category: 'file', icon: CalendarClock, keywords: ['날짜', '생성일', '수정일', 'timestamp', 'date', 'touch'], status: 'ready', accepts: ['*'] }),
