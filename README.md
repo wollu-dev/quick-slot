@@ -46,6 +46,7 @@ Renaming a batch of files, stripping GPS data from a photo, pretty-printing JSON
 | **ZIP & Unzip** | Zip files and folders with UTF-8 names, browse a ZIP and extract single files or everything into a folder, and fix garbled Korean or Japanese names |
 | **Image Compressor** | Shrink JPEG, PNG, WebP, AVIF and HEIC with MozJPEG, OxiPNG, WebP and AVIF encoders, with a before and after comparison |
 | **Image Resizer** | Resize many images by pixels, percentage or long side, or fill and crop to a size with a draggable crop position |
+| **QR Code** | Create QR codes for links, text, Wi-Fi, contacts, email, phone and SMS (PNG, SVG, custom colors), and read them from images or the camera |
 | **Character Counter** | Characters with and without spaces, words, bytes, reading time |
 | **Korean ↔ English Keyboard Fix** | Fix text typed in the wrong Korean / English mode (dkssud → 안녕, ㅗ디ㅣㅐ → hello) |
 | **Text Diff** | Compare two texts by line, word or character, with changed words highlighted and a unified diff to copy |
@@ -61,12 +62,11 @@ Renaming a batch of files, stripping GPS data from a photo, pretty-printing JSON
 | **Bill Splitter** | Split a bill evenly or with extras per person, round to 10 / 100 / 1000, and copy a summary to share |
 
 <details>
-<summary><b>Coming soon</b> (8 tools)</summary>
+<summary><b>Coming soon</b> (7 tools)</summary>
 
 | Category | Tools |
 |---|---|
 | PDF & Docs | Merge PDF · Split PDF · Images → PDF · Office → PDF |
-| Images | QR Code |
 | Video & Audio | Video → GIF · Screen Recorder |
 | Developer | Normal Map Green Flip |
 

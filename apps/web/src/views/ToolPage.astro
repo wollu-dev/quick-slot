@@ -19,6 +19,7 @@ import FileHash from '../tools/file/FileHash';
 import ZipTool from '../tools/file/ZipTool';
 import ImageCompress from '../tools/image/ImageCompress';
 import ImageResize from '../tools/image/ImageResize';
+import QrCode from '../tools/image/QrCode';
 import CharCounter from '../tools/text/CharCounter';
 import KoreanEnglishTypo from '../tools/text/KoreanEnglishTypo';
 import TextDiff from '../tools/text/TextDiff';
@@ -85,6 +86,7 @@ const tt = toolText(lang, tool.slug);
   {slug === 'zip' && <ZipTool client:load lang={lang} />}
   {slug === 'image-compress' && <ImageCompress client:load lang={lang} />}
   {slug === 'image-resize' && <ImageResize client:load lang={lang} />}
+  {slug === 'qr-code' && <QrCode client:load lang={lang} />}
   {slug === 'char-counter' && <CharCounter client:load lang={lang} />}
   {slug === 'korean-english-typo' && <KoreanEnglishTypo client:load lang={lang} />}
   {slug === 'text-diff' && <TextDiff client:load lang={lang} />}

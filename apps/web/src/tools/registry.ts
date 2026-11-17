@@ -72,7 +72,7 @@ export const tools: Tool[] = [
   // Image
   t({ slug: 'image-compress', category: 'image', icon: Images, keywords: ['이미지', '압축', '용량', '사진 용량 줄이기', '이미지 최적화', 'compress', 'optimize', 'png', 'jpg', 'jpeg', 'webp', 'avif', 'mozjpeg', 'tinypng', '画像圧縮', '容量'], status: 'ready', accepts: ['image/*'] }),
   t({ slug: 'image-resize', category: 'image', icon: Scaling, keywords: ['리사이즈', 'resize', '크기', '크기 조절', '사이즈', '자르기', '크롭', 'crop', '썸네일', '프로필 사진', 'thumbnail', 'scale', 'リサイズ', 'トリミング'], status: 'ready', accepts: ['image/*'] }),
-  t({ slug: 'qr-code', category: 'image', icon: QrCode, keywords: ['qr', '큐알', '코드'], status: 'soon' }),
+  t({ slug: 'qr-code', category: 'image', icon: QrCode, keywords: ['qr', '큐알', '코드', 'qr코드', 'qr 생성', 'qr 읽기', '와이파이', 'wifi', 'barcode', 'scan', 'QRコード'], status: 'ready' }),
 
   // Media
   t({ slug: 'video-to-gif', category: 'media', icon: Film, keywords: ['gif', '영상', 'video', 'mp4'], status: 'soon', accepts: ['video/*'] }),
