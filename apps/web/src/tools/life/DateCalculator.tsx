@@ -2,6 +2,7 @@ import { useState, type ReactNode } from 'react';
 import DateTimePicker from '../../components/ui/DateTimePicker';
 import NumberField from '../../components/ui/NumberField';
 import Segmented from '../../components/ui/Segmented';
+import { element, zodiacOf } from '../../lib/zodiac';
 import { LANG_TAGS, useLang, useT, withI18n } from '../../i18n';
 import {
   addBusinessDays,
@@ -27,6 +28,14 @@ function DateCalculator() {
   const c = t.dateCalc;
   const lang = useLang();
   const tag = LANG_TAGS[lang];
+  /** Zodiac rows for a birth date; Japan changes the animal on January 1, Korea and the Chinese zodiac at the Lunar New Year */
+  const zodiacRows = (b: Ymd): [string, string][] => {
+    const z = c.zodiac;
+    const zd = zodiacOf(b, lang === 'ja' ? 'january1' : 'lunarNewYear');
+    const rows: [string, string][] = [[z.label, z.value(z.animals[zd.branch], z.stems[zd.stem] + z.branches[zd.branch], z.colors[element(zd.stem)])]];
+    if (zd.beforeNewYear) rows.push([z.noteLabel, z.beforeNewYear(z.animals[(((b.y - 4) % 12) + 12) % 12])]);
+    return rows;
+  };
   const today = todayYmd();
   const todayStr = formatYmd(today);
 
@@ -128,8 +137,9 @@ function DateCalculator() {
               rows={
                 valid
                   ? [
-                      ...(lang === 'ko' ? ([[c.yearAgeLabel, c.age(num(o.y - b.y))]] as [string, string][]) : []),
+                      ...(lang === 'ko' ? ([[c.yearAgeLabel, c.yearAge(num(o.y - b.y))]] as [string, string][]) : []),
                       [c.nextBirthday, `${fullDate(next)} · ${untilNext === 0 ? c.todayBirthday : c.daysLeft(num(untilNext))}`],
+                      ...zodiacRows(b),
                       [c.daysLived, c.days(num(daysBetween(b, o)))],
                       [c.bornOn, fullDate(b)],
                     ]
