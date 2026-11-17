@@ -132,9 +132,20 @@ function DutchPay() {
           <ul className="divide-y divide-line">
             {people.map((p, i) => (
               <li key={i} className="grid grid-cols-[minmax(0,1fr)_7.5rem_auto] items-center gap-2 px-4 py-2 sm:grid-cols-[minmax(0,1fr)_9rem_8rem]">
-                <div className="flex min-w-0 items-center gap-2">
-                  <input className="input min-w-0" aria-label={d.name} placeholder={d.person(i + 1)} value={names[i] ?? ''} onChange={(e) => setAt(names, setNames, i, e.target.value)} />
-                  {i === 0 && count > 1 && <span className="hidden shrink-0 rounded-full bg-accent/12 px-2 py-0.5 text-[11px] font-medium text-accent sm:inline">{d.organizer}</span>}
+                {/* The organizer badge sits inside the name field, so every row's field keeps the same width */}
+                <div className="relative min-w-0">
+                  <input
+                    className={`input w-full min-w-0 ${i === 0 && count > 1 ? 'pr-14' : ''}`}
+                    aria-label={i === 0 && count > 1 ? `${d.name} (${d.organizer})` : d.name}
+                    placeholder={d.person(i + 1)}
+                    value={names[i] ?? ''}
+                    onChange={(e) => setAt(names, setNames, i, e.target.value)}
+                  />
+                  {i === 0 && count > 1 && (
+                    <span className="pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 rounded-full bg-accent/12 px-2 py-0.5 text-[11px] font-medium text-accent" aria-hidden>
+                      {d.organizer}
+                    </span>
+                  )}
                 </div>
                 <MoneyField value={extras[i] ?? ''} onChange={(v) => setAt(extras, setExtras, i, v)} placeholder="0" allowNegative />
                 <span className="text-right font-mono text-[14px] font-semibold tabular-nums">{result ? money(result.shares[i]) : '-'}</span>
