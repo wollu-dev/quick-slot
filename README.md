@@ -39,6 +39,7 @@ Renaming a batch of files, stripping GPS data from a photo, pretty-printing JSON
 | Tool | What it does |
 |---|---|
 | **File Converter** | Actually convert images, audio, video and data files (JPG, PNG, WebP, AVIF, HEIC, MP3, MP4, WebM, JSON, YAML, CSV, XML and more) |
+| **Fix Split Characters (NFC)** | Fix file names from a Mac that show split Korean letters or detached accents: rename in place in a folder, get a ZIP, or convert text |
 | **Batch Rename** | Numbering, find & replace, regex, case conversion |
 | **File Date Changer** | Download files with new created and modified dates as a ZIP, or get a PowerShell / Bash script |
 | **Merge PDF** | Combine PDFs in any order, optionally taking only some pages from each (e.g. 1-3, 5, 8-) |
