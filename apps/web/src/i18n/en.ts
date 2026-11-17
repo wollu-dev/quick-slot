@@ -33,6 +33,12 @@ const en: Dict = {
   picker: {
     prevMonth: 'Previous month',
     nextMonth: 'Next month',
+    prevYear: 'Previous year',
+    nextYear: 'Next year',
+    prevYears: 'Previous 12 years',
+    nextYears: 'Next 12 years',
+    chooseMonth: 'Choose month and year',
+    chooseYear: 'Choose year',
     time: 'Time',
     hour: 'Hour',
     minute: 'Minute',

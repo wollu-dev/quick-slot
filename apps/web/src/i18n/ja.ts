@@ -33,6 +33,12 @@ const ja: Dict = {
   picker: {
     prevMonth: '前の月',
     nextMonth: '次の月',
+    prevYear: '前の年',
+    nextYear: '次の年',
+    prevYears: '前の12年',
+    nextYears: '次の12年',
+    chooseMonth: '年と月を選ぶ',
+    chooseYear: '年を選ぶ',
     time: '時刻',
     hour: '時',
     minute: '分',
