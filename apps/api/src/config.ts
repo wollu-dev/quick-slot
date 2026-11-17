@@ -26,6 +26,17 @@ export const config = {
   videoConcurrent: num(env.VIDEO_CONCURRENT, 2),
   /** Downloads per client address per hour */
   videoPerHour: num(env.VIDEO_PER_HOUR, 10),
+  /** Public address of the site (same as the web build's SITE_URL): sign-in links and cookie origin */
+  siteUrl: (env.SITE_URL || 'http://localhost:4321').replace(/\/$/, ''),
+  /** Accounts are on only when a database is set: postgres://… in production, pglite:<folder> for local development */
+  databaseUrl: env.DATABASE_URL || '',
+  /** Signs session cookies. Required in production; in development a random one is made at each start */
+  authSecret: env.AUTH_SECRET || '',
+  /** SMTP server for sign-in emails, e.g. smtps://user:pass@smtp.example.com:465 */
+  smtpUrl: env.SMTP_URL || '',
+  mailFrom: env.MAIL_FROM || 'QuickSlot <no-reply@localhost>',
+  google: env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET ? { clientId: env.GOOGLE_CLIENT_ID, clientSecret: env.GOOGLE_CLIENT_SECRET } : null,
+  apple: env.APPLE_CLIENT_ID && env.APPLE_CLIENT_SECRET ? { clientId: env.APPLE_CLIENT_ID, clientSecret: env.APPLE_CLIENT_SECRET } : null,
   /** Only for tests: let outgoing requests reach private and loopback addresses */
   allowPrivateTargets: env.ALLOW_PRIVATE_TARGETS === 'true',
   version: pkg.version,

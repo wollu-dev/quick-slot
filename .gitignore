@@ -31,6 +31,9 @@ pnpm-debug.log*
 Thumbs.db
 desktop.ini
 
+# Local database for development (DATABASE_URL=pglite:.data/db)
+.data/
+
 # Local temp files
 *.tmp
 *.swp

@@ -140,6 +140,12 @@ The API (`apps/api`, see `apps/api/.env.example`) reads:
 | `VIDEO_PER_HOUR` | Video downloads per client address per hour | `10` |
 | `VIDEO_WORK_DIR` | Folder where downloads wait until they are sent (deleted right after) | system temp folder; `/work` in the image |
 | `YTDLP_PATH` | The yt-dlp command | `yt-dlp` |
+| `SITE_URL` | Public site address (same as the web build). Sign-in links point here | `http://localhost:4321` |
+| `DATABASE_URL` | Turns accounts on: `postgres://…`, or `pglite:.data/db` for a local development database | accounts off |
+| `AUTH_SECRET` | Long random string that signs session cookies (required with `DATABASE_URL` in production) | random at each start (development) |
+| `SMTP_URL`, `MAIL_FROM` | SMTP server and sender for sign-in emails | links printed to the console (development only) |
+| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | Sign in with Google | off |
+| `APPLE_CLIENT_ID`, `APPLE_CLIENT_SECRET` | Sign in with Apple | off |
 
 ## Project structure
 
@@ -198,6 +204,16 @@ docker compose up -d          # http://localhost:8080 (change with QUICKSLOT_POR
 ```
 
 Only the web container opens a port; the API is reached through nginx. Publishing images to the GitHub Container Registry on version tags (`v*`) is planned.
+
+**Accounts (optional, for Pro features).** Every free tool works without them. To turn them on, start the bundled Postgres with the `accounts` profile and give the API a database, a secret and the site address:
+
+```bash
+COMPOSE_PROFILES=accounts POSTGRES_PASSWORD=… AUTH_SECRET=$(openssl rand -base64 32) \
+SITE_URL=https://example.com DATABASE_URL=postgres://quickslot:…@db:5432/quickslot \
+SMTP_URL=smtps://… docker compose up -d
+```
+
+The API creates its tables at startup. For local development, put `DATABASE_URL=pglite:.data/db` in `apps/api/.env`: no Postgres is needed, and sign-in links are printed to the console.
 
 ## Contributing
 
