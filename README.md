@@ -201,7 +201,7 @@ Only the web container opens a port; the API is reached through nginx. Publishin
 
 ## Contributing
 
-Contributions are welcome! This project follows GitHub Flow: branch from `main`, open a pull request, and squash-merge once CI passes.
+Contributions are welcome! See **[CONTRIBUTING.md](CONTRIBUTING.md)** for how to send a change. This project follows GitHub Flow: branch from `main`, open a pull request, and squash-merge once CI passes. On your first pull request you'll be asked to sign the [Contributor License Agreement](CLA.md); you keep the copyright in your work.
 
 Please read **[AGENTS.md](AGENTS.md)** first. It holds the rules for code, design, i18n, commits and pull requests, for humans and AI coding agents alike. ([한국어](AGENTS.ko.md) · [日本語](AGENTS.ja.md))
 
