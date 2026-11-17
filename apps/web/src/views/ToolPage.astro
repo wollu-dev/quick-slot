@@ -21,6 +21,7 @@ import ImageCompress from '../tools/image/ImageCompress';
 import ImageResize from '../tools/image/ImageResize';
 import QrCode from '../tools/image/QrCode';
 import NormalMapFlip from '../tools/dev/NormalMapFlip';
+import NumberBase from '../tools/dev/NumberBase';
 import PdfMerge from '../tools/pdf/PdfMerge';
 import PdfSplit from '../tools/pdf/PdfSplit';
 import ImageToPdf from '../tools/pdf/ImageToPdf';
@@ -94,6 +95,7 @@ const tt = toolText(lang, tool.slug);
   {slug === 'image-resize' && <ImageResize client:load lang={lang} />}
   {slug === 'qr-code' && <QrCode client:load lang={lang} />}
   {slug === 'normal-map-flip' && <NormalMapFlip client:load lang={lang} />}
+  {slug === 'number-base' && <NumberBase client:load lang={lang} />}
   {slug === 'pdf-merge' && <PdfMerge client:load lang={lang} />}
   {slug === 'pdf-split' && <PdfSplit client:load lang={lang} />}
   {slug === 'image-to-pdf' && <ImageToPdf client:load lang={lang} />}
