@@ -63,7 +63,7 @@ Renaming a batch of files, stripping GPS data from a photo, pretty-printing JSON
 | **JWT Decoder** | Read a token's header and payload, with expiry status and readable times (signature not verified) |
 | **Color Converter** | Pick or paste a color and copy it as HEX, RGB, HSL, Unity, Unreal (linear) or Godot code, with a WCAG contrast check |
 | **Normal Map Green Flip** | Convert normal maps between DirectX and OpenGL exactly (8 and 16-bit PNG, TGA, alpha kept), with a lit preview and _DX / _GL renaming |
-| **Date Calculator** | Days between dates (D-day, weekdays), age, and adding days, weeks, months or weekdays to a date |
+| **Date Calculator** | Days between dates (D-day, weekdays), age with the Chinese zodiac sign, and adding days, weeks, months or weekdays to a date |
 | **Unit Converter** | Length, weight, area (incl. pyeong), volume, temperature, speed and data size, all units at once |
 | **Bill Splitter** | Split a bill evenly or with extras per person, round to 10 / 100 / 1000, and copy a summary to share |
 
