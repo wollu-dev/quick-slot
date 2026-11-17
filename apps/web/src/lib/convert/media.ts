@@ -95,11 +95,27 @@ export async function convertMedia(
   onProgress?: (ratio: number) => void,
   onDownload?: (ratio: number) => void,
 ): Promise<Blob> {
+  return runFFmpeg(file, sourceExt, outExt, mime, (input, output) => argsFor(target, quality, input, output), ({ progress }) => onProgress?.(Math.max(0, Math.min(1, progress))), onDownload);
+}
+
+/**
+ * Runs ffmpeg on one file with the arguments `buildArgs` returns for the in-memory input and output names.
+ * `onProgress` gets ffmpeg's progress events (`time` is the output position in microseconds).
+ */
+export async function runFFmpeg(
+  file: Blob,
+  sourceExt: string,
+  outExt: string,
+  mime: string,
+  buildArgs: (input: string, output: string) => string[],
+  onProgress?: (e: { progress: number; time: number }) => void,
+  onDownload?: (ratio: number) => void,
+): Promise<Blob> {
   const ffmpeg = await loadFFmpeg(onDownload);
   const id = Math.random().toString(36).slice(2);
   const input = `in-${id}.${sourceExt}`;
   const output = `out-${id}.${outExt}`;
-  const progress = ({ progress }: { progress: number }) => onProgress?.(Math.max(0, Math.min(1, progress)));
+  const progress = (e: { progress: number; time: number }) => onProgress?.(e);
   // Keep the tail of ffmpeg's log so a failure can be diagnosed from the developer console
   const log: string[] = [];
   const collect = ({ message }: { message: string }) => {
@@ -110,7 +126,7 @@ export async function convertMedia(
   ffmpeg.on('log', collect);
   try {
     await ffmpeg.writeFile(input, new Uint8Array(await file.arrayBuffer()));
-    const args = argsFor(target, quality, input, output);
+    const args = buildArgs(input, output);
     let code: number;
     try {
       code = await ffmpeg.exec(args);
