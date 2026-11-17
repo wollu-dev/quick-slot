@@ -70,7 +70,7 @@ export const tools: Tool[] = [
   t({ slug: 'office-to-pdf', category: 'pdf', icon: FileText, keywords: ['word', 'excel', 'ppt', 'docx', 'pdf'], status: 'soon', processing: 'server' }),
 
   // Image
-  t({ slug: 'image-compress', category: 'image', icon: Images, keywords: ['이미지', '압축', '용량', 'compress', 'png', 'jpg', 'webp'], status: 'soon', accepts: ['image/*'] }),
+  t({ slug: 'image-compress', category: 'image', icon: Images, keywords: ['이미지', '압축', '용량', '사진 용량 줄이기', '이미지 최적화', 'compress', 'optimize', 'png', 'jpg', 'jpeg', 'webp', 'avif', 'mozjpeg', 'tinypng', '画像圧縮', '容量'], status: 'ready', accepts: ['image/*'] }),
   t({ slug: 'image-resize', category: 'image', icon: Scaling, keywords: ['리사이즈', 'resize', '크기', '자르기', 'crop'], status: 'soon', accepts: ['image/*'] }),
   t({ slug: 'qr-code', category: 'image', icon: QrCode, keywords: ['qr', '큐알', '코드'], status: 'soon' }),
 
