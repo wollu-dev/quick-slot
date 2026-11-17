@@ -62,6 +62,7 @@ Renaming a batch of files, stripping GPS data from a photo, pretty-printing JSON
 | **Password Generator** | Random passwords with the length and characters you choose, plus a strength meter |
 | **JWT Decoder** | Read a token's header and payload, with expiry status and readable times (signature not verified) |
 | **Color Converter** | Pick or paste a color and copy it as HEX, RGB, HSL, Unity, Unreal (linear) or Godot code, with a WCAG contrast check |
+| **Number Base Converter** | Binary, octal, decimal, hex and any base from 2 to 36 at once, exact at any size, with 8 to 64-bit two's complement and clickable bits |
 | **Normal Map Green Flip** | Convert normal maps between DirectX and OpenGL exactly (8 and 16-bit PNG, TGA, alpha kept), with a lit preview and _DX / _GL renaming |
 | **Date Calculator** | Days between dates (D-day, weekdays), age with the Chinese zodiac sign, and adding days, weeks, months or weekdays to a date |
 | **Unit Converter** | Length, weight, area (incl. pyeong), volume, temperature, speed and data size, all units at once |
