@@ -47,7 +47,7 @@ Renaming a batch of files, stripping GPS data from a photo, pretty-printing JSON
 | **Images → PDF** | One image per page on A4, Letter, A5 or image-sized pages, with orientation and margins; JPEG and PNG embedded without re-compression |
 | **Video → GIF** | Trim a clip and turn it into an animated GIF with your choice of width, frame rate, speed and quality |
 | **Screen Recorder** | Record a screen, window or tab with screen or tab audio and the microphone, pause and resume, and save as MP4 or WebM |
-| **Metadata Remover** | Strip GPS, camera info and more from JPEG / PNG / WebP without losing quality |
+| **Metadata Remover & Editor** | Strip GPS, camera info and more from JPEG / PNG / WebP without losing quality, or edit the date taken (set or shift many photos at once), location, author, copyright and title of JPEGs |
 | **Hash & Checksum** | MD5, SHA-1, SHA-256, SHA-512 and CRC32 of files or text, verify a published hash, and check whether files are identical |
 | **ZIP & Unzip** | Zip files and folders with UTF-8 names, browse a ZIP and extract single files or everything into a folder, and fix garbled Korean or Japanese names |
 | **Image Compressor** | Shrink JPEG, PNG, WebP, AVIF and HEIC with MozJPEG, OxiPNG, WebP and AVIF encoders, with a before and after comparison |
