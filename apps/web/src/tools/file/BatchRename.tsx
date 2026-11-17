@@ -4,61 +4,18 @@ import DropZone from '../../components/ui/DropZone';
 import Select from '../../components/ui/Select';
 import { LANG_TAGS, useLang, useT, withI18n, type Dict } from '../../i18n';
 import Rich from '../../i18n/Rich';
-import { dedupeNames, downloadBlob, formatBytes, makeZip, readBytes, splitName, timestampForFilename } from '../../lib/files';
+import { dedupeNames, downloadBlob, formatBytes, makeZip, readBytes, timestampForFilename } from '../../lib/files';
+import { buildName as buildNameFrom, INVALID_NAME, RENAME_DEFAULTS, type RenameOptions } from '../../lib/rename';
 import NumberField from '../../components/ui/NumberField';
 
-type CaseMode = 'none' | 'lower' | 'upper';
-
-interface Options {
-  find: string;
-  replace: string;
-  useRegex: boolean;
-  ignoreCase: boolean;
-  pattern: string;
-  start: number;
-  pad: number;
-  caseMode: CaseMode;
-  spaceToUnderscore: boolean;
-  extLower: boolean;
-}
-
-const DEFAULTS: Options = {
-  find: '',
-  replace: '',
-  useRegex: false,
-  ignoreCase: false,
-  pattern: '{name}',
-  start: 1,
-  pad: 3,
-  caseMode: 'none',
-  spaceToUnderscore: false,
-  extLower: false,
-};
+type Options = RenameOptions;
+const DEFAULTS = RENAME_DEFAULTS;
+const INVALID = INVALID_NAME;
 
 function buildName(file: File, index: number, o: Options, t: Dict): { name: string; error?: string } {
-  const { base, ext } = splitName(file.name);
-
-  let b = base;
-  if (o.find) {
-    try {
-      const re = o.useRegex
-        ? new RegExp(o.find, o.ignoreCase ? 'gi' : 'g')
-        : new RegExp(o.find.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), o.ignoreCase ? 'gi' : 'g');
-      b = b.replace(re, o.replace);
-    } catch (e) {
-      return { name: file.name, error: t.rename.regexError((e as Error).message) };
-    }
-  }
-  const n = String(o.start + index).padStart(Math.max(0, o.pad), '0');
-  b = (o.pattern || '{name}').replaceAll('{name}', b).replaceAll('{n}', n);
-  if (o.caseMode === 'lower') b = b.toLowerCase();
-  if (o.caseMode === 'upper') b = b.toUpperCase();
-  if (o.spaceToUnderscore) b = b.replace(/\s+/g, '_');
-  const e = o.extLower ? ext.toLowerCase() : ext;
-  return { name: e ? `${b}.${e}` : b };
+  const r = buildNameFrom(file.name, index, o, new Date(file.lastModified));
+  return r.regexError ? { name: r.name, error: t.rename.regexError(r.regexError) } : { name: r.name };
 }
-
-const INVALID = /[\\/:*?"<>|]/;
 
 function BatchRename() {
   const t = useT();
