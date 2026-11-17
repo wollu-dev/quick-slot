@@ -30,7 +30,7 @@ const ko = {
     copyright: (year: number) => `© ${year} 정재윤 (WolLu)`,
     links: '프로젝트 링크',
     github: 'GitHub',
-    license: 'MIT 라이선스',
+    license: '라이선스',
     issues: '문제 신고',
     privacy: '개인정보처리방침',
   },

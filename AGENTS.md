@@ -18,6 +18,13 @@ QuickSlot: everyday and developer tools that run right in the browser. See [READ
 - Heavy engines (WebAssembly such as ffmpeg.wasm, HEIC and AVIF codecs) are loaded only when needed with dynamic `import()`, and served from this site, never from a CDN.
 - File conversion must never produce a file whose extension doesn't match its content. Read the real format from the bytes (`lib/convert/formats.ts`), rename only when the format already matches, and refuse what can't be converted.
 
+## License
+
+- The project is source-available under the Sustainable Use License (`LICENSE.md`), like n8n. Versions up to commit `7ee6d28` stay MIT.
+- **Code for paid features lives only in files with `.ee.` in the name or in an `ee/` folder**, covered by `LICENSE_EE.md`. Code outside them never imports from them; paid features plug in from the `ee` side.
+- **Tools that are free today stay free.** Paid plans add new things (AI, sync, higher limits); never move an existing free feature behind a subscription.
+- Third-party engines keep their own licenses (ffmpeg.wasm is GPL-2.0-or-later, `heic-to` is LGPL-3.0). Load them as separate, unmodified files, as today. Don't copy code from other projects unless its license allows it (MIT, Apache-2.0, BSD and similar are fine).
+
 ## Languages of the repository
 
 | What | Language |

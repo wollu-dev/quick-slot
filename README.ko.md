@@ -10,7 +10,7 @@
 설치도, 가입도 없고, 따로 표시된 도구가 아니면 파일은 내 컴퓨터를 떠나지 않습니다.
 
 [![CI](https://github.com/wollu-dev/quick-slot/actions/workflows/ci.yml/badge.svg)](https://github.com/wollu-dev/quick-slot/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![License: Sustainable Use](https://img.shields.io/badge/License-Sustainable%20Use-blue.svg)](LICENSE.md)
 ![Astro](https://img.shields.io/badge/Astro-7-BC52EE?logo=astro&logoColor=white)
 ![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white)
@@ -207,4 +207,14 @@ docker compose up -d          # http://localhost:8080 (QUICKSLOT_PORT 로 변경
 
 ## 라이선스
 
-[MIT](LICENSE) © 2026 정재윤 (Jaeyun Jung, WolLu)
+QuickSlot은 n8n과 같은 "페어코드(fair-code)" 방식으로, 소스를 공개하는 [Sustainable Use License](LICENSE.md)를 따릅니다.
+
+- **할 수 있는 것:** 개인적·비상업적 용도나 자기 회사 내부 업무를 위해 사용, 수정, 직접 설치(셀프 호스팅)하는 것, 비상업적 목적으로 무료로 나누는 것.
+- **할 수 없는 것:** 판매하거나, 다른 사람에게 유료·상업 서비스로 제공하는 것.
+- 이름에 `.ee.`가 들어간 파일과 `ee/` 폴더의 파일(유료 기능)은 [QuickSlot Enterprise License](LICENSE_EE.md)를 따릅니다. 실제 운영에는 QuickSlot 구독이나 Enterprise 라이선스가 필요하고, 개발·테스트는 무료입니다.
+- 커밋 `7ee6d28`(2026년 11월 17일)까지의 버전은 MIT 라이선스로 공개되었고, 계속 MIT로 쓸 수 있습니다.
+- 서드파티 구성 요소는 각자의 라이선스를 따릅니다(예: ffmpeg.wasm은 GPL-2.0-or-later).
+
+상업용 라이선스는 [이슈](https://github.com/wollu-dev/quick-slot/issues)로 문의해 주세요.
+
+© 2026 정재윤 (Jaeyun Jung, WolLu)

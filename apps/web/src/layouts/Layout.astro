@@ -6,7 +6,7 @@ import SettingsSheet from '../components/SettingsSheet';
 import LanguageSuggest from '../components/LanguageSuggest';
 import Logo from '../components/Logo.astro';
 import GithubMark from '../components/GithubMark.astro';
-import { REPO_URL } from '../lib/project';
+import { LICENSE_URL, REPO_URL } from '../lib/project';
 import { LOCALES, getDict, localizePath, type Lang } from '../i18n';
 
 interface Props {
@@ -126,7 +126,7 @@ const absolute = (p: string) => (Astro.site ? new URL(p, Astro.site).href : p);
                 <GithubMark size={13} />
                 {t.footer.github}
               </a>
-              <a href={`${REPO_URL}/blob/main/LICENSE`} target="_blank" rel="noopener noreferrer" class="footer-link px-3">
+              <a href={LICENSE_URL} target="_blank" rel="noopener noreferrer" class="footer-link px-3">
                 {t.footer.license}
               </a>
               <a href={`${REPO_URL}/issues`} target="_blank" rel="noopener noreferrer" class="footer-link pl-3">

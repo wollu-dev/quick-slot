@@ -26,7 +26,7 @@ const ja: Dict = {
     copyright: (year) => `© ${year} Jaeyun Jung（WolLu）`,
     links: 'プロジェクトのリンク',
     github: 'GitHub',
-    license: 'MITライセンス',
+    license: 'ライセンス',
     issues: '不具合を報告',
     privacy: 'プライバシー',
   },

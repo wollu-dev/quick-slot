@@ -10,7 +10,7 @@ Everyday and developer utilities that run on your device.<br />
 No install, no sign-up, and your files stay on your computer unless a tool clearly says otherwise.
 
 [![CI](https://github.com/wollu-dev/quick-slot/actions/workflows/ci.yml/badge.svg)](https://github.com/wollu-dev/quick-slot/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![License: Sustainable Use](https://img.shields.io/badge/License-Sustainable%20Use-blue.svg)](LICENSE.md)
 ![Astro](https://img.shields.io/badge/Astro-7-BC52EE?logo=astro&logoColor=white)
 ![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white)
@@ -207,4 +207,14 @@ Please read **[AGENTS.md](AGENTS.md)** first. It holds the rules for code, desig
 
 ## License
 
-[MIT](LICENSE) © 2026 Jaeyun Jung (WolLu)
+QuickSlot is **source-available** under the [Sustainable Use License](LICENSE.md), the same "fair-code" model as n8n.
+
+- **Allowed:** using, modifying and self-hosting it for personal or non-commercial use and for your own internal business purposes, and sharing it free of charge for non-commercial purposes.
+- **Not allowed:** selling it, or offering it to others as a paid or commercial service.
+- Files with `.ee.` in their name and files in `ee/` folders (paid features) are under the [QuickSlot Enterprise License](LICENSE_EE.md). They can be used in production only with a QuickSlot subscription or an Enterprise license; development and testing are free.
+- Versions up to commit `7ee6d28` (17 November 2026) were released under the MIT License and remain available under it.
+- Third-party components keep their own licenses (for example ffmpeg.wasm, GPL-2.0-or-later).
+
+For a commercial license, [open an issue](https://github.com/wollu-dev/quick-slot/issues).
+
+© 2026 Jaeyun Jung (WolLu)
