@@ -79,15 +79,53 @@ function getWorker(): Worker {
   return worker;
 }
 
-function encodeInWorker(image: ImageData, format: OutFormat, quality: number, pngColors: boolean): Promise<ArrayBuffer> {
+/** Encodes pixels in the worker (MozJPEG, OxiPNG, libwebp, libavif). The ImageData buffer is transferred. */
+export function encodeImage(image: ImageData, format: OutFormat, quality: number, pngColors = false): Promise<Blob> {
   const id = nextId++;
-  return new Promise((resolve, reject) => {
+  return new Promise<ArrayBuffer>((resolve, reject) => {
     pending.set(id, { resolve, reject });
     getWorker().postMessage({ id, image, format, quality, pngColors } satisfies EncodeRequest, [image.data.buffer]);
-  });
+  }).then((buffer) => new Blob([buffer], { type: MIME[format] }));
 }
 
-/** Draws the bitmap at its target size; scales down in halving steps so large reductions stay sharp */
+/**
+ * Draws the source rectangle (sx, sy, sw, sh) of an image at w × h.
+ * Large reductions go through halving steps so they stay sharp instead of aliased.
+ * `opaque` puts transparent areas on white (for JPEG, which has no transparency).
+ */
+export function renderRegion(src: CanvasImageSource, sx: number, sy: number, sw: number, sh: number, w: number, h: number, opaque: boolean): ImageData {
+  let cur = src;
+  let cx = sx;
+  let cy = sy;
+  let cw = sw;
+  let ch = sh;
+  while (cw / 2 >= w * 1.5 && ch / 2 >= h * 1.5) {
+    const half = document.createElement('canvas');
+    half.width = Math.round(cw / 2);
+    half.height = Math.round(ch / 2);
+    const hc = half.getContext('2d')!;
+    hc.imageSmoothingQuality = 'high';
+    hc.drawImage(cur, cx, cy, cw, ch, 0, 0, half.width, half.height);
+    cur = half;
+    cx = 0;
+    cy = 0;
+    cw = half.width;
+    ch = half.height;
+  }
+  const canvas = document.createElement('canvas');
+  canvas.width = w;
+  canvas.height = h;
+  const c = canvas.getContext('2d', { willReadFrequently: true })!;
+  if (opaque) {
+    c.fillStyle = '#ffffff';
+    c.fillRect(0, 0, w, h);
+  }
+  c.imageSmoothingQuality = 'high';
+  c.drawImage(cur, cx, cy, cw, ch, 0, 0, w, h);
+  return c.getImageData(0, 0, w, h);
+}
+
+/** The whole bitmap, scaled so its longest side is at most maxSide (0 keeps the size) */
 function toImageData(bitmap: ImageBitmap, maxSide: number, opaque: boolean): ImageData {
   let w = bitmap.width;
   let h = bitmap.height;
@@ -96,32 +134,7 @@ function toImageData(bitmap: ImageBitmap, maxSide: number, opaque: boolean): Ima
     w = Math.max(1, Math.round(w * s));
     h = Math.max(1, Math.round(h * s));
   }
-  let src: CanvasImageSource = bitmap;
-  let sw = bitmap.width;
-  let sh = bitmap.height;
-  while (sw / 2 >= w * 1.5 && sh / 2 >= h * 1.5) {
-    const half = document.createElement('canvas');
-    half.width = Math.round(sw / 2);
-    half.height = Math.round(sh / 2);
-    const hc = half.getContext('2d')!;
-    hc.imageSmoothingQuality = 'high';
-    hc.drawImage(src, 0, 0, half.width, half.height);
-    src = half;
-    sw = half.width;
-    sh = half.height;
-  }
-  const canvas = document.createElement('canvas');
-  canvas.width = w;
-  canvas.height = h;
-  const c = canvas.getContext('2d', { willReadFrequently: true })!;
-  if (opaque) {
-    // JPEG has no transparency: put transparent areas on white instead of black
-    c.fillStyle = '#ffffff';
-    c.fillRect(0, 0, w, h);
-  }
-  c.imageSmoothingQuality = 'high';
-  c.drawImage(src, 0, 0, w, h);
-  return c.getImageData(0, 0, w, h);
+  return renderRegion(bitmap, 0, 0, bitmap.width, bitmap.height, w, h, opaque);
 }
 
 export async function sourceFormat(file: File): Promise<FormatId | null> {
@@ -145,15 +158,14 @@ export async function compressImage(file: File, source: FormatId, opts: Compress
     bitmap.close();
   }
   const { width, height } = image;
-  const buffer = await encodeInWorker(image, format, opts.quality, opts.pngColors);
-  const blob = new Blob([buffer], { type: MIME[format] });
+  const blob = await encodeImage(image, format, opts.quality, opts.pngColors);
   // Same format and size but no smaller: hand back the original rather than a bigger copy
   if (!resized && format === source && blob.size >= file.size) return { blob: file, format, width, height, keptOriginal: true };
   return { blob, format, width, height, keptOriginal: false };
 }
 
-/** "photo.HEIC" + webp → "photo.webp" */
-export function outputName(name: string, format: OutFormat): string {
+/** "photo.HEIC" + webp → "photo.webp"; with a suffix, "photo-1080x1080.webp" */
+export function outputName(name: string, format: OutFormat, suffix = ''): string {
   const dot = name.lastIndexOf('.');
-  return `${dot > 0 ? name.slice(0, dot) : name}.${EXT[format]}`;
+  return `${dot > 0 ? name.slice(0, dot) : name}${suffix}.${EXT[format]}`;
 }
