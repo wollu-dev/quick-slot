@@ -7,7 +7,7 @@
  */
 import { getDict, localizePath, type Dict, type Lang } from '../i18n';
 import {
-  ArrowRightLeft, Binary, Braces, Calculator, CalendarClock, CalendarDays, Clapperboard, Clock, Code, Diff, EyeOff, FileArchive,
+  ArrowRightLeft, Binary, Braces, Calculator, CalendarClock, CalendarDays, Clapperboard, Clock, Code, Combine, Diff, EyeOff, FileArchive,
   FileImage, FileText, Film, FingerprintPattern, Folder, Hash, Image, Images, KeyRound, Languages, Layers,
   Merge, Palette, PenLine, QrCode, Receipt, Ruler, Scaling, Scissors, ScreenShare, TextCursorInput, Ticket,
   Type, type LucideIcon,
@@ -57,6 +57,7 @@ const t = (tool: Omit<Tool, 'processing'> & { processing?: Tool['processing'] })
 export const tools: Tool[] = [
   // File
   t({ slug: 'file-converter', category: 'file', icon: ArrowRightLeft, keywords: ['변환', '형식', '확장자', 'convert', 'converter', 'format', 'extension', 'heic', 'jpg', 'png', 'webp', 'avif', 'mp3', 'mp4', 'webm', 'gif', 'json', 'yaml', 'csv', 'xml', '変換', '拡張子'], status: 'ready', accepts: ['*'] }),
+  t({ slug: 'unicode-normalize', category: 'file', icon: Combine, keywords: ['자모', '자모 분리', '한글 깨짐', '맥', 'mac', 'nfd', 'nfc', '정규화', 'normalize', 'unicode', '파일 이름', 'ㅎㅏㄴㄱㅡㄹ', 'jamo', '濁点', '分離'], status: 'ready', accepts: ['*'] }),
   t({ slug: 'batch-rename', category: 'file', icon: TextCursorInput, keywords: ['이름', 'rename', '일괄', 'batch', '번호', '정규식', 'regex'], status: 'ready', accepts: ['*'] }),
   t({ slug: 'file-date-changer', category: 'file', icon: CalendarClock, keywords: ['날짜', '생성일', '수정일', 'timestamp', 'date', 'touch'], status: 'ready', accepts: ['*'] }),
   t({ slug: 'metadata-remover', category: 'file', icon: EyeOff, keywords: ['메타데이터', 'exif', 'gps', '위치', '개인정보', 'metadata'], status: 'ready', accepts: ['image/jpeg', 'image/png', 'image/webp'] }),
