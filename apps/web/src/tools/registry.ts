@@ -75,7 +75,7 @@ export const tools: Tool[] = [
   t({ slug: 'qr-code', category: 'image', icon: QrCode, keywords: ['qr', '큐알', '코드', 'qr코드', 'qr 생성', 'qr 읽기', '와이파이', 'wifi', 'barcode', 'scan', 'QRコード'], status: 'ready' }),
 
   // Media
-  t({ slug: 'video-to-gif', category: 'media', icon: Film, keywords: ['gif', '영상', 'video', 'mp4'], status: 'soon', accepts: ['video/*'] }),
+  t({ slug: 'video-to-gif', category: 'media', icon: Film, keywords: ['gif', '움짤', '영상', '동영상', 'video', 'mp4', 'webm', 'mov', 'animated gif', 'clip', '動画', 'GIF変換'], status: 'ready', accepts: ['video/*'] }),
   t({ slug: 'screen-recorder', category: 'media', icon: ScreenShare, keywords: ['녹화', '화면', 'record', 'screen'], status: 'soon' }),
 
   // Text
