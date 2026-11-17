@@ -76,7 +76,7 @@ export const tools: Tool[] = [
 
   // Media
   t({ slug: 'video-to-gif', category: 'media', icon: Film, keywords: ['gif', '움짤', '영상', '동영상', 'video', 'mp4', 'webm', 'mov', 'animated gif', 'clip', '動画', 'GIF変換'], status: 'ready', accepts: ['video/*'] }),
-  t({ slug: 'screen-recorder', category: 'media', icon: ScreenShare, keywords: ['녹화', '화면', 'record', 'screen'], status: 'soon' }),
+  t({ slug: 'screen-recorder', category: 'media', icon: ScreenShare, keywords: ['녹화', '화면', '화면 녹화', '캡처', 'record', 'screen', 'screen recorder', 'capture', '画面録画', '録画'], status: 'ready' }),
 
   // Text
   t({ slug: 'char-counter', category: 'text', icon: Type, keywords: ['글자수', '글자 수', '자소서', '바이트', 'count', '단어'], status: 'ready' }),
