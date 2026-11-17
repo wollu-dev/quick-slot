@@ -15,7 +15,7 @@ import { checkUrl, createJob, disposition, FORMATS, getJob, info, takeFile, Vide
 import { Readable } from 'node:stream';
 import { CLIENT_IP_HEADER, providers, type Auth } from './auth.ts';
 import type { Mailer } from './mail.ts';
-import { applyPaddleEvent, checkoutConfig, planOf, verifyPaddleSignature, type PaddleEvent } from './billing.ts';
+import { applyPaddleEvent, checkoutConfig, planOf, portalAvailable, portalUrl, PortalFailure, verifyPaddleSignature, type PaddleEvent } from './billing.ts';
 import type { Db } from './db/index.ts';
 
 export type Env = { Variables: { ip: string } };
@@ -187,7 +187,22 @@ export function createApp({ auth = null, mailer = null, db = null }: Deps = {}) 
   const session = async (headers: Headers) => (auth ? ((await auth.api.getSession({ headers })) as { user: { id: string } } | null) : null);
 
   /** How the site opens the checkout; { checkout: null } while payments aren't set up */
-  app.get('/api/billing/config', (c) => c.json({ checkout: auth && db ? checkoutConfig() : null }));
+  app.get('/api/billing/config', (c) => c.json({ checkout: auth && db ? checkoutConfig() : null, portal: !!(auth && db && portalAvailable()) }));
+
+  /** A one-time link to Paddle's customer portal (cancel, change card, invoices) */
+  app.post('/api/billing/portal', async (c) => {
+    if (!auth || !db) return c.json({ error: 'accountsDisabled' }, 503);
+    // A POST that creates something for the signed-in user: only from our own pages
+    if (c.req.header('origin') !== config.siteUrl) return c.json({ error: 'badOrigin' }, 403);
+    const s = await session(c.req.raw.headers);
+    if (!s) return c.json({ error: 'signInRequired' }, 401);
+    try {
+      return c.json({ url: await portalUrl(db, s.user.id) });
+    } catch (e) {
+      if (!(e instanceof PortalFailure)) throw e;
+      return c.json({ error: e.code }, e.code === 'unavailable' ? 501 : e.code === 'noSubscription' ? 404 : 502);
+    }
+  });
 
   /** The signed-in user's plan */
   app.get('/api/billing/me', async (c) => {

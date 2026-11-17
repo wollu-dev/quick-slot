@@ -45,6 +45,9 @@ export const config = {
           clientToken: env.PADDLE_CLIENT_TOKEN,
           webhookSecret: env.PADDLE_WEBHOOK_SECRET,
           prices: { monthly: env.PADDLE_PRICE_MONTHLY, yearly: env.PADDLE_PRICE_YEARLY },
+          /** Optional: lets subscribers open Paddle's customer portal (needs the customer_portal_session.write permission) */
+          apiKey: env.PADDLE_API_KEY || '',
+          apiBase: env.PADDLE_API_BASE || (env.PADDLE_ENV === 'production' ? 'https://api.paddle.com' : 'https://sandbox-api.paddle.com'),
         }
       : null,
   /** Only for tests: let outgoing requests reach private and loopback addresses */

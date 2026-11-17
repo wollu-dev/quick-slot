@@ -23,15 +23,32 @@ export interface PlanInfo {
 
 export type Period = 'monthly' | 'yearly';
 
+interface BillingConfig {
+  checkout: CheckoutConfig | null;
+  /** Subscribers can open Paddle's customer portal */
+  portal: boolean;
+}
+let billingConfig: Promise<BillingConfig> | null = null;
+function getBillingConfig(): Promise<BillingConfig> {
+  billingConfig ??= fetch('/api/billing/config', { cache: 'no-store' })
+    .then((r) => (r.ok ? (r.json() as Promise<BillingConfig>) : { checkout: null, portal: false }))
+    .catch(() => ({ checkout: null, portal: false }));
+  return billingConfig;
+}
+
 /** null when payments aren't set up on this server (or it can't be reached) */
-export async function getCheckoutConfig(): Promise<CheckoutConfig | null> {
-  try {
-    const res = await fetch('/api/billing/config', { cache: 'no-store' });
-    if (!res.ok) return null;
-    return ((await res.json()) as { checkout: CheckoutConfig | null }).checkout;
-  } catch {
-    return null;
-  }
+export const getCheckoutConfig = async () => (await getBillingConfig()).checkout;
+export const portalAvailable = async () => (await getBillingConfig()).portal;
+
+/**
+ * Sends the user to Paddle's customer portal (cancel, change card, invoices). The API makes a fresh,
+ * short-lived link each time, so it is never stored. Throws when the link can't be made.
+ */
+export async function openPortal(): Promise<void> {
+  const res = await fetch('/api/billing/portal', { method: 'POST', credentials: 'same-origin', cache: 'no-store' });
+  const body = (await res.json().catch(() => ({}))) as { url?: string };
+  if (!res.ok || !body.url) throw new Error('portal');
+  location.assign(body.url);
 }
 
 /** The signed-in user's plan; null when signed out or accounts are off */
