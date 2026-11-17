@@ -107,6 +107,8 @@ npm run dev
 | `npm run dev` | 개발 서버 실행 (`localhost:4321`) |
 | `npm run build` | 정적 사이트를 `apps/web/dist` 로 빌드 |
 | `npm run preview` | 빌드 결과를 로컬에서 띄워 보기 |
+| `npm run dev:api` | API 서버를 `localhost:8787` 에서 실행 (서버 도구에만 필요, 개발 서버가 `/api` 를 넘겨줌) |
+| `npm test` | API 테스트 실행 |
 | `npm run check` | 프로젝트 전체 타입 검사 |
 
 ## 설정
@@ -121,10 +123,20 @@ npm run dev
 - **GitHub Actions:** 저장소 **Variables** 에 `SITE_URL` 추가
 - **Docker:** `--build-arg SITE_URL=https://…`
 
+API (`apps/api`, `apps/api/.env.example` 참고) 설정:
+
+| 변수 | 용도 | 기본값 |
+|---|---|---|
+| `PORT` | API 가 받는 포트 | `8787` |
+| `TRUST_PROXY` | 클라이언트 주소를 `X-Forwarded-For` 에서 읽기 (함께 들어 있는 nginx 뒤에서는 `true`) | `false` |
+| `RATE_LIMIT_PER_MINUTE` | 클라이언트 주소별 1분당 허용 요청 수 | `60` |
+| `LOG_REQUESTS` | 요청마다 한 줄 기록: 메서드, 쿼리를 뺀 경로, 상태, 시간 | `true` |
+
 ## 프로젝트 구조
 
 ```
 quick-slot/
+├─ apps/api/                 # 일부 서버 도구용 API (Node 24 위의 Hono)
 ├─ apps/web/                 # 웹사이트 (Astro + React islands + Tailwind CSS)
 │  ├─ src/
 │  │  ├─ tools/registry.ts   # ★ 툴 목록 (홈·검색·독이 모두 여기서 읽음)
@@ -136,6 +148,9 @@ quick-slot/
 │  │  ├─ lib/                # 파일·ZIP, 메타데이터 제거, 슬롯, 테마, 독 설정
 │  │  └─ styles/global.css   # 디자인 토큰과 글래스 디자인 시스템
 │  └─ public/
+├─ deploy/nginx.conf         # web 이미지의 nginx 설정
+├─ Dockerfile                # 이미지: web (nginx + 정적 사이트), api
+├─ docker-compose.yml        # web 과 api 를 함께 실행
 ├─ docs/assets/              # README 스크린샷
 └─ AGENTS.md                 # 사람과 AI 에이전트를 위한 기여 규칙
 ```
@@ -166,7 +181,14 @@ quick-slot/
 
 ## 배포
 
-Docker 이미지를 GitHub Container Registry 에 올려 직접 호스팅할 계획입니다. 아직 만들지 않았고, 지금은 CI 가 모든 PR 의 타입 검사와 빌드만 합니다.
+QuickSlot 은 Docker 로 직접 호스팅합니다. 루트 `Dockerfile` 이 두 이미지를 만듭니다: **web** (정적 사이트를 제공하고 `/api` 를 API 로 넘기는 nginx) 와 **api**. CI 는 PR 마다 두 이미지를 빌드하고 함께 동작하는지 확인합니다.
+
+```bash
+SITE_URL=https://example.com docker compose build
+docker compose up -d          # http://localhost:8080 (QUICKSLOT_PORT 로 변경)
+```
+
+포트는 web 컨테이너만 열고, API 는 nginx 를 거쳐서만 접근합니다. 버전 태그(`v*`)를 올릴 때 GitHub Container Registry 에 이미지를 게시하는 것은 다음에 추가할 예정입니다.
 
 ## 기여하기
 

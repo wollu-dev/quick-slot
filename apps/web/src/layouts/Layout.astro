@@ -115,10 +115,14 @@ const absolute = (p: string) => (Astro.site ? new URL(p, Astro.site).href : p);
       <div class="flex flex-col gap-3 border-t border-line pt-5 sm:flex-row sm:items-center sm:justify-between">
         <p>{t.footer.copyright(new Date().getFullYear())}</p>
 
-        {
-          REPO_URL && (
-            <nav aria-label={t.footer.links} class="flex flex-wrap items-center gap-y-1 divide-x divide-line">
-              <a href={REPO_URL} target="_blank" rel="noopener noreferrer" class="footer-link pr-3">
+        <nav aria-label={t.footer.links} class="flex flex-wrap items-center gap-y-1 divide-x divide-line">
+          <a href={localizePath(lang, '/privacy')} class="footer-link pr-3">
+            {t.footer.privacy}
+          </a>
+          {
+            REPO_URL && (
+              <>
+              <a href={REPO_URL} target="_blank" rel="noopener noreferrer" class="footer-link px-3">
                 <GithubMark size={13} />
                 {t.footer.github}
               </a>
@@ -128,9 +132,10 @@ const absolute = (p: string) => (Astro.site ? new URL(p, Astro.site).href : p);
               <a href={`${REPO_URL}/issues`} target="_blank" rel="noopener noreferrer" class="footer-link pl-3">
                 {t.footer.issues}
               </a>
-            </nav>
-          )
-        }
+              </>
+            )
+          }
+        </nav>
       </div>
     </footer>
 

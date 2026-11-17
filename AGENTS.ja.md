@@ -11,7 +11,7 @@
 
 QuickSlot: ブラウザですぐ使える日常・開発ツール集。構成とツールの追加方法は [README.ja.md](README.ja.md) を参照。
 
-- npm workspaces のモノレポ。ウェブサイトは `apps/web`（Astro 7 + React 19 islands + Tailwind 4）。バックエンド（`apps/api`）はまだありません。
+- npm workspaces のモノレポ。ウェブサイトは `apps/web`（Astro 7 + React 19 islands + Tailwind 4）。バックエンドは `apps/api`（Node 24 上の Hono、TypeScript を Node がそのまま実行）。サーバーツールだけが使う。
 - ツールの唯一の情報源は `apps/web/src/tools/registry.ts`。ツールの追加・状態変更はここから。
 - 原則: ツールは基本的にすべての処理をブラウザ内で行う（`processing: 'client'`）。サーバーなしでは本当に動かないツールだけ `'server'` にし、その前にブラウザ用エンジン（WebAssembly）で実現できないか確認する。*すべての*ツールが端末内で処理されると約束する文言は書かず、処理場所はツールごとに説明する。
 - サーバーツールは必ず: サーバーのバッジと雲アイコンを表示し（`processing` から自動）、ドロップ領域の「端末内で処理」の文言を「アップロード後、処理が終わり次第削除」の文言に置き換え、最初のアップロード前に確認を取り、ファイルを保存したり内容をログに残したりせず、結果を返したらすぐに削除し、公開前にプライバシーポリシーのページに記載する。
@@ -45,11 +45,13 @@ QuickSlot: ブラウザですぐ使える日常・開発ツール集。構成と
 ## デプロイ
 
 - **デプロイ方式: Docker イメージ → GitHub Container Registry（`ghcr.io`）→ セルフホスト。** 他のホスティング（GitHub Pages、Vercel、Netlify、Cloudflare Pages など）は使わないので、提案も設定もしない。
-- **現状: まだ構築していない。** サービスが完成に近づいたら構築する。それまでに `Dockerfile` やイメージ公開のワークフローを追加しない。現在の自動化は CI（`.github/workflows/ci.yml`: 型チェックとビルド）だけ。
-- 構築するときの方針: 2段階の `Dockerfile`（Node でビルド → nginx で静的な成果物だけを配信）、サイトURLは `ARG SITE_URL`。イメージの公開は `main` へのマージごとではなく、**バージョンタグ（`v*`）を push したときだけ**。
+- **イメージ:** ルートの `Dockerfile` が2つのターゲットを作る。`web` は静的ビルドを配信し `/api` を API に渡す nginx（`deploy/nginx.conf`）、サイトURLは `ARG SITE_URL`。`api` は `apps/api` を実行する Node。`docker-compose.yml` が両方を起動し、ポートを公開するのは web コンテナだけ。
+- **CI**（`.github/workflows/ci.yml`）は型チェック・テスト・ビルドに加え、プルリクエストごとに2つのイメージをビルドし、一緒に起動して簡単に確認する。CI からは何も公開しない。
+- **公開:** イメージは **バージョンタグ（`v*`）を push したときだけ** GHCR に公開し、`main` へのマージごとには公開しない。公開用ワークフローはまだ追加していない。パッケージを公開するため、追加にはリポジトリ所有者の承認が必要。
+- **ログに個人情報を残さない:** nginx と API が記録するのは、時刻、メソッド、クエリ文字列を除いたパス、ステータス、サイズ、処理時間だけ。クライアントのアドレス、リクエスト本文、ファイル名は残さない。ルートを追加するときも守る。プライバシーポリシー（`/privacy`）で約束している内容。
 - **ドメインやURLをコードに書かない。** サイトURLはビルド環境変数 `SITE_URL` からのみ受け取る（`astro.config.mjs` → `Astro.site`）。絶対URLが必要なら `Astro.site` を使い、未設定のときは相対URLで動くようにする。
 - プロジェクトのリンク（GitHub リポジトリ）と作者は、ルートの `package.json` の `repository`、`author` から取得する。画面のコードにURLを書かず、`apps/web/src/lib/project.ts` で読み込む。
-- 環境変数を追加したら、`apps/web/.env.example` と README の「設定（Configuration）」表（3言語すべて）にも書く。
+- 環境変数を追加したら、`apps/web/.env.example`（サイト）または `apps/api/.env.example`（API）と、README の「設定（Configuration）」表（3言語すべて）にも書く。
 
 ## デザインルール
 
@@ -79,7 +81,9 @@ QuickSlot: ブラウザですぐ使える日常・開発ツール集。構成と
 npm install
 npm run check    # 型チェック（変更後は必ず実行）
 npm run build    # ビルド（変更後は必ず実行）
-npm run dev      # 開発サーバー（http://localhost:4321）
+npm run dev      # 開発サーバー（http://localhost:4321）、/api は API に転送
+npm run dev:api  # API サーバー（http://localhost:8787）、サーバーツールにだけ必要
+npm test         # API のテスト
 ```
 
 エージェントが開発サーバーを起動するときはバックグラウンドで: `apps/web` で `npx astro dev --background`、停止は `npx astro dev stop`。

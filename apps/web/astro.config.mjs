@@ -34,5 +34,8 @@ export default defineConfig({
     optimizeDeps: { exclude: ['@ffmpeg/ffmpeg', '@ffmpeg/util', '@jsquash/avif', '@jsquash/jpeg', '@jsquash/oxipng', '@jsquash/webp'] },
     // Our own workers load codecs with dynamic import(), which needs ES module workers
     worker: { format: 'es' },
+    // In development, /api goes to the API server (npm run dev:api); in production nginx does the same
+    server: { proxy: { '/api': { target: `http://localhost:${process.env.API_PORT || 8787}`, changeOrigin: false } } },
+    preview: { proxy: { '/api': { target: `http://localhost:${process.env.API_PORT || 8787}`, changeOrigin: false } } },
   },
 });

@@ -11,7 +11,7 @@
 
 QuickSlot: 브라우저에서 바로 쓰는 생활·개발 도구 모음. 구조와 툴 추가 방법은 [README.ko.md](README.ko.md) 참고.
 
-- npm workspaces 모노레포. 웹사이트는 `apps/web` (Astro 7 + React 19 islands + Tailwind 4). 백엔드(`apps/api`)는 아직 없음.
+- npm workspaces 모노레포. 웹사이트는 `apps/web` (Astro 7 + React 19 islands + Tailwind 4). 백엔드는 `apps/api` (Node 24 위의 Hono, TypeScript 를 Node 가 그대로 실행). 서버 도구만 쓴다.
 - 툴의 단일 진실 공급원은 `apps/web/src/tools/registry.ts`. 툴 추가·상태 변경은 여기부터.
 - 원칙: 툴은 기본적으로 모든 처리를 브라우저 안에서 한다(`processing: 'client'`). 서버 없이는 정말 안 되는 툴만 `'server'` 로 하고, 그 전에 브라우저용 엔진(WebAssembly)으로 가능한지 먼저 확인한다. *모든* 툴이 기기 안에서 처리된다고 약속하는 문구는 쓰지 않고, 처리 위치는 툴마다 설명한다.
 - 서버 툴은 반드시: 서버 배지와 구름 아이콘을 표시하고(`processing` 으로 자동), 드롭 영역의 "기기 안에서 처리" 문구를 "업로드 후 처리 직후 삭제" 문구로 바꾸고, 처음 업로드하기 전에 확인을 받고, 파일을 저장하거나 내용을 로그로 남기지 않으며 결과를 돌려준 즉시 삭제하고, 출시 전에 개인정보 처리방침 페이지에 내용을 적는다.
@@ -45,11 +45,13 @@ QuickSlot: 브라우저에서 바로 쓰는 생활·개발 도구 모음. 구조
 ## 배포
 
 - **배포 방식: Docker 이미지 → GitHub Container Registry(`ghcr.io`) → 직접 호스팅.** 다른 호스팅(GitHub Pages, Vercel, Netlify, Cloudflare Pages 등)은 쓰지 않으므로 제안하거나 설정하지 않는다.
-- **현재 상태: 아직 만들지 않음.** 서비스가 완성 단계에 가까워지면 만든다. 그 전에 `Dockerfile` 이나 이미지 게시 워크플로를 추가하지 않는다. 지금 자동화는 CI(`.github/workflows/ci.yml`: 타입 검사·빌드)뿐이다.
-- 만들 때의 방향: 2단계 `Dockerfile` (Node 로 빌드 → nginx 에 정적 결과물만 담기), 사이트 주소는 `ARG SITE_URL`. 이미지 게시는 `main` 머지마다가 아니라 **버전 태그(`v*`)를 push 할 때만**.
+- **이미지:** 루트 `Dockerfile` 이 두 타깃을 만든다. `web` 은 정적 빌드를 제공하고 `/api` 를 API 로 넘기는 nginx (`deploy/nginx.conf`), 사이트 주소는 `ARG SITE_URL`. `api` 는 `apps/api` 를 실행하는 Node. `docker-compose.yml` 이 둘을 함께 띄우고, 포트는 web 컨테이너만 연다.
+- **CI** (`.github/workflows/ci.yml`) 는 타입 검사·테스트·빌드에 더해, PR 마다 두 이미지를 빌드하고 함께 띄워 간단히 검사한다. CI 에서는 아무것도 게시하지 않는다.
+- **게시:** 이미지는 **버전 태그(`v*`)를 push 할 때만** GHCR 에 올리고, `main` 머지마다 올리지 않는다. 게시 워크플로는 아직 추가하지 않았다. 패키지를 공개하는 일이라 추가하려면 저장소 주인의 승인이 필요하다.
+- **로그에 개인정보를 남기지 않는다:** nginx 와 API 는 시각, 메서드, 쿼리 문자열을 뺀 경로, 상태, 크기, 처리 시간만 기록한다. 클라이언트 주소, 요청 본문, 파일 이름은 남기지 않는다. 경로를 추가할 때도 지킨다. 개인정보처리방침(`/privacy`)이 약속하는 내용이다.
 - **도메인·주소를 코드에 쓰지 않는다.** 사이트 주소는 빌드 환경 변수 `SITE_URL` 로만 받는다 (`astro.config.mjs` → `Astro.site`). 전체 주소가 필요하면 `Astro.site` 를 쓰고, 없을 때는 상대 주소로 동작하게 만든다.
 - 프로젝트 링크(GitHub 저장소)와 작성자는 루트 `package.json` 의 `repository`, `author` 에서 가져온다. 화면 코드에 주소를 쓰지 말고 `apps/web/src/lib/project.ts` 로 읽는다.
-- 환경 변수를 추가하면 `apps/web/.env.example` 과 README 의 "설정(Configuration)" 표(세 언어 모두)에도 적는다.
+- 환경 변수를 추가하면 `apps/web/.env.example` (사이트) 또는 `apps/api/.env.example` (API) 과 README 의 "설정(Configuration)" 표(세 언어 모두)에도 적는다.
 
 ## 디자인 규칙
 
@@ -79,7 +81,9 @@ QuickSlot: 브라우저에서 바로 쓰는 생활·개발 도구 모음. 구조
 npm install
 npm run check    # 타입 검사 (변경 후 반드시 실행)
 npm run build    # 빌드 (변경 후 반드시 실행)
-npm run dev      # 개발 서버 (http://localhost:4321)
+npm run dev      # 개발 서버 (http://localhost:4321), /api 는 API 로 전달
+npm run dev:api  # API 서버 (http://localhost:8787), 서버 도구에만 필요
+npm test         # API 테스트
 ```
 
 에이전트가 개발 서버를 띄울 때는 백그라운드로: `apps/web` 에서 `npx astro dev --background`, 중지는 `npx astro dev stop`.

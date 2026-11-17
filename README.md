@@ -108,6 +108,8 @@ Then open <http://localhost:4321>.
 | `npm run build` | Build the static site into `apps/web/dist` |
 | `npm run preview` | Serve the production build locally |
 | `npm run check` | Type-check the whole project |
+| `npm run dev:api` | Start the API at `localhost:8787` (only server tools need it; the dev server proxies `/api` to it) |
+| `npm test` | Run the API tests |
 
 ## Configuration
 
@@ -121,10 +123,20 @@ The site URL is never hard-coded. Set it where you build:
 - **GitHub Actions:** add a repository **variable** named `SITE_URL`.
 - **Docker:** pass `--build-arg SITE_URL=https://…`.
 
+The API (`apps/api`, see `apps/api/.env.example`) reads:
+
+| Variable | Purpose | Default |
+|---|---|---|
+| `PORT` | Port the API listens on | `8787` |
+| `TRUST_PROXY` | Read the client address from `X-Forwarded-For` (set `true` behind the bundled nginx) | `false` |
+| `RATE_LIMIT_PER_MINUTE` | Requests allowed per client address per minute | `60` |
+| `LOG_REQUESTS` | One log line per request: method, path without query, status, time | `true` |
+
 ## Project structure
 
 ```
 quick-slot/
+├─ apps/api/                 # API for the few server tools (Hono on Node 24)
 ├─ apps/web/                 # The website (Astro + React islands + Tailwind CSS)
 │  ├─ src/
 │  │  ├─ tools/registry.ts   # ★ Tool manifest that home, search and the dock all read from
@@ -136,6 +148,9 @@ quick-slot/
 │  │  ├─ lib/                # Files/ZIP, metadata stripping, slots, theme, dock settings
 │  │  └─ styles/global.css   # Design tokens and the glass design system
 │  └─ public/
+├─ deploy/nginx.conf         # nginx config of the web image
+├─ Dockerfile                # Images: web (nginx + static site) and api
+├─ docker-compose.yml        # Runs web and api together
 ├─ docs/assets/              # Screenshots for the README
 └─ AGENTS.md                 # Contribution rules for humans and AI agents
 ```
@@ -166,7 +181,14 @@ Every language is a separate static page with `hreflang` links. QuickSlot never 
 
 ## Deployment
 
-The planned deployment is a Docker image published to the GitHub Container Registry and self-hosted. It isn't set up yet. For now, CI only type-checks and builds every pull request.
+QuickSlot is self-hosted with Docker. The root `Dockerfile` builds two images: **web** (nginx serving the static site and passing `/api` to the API) and **api**. CI builds both on every pull request and checks that they work together.
+
+```bash
+SITE_URL=https://example.com docker compose build
+docker compose up -d          # http://localhost:8080 (change with QUICKSLOT_PORT)
+```
+
+Only the web container opens a port; the API is reached through nginx. Publishing images to the GitHub Container Registry on version tags (`v*`) is planned.
 
 ## Contributing
 
