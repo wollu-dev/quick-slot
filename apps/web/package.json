@@ -2,7 +2,7 @@
   "name": "@quickslot/web",
   "type": "module",
   "version": "0.0.1",
-  "license": "MIT",
+  "license": "SEE LICENSE IN LICENSE.md",
   "engines": {
     "node": ">=22.23.4"
   },

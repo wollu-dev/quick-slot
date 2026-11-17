@@ -26,7 +26,7 @@ const en: Dict = {
     copyright: (year) => `© ${year} Jaeyun Jung (WolLu)`,
     links: 'Project links',
     github: 'GitHub',
-    license: 'MIT License',
+    license: 'License',
     issues: 'Report an issue',
     privacy: 'Privacy',
   },

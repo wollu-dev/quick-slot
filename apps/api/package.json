@@ -1,6 +1,7 @@
 {
   "name": "@quickslot/api",
   "version": "0.0.1",
+  "license": "SEE LICENSE IN LICENSE.md",
   "private": true,
   "type": "module",
   "description": "Server side of the few QuickSlot tools that can't run in the browser",
