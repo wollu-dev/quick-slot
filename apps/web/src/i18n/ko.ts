@@ -37,6 +37,12 @@ const ko = {
   picker: {
     prevMonth: '이전 달',
     nextMonth: '다음 달',
+    prevYear: '이전 해',
+    nextYear: '다음 해',
+    prevYears: '이전 12년',
+    nextYears: '다음 12년',
+    chooseMonth: '연도·월 고르기',
+    chooseYear: '연도 고르기',
     time: '시간',
     hour: '시',
     minute: '분',
