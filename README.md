@@ -67,6 +67,7 @@ Renaming a batch of files, stripping GPS data from a photo, pretty-printing JSON
 | **Normal Map Green Flip** | Convert normal maps between DirectX and OpenGL exactly (8 and 16-bit PNG, TGA, alpha kept), with a lit preview and _DX / _GL renaming |
 | **Date Calculator** | Days between dates (D-day, weekdays), age with the Chinese zodiac sign, and adding days, weeks, months or weekdays to a date |
 | **Unit Converter** | Length, weight, area (incl. pyeong), volume, temperature, speed and data size, all units at once |
+| **Draw Games** | Roulette, ladder (amidakuji) and pinball for fair random picks, using the browser's cryptographic random generator |
 | **Bill Splitter** | Split a bill evenly or with extras per person, round to 10 / 100 / 1000, and copy a summary to share |
 
 <details>
