@@ -3,6 +3,9 @@
  * en.ts / ja.ts must match this structure exactly (a missing key is a type error).
  * **bold** and `code` inside strings are rendered as formatting by the <Rich> component.
  */
+/** One row of the plan comparison: true = included, false = not included, text = what is included */
+export type PlanRow = { label: string; free: boolean | string; pro: boolean | string; enterprise: boolean | string };
+
 const ko = {
   meta: {
     siteTitle: 'QuickSlot · 필요한 도구를 바로 꺼내 쓰세요',
@@ -33,6 +36,8 @@ const ko = {
     license: '라이선스',
     issues: '문제 신고',
     privacy: '개인정보처리방침',
+    terms: '이용약관',
+    pricing: '요금제',
   },
   picker: {
     prevMonth: '이전 달',
@@ -1155,6 +1160,59 @@ const ko = {
     noServerTools: '지금은 서버를 쓰는 도구가 없어요. 모든 도구가 기기 안에서 처리돼요.',
     contactHeading: '문의',
     contact: '궁금한 점이나 요청은 GitHub 이슈로 남겨 주세요.',
+  },
+  terms: {
+    title: '이용약관',
+    updated: '최종 수정일: 2026년 11월 17일',
+    summary: 'QuickSlot의 도구는 계정 없이 무료로 쓸 수 있어요. 이 약관은 서비스를 쓰는 규칙과, 앞으로 나올 **유료 요금제**(구독, 결제, 환불)를 정해요.',
+    sections: [
+      { heading: '1. 서비스와 운영자', body: ['QuickSlot(이하 "서비스")은 이 사이트와 앱에서 제공하는 브라우저 도구 모음이고, 정재윤(WolLu, 이하 "운영자")이 운영해요.', '서비스를 쓰면 이 약관에 동의한 것으로 봐요. 사업자 정보는 유료 요금제 판매를 시작하기 전에 이 페이지에 추가해요.'] },
+      { heading: '2. 도구 사용', body: ['무료 도구는 계정 없이 쓸 수 있어요. 대부분의 도구는 파일과 입력을 내 기기 안에서 처리하고, **서버에서 처리** 배지가 붙은 도구만 필요한 정보를 서버로 보내요. 자세한 내용은 개인정보처리방침에 있어요.', '처리하는 파일과 내용, 그리고 그에 대한 권리는 사용자에게 책임이 있어요.'] },
+      { heading: '3. 금지되는 사용', body: ['불법적인 목적, 다른 사람의 권리 침해(권리가 없는 영상 내려받기 포함), 서비스 공격이나 과부하, 사용 한도 우회에 서비스를 쓰면 안 돼요.', '이 약관을 어기는 사용은 제한하거나 막을 수 있어요.'] },
+      { heading: '4. 유료 요금제', body: ['Pro와 Enterprise 요금제는 요금제 페이지에 적힌 기능을 더해요. 지금 무료인 도구는 계속 무료예요.', '구독은 해지할 때까지 매월 또는 매년 자동으로 갱신돼요. 언제든 해지할 수 있고, 이미 결제한 기간이 끝날 때까지 계속 쓸 수 있어요.'] },
+      { heading: '5. 결제', body: ['웹과 데스크톱의 주문은 온라인 판매 대행사 **Paddle.com**이 처리해요. Paddle.com이 모든 주문의 판매자(Merchant of Record)로서 결제, 세금, 영수증을 처리하고 주문과 환불 문의에 답해요.', '모바일 앱 안에서의 구매는 Apple App Store 또는 Google Play가 각자의 약관에 따라 처리해요.'] },
+      { heading: '6. 환불', body: ['요금제의 첫 결제일로부터 **14일 안에** 요청하면 전액 환불해요. 갱신 결제는 갱신 뒤 사용하지 않았다면 14일 안에 환불받을 수 있어요.', '앱스토어에서 구매한 경우 해당 스토어의 환불 절차를 따라요. 이 약관은 사용자가 사는 나라의 법이 보장하는 소비자 권리(예: 청약철회)를 제한하지 않아요.'] },
+      { heading: '7. AI 기능', body: ['AI가 만든 답과 결과는 틀릴 수 있어요. 중요한 결과는 직접 확인하세요.', 'AI 기능에 입력한 내용은 개인정보처리방침에 적힌 AI 제공자가 처리해요. 처리되길 원하지 않는 정보는 입력하지 마세요.'] },
+      { heading: '8. 소스 코드와 라이선스', body: ['QuickSlot의 소스 코드는 GitHub에 Sustainable Use License로 공개되어 있어요. 이 약관은 서비스 이용을, 라이선스는 코드 이용을 정해요.'] },
+      { heading: '9. 서비스 변경과 중단', body: ['서비스가 계속 동작하도록 노력하지만, 중단이나 오류가 없다고 보장하지는 않아요.', '도구와 기능은 바뀔 수 있어요. 결제한 기능이 없어지면 남은 기간만큼 환불해요.'] },
+      { heading: '10. 책임의 한계', body: ['서비스는 "있는 그대로" 제공돼요. 법이 허용하는 범위에서 운영자는 간접 손해나 데이터 손실에 책임지지 않고, 운영자의 전체 책임은 최근 12개월 동안 사용자가 낸 금액으로 한정돼요.', '법으로 제한할 수 없는 책임은 이 조항으로 제한되지 않아요.'] },
+      { heading: '11. 약관 변경', body: ['약관이 바뀌면 이 페이지와 위의 날짜를 고쳐요. 유료 요금제에 중요한 변경이 있으면 구독자에게 적어도 30일 전에 알려요.'] },
+      { heading: '12. 준거법', body: ['이 약관은 대한민국 법을 따라요. 다만 사용자가 사는 나라의 소비자 보호법이 포기할 수 없는 권리를 보장하면 그 권리가 우선해요.'] },
+    ],
+    relatedHeading: '관련 문서',
+  },
+  pricing: {
+    title: '요금제',
+    summary: 'QuickSlot의 모든 도구는 계정 없이 무료예요. **Pro**는 AI, 기기 간 동기화, 더 높은 한도를 더해요. 유료 요금제는 곧 출시돼요.',
+    soon: '출시 예정',
+    custom: '별도 문의',
+    perMonth: (price: string) => `${price} / 월`,
+    perYear: (price: string) => `또는 ${price} / 년 (2개월 무료)`,
+    plans: {
+      free: { name: 'Free', tagline: '모든 도구를 계정 없이', cta: '도구 열기', points: ['모든 도구 무료', '파일은 기본적으로 내 기기에서 처리', '광고·추적 없음'] },
+      pro: { name: 'Pro', tagline: 'QuickSlot을 매일 쓰는 사람을 위한 AI와 동기화', cta: 'Pro 시작하기', points: ['도구를 대신 써 주는 AI 비서', 'AI 접어 게임', 'Quick Slot·내 도구 기기 간 동기화', '서버 도구 더 높은 한도', 'AI 앱용 원격 MCP 서버'] },
+      enterprise: { name: 'Enterprise', tagline: '회사에서 QuickSlot을 직접 운영하려면', cta: '문의하기', points: ['상업용 셀프 호스팅 라이선스', '자체 AI API 키 사용', '유료 기능 전체'] },
+    },
+    compareHeading: '요금제 비교',
+    feature: '기능',
+    included: '포함',
+    notIncluded: '포함 안 됨',
+    rows: [
+      { label: '모든 도구 (변환, PDF, 이미지, 개발 도구 등)', free: true, pro: true, enterprise: true },
+      { label: '파일을 내 기기에서 처리', free: true, pro: true, enterprise: true },
+      { label: '서버 도구 (서버 시간, 비디오 다운로더)', free: '기본 한도', pro: '높은 한도', enterprise: '직접 운영' },
+      { label: 'Quick Slot·내 도구 기기 간 동기화', free: false, pro: true, enterprise: true },
+      { label: '도구를 대신 써 주는 AI 비서', free: '맛보기', pro: '월 크레딧', enterprise: '자체 API 키' },
+      { label: 'AI 접어 게임', free: '기본 카드 팩', pro: 'AI 맞춤 질문', enterprise: true },
+      { label: 'AI 앱용 MCP 서버', free: '로컬', pro: '로컬·원격', enterprise: '로컬·원격' },
+      { label: '상업용 셀프 호스팅 라이선스', free: false, pro: false, enterprise: true },
+    ] as PlanRow[],
+    notes: [
+      'Pro 기능은 지금 만들고 있고, Pro 요금제와 함께 열려요.',
+      '가격은 미국 달러 기준이에요. 사는 곳에 따라 결제할 때 부가세나 판매세가 더해질 수 있어요.',
+      '결제는 판매 대행사이자 판매자(Merchant of Record)인 **Paddle.com**이 처리해요. 모바일 앱에서는 Apple이나 Google이 처리해요.',
+      '언제든 해지할 수 있고, 결제한 기간이 끝날 때까지 Pro를 쓸 수 있어요. 첫 결제 후 14일 안에는 전액 환불해요.',
+    ],
   },
   serverTime: {
     address: '사이트 주소',
