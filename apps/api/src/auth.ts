@@ -9,7 +9,9 @@
  */
 import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
+import { APIError } from 'better-auth/api';
 import { magicLink } from 'better-auth/plugins/magic-link';
+import { hasRenewingSubscription } from './billing.ts';
 import { config } from './config.ts';
 import type { Db } from './db/index.ts';
 import { schema } from './db/schema.ts';
@@ -35,7 +37,15 @@ export function createAuth(db: Db, mailer: Mailer | null) {
     telemetry: { enabled: false },
     emailAndPassword: { enabled: false },
     socialProviders: social,
-    user: { deleteUser: { enabled: true } },
+    user: {
+      deleteUser: {
+        enabled: true,
+        // Deleting the account while a subscription still renews would leave the user paying for nothing
+        beforeDelete: async (u) => {
+          if (await hasRenewingSubscription(db, u.id)) throw new APIError('BAD_REQUEST', { message: 'activeSubscription' });
+        },
+      },
+    },
     session: { expiresIn: 60 * 60 * 24 * 30, updateAge: 60 * 60 * 24 },
     rateLimit: { enabled: true, window: 60, max: 30 },
     advanced: {

@@ -15,6 +15,8 @@ import { checkUrl, createJob, disposition, FORMATS, getJob, info, takeFile, Vide
 import { Readable } from 'node:stream';
 import { CLIENT_IP_HEADER, providers, type Auth } from './auth.ts';
 import type { Mailer } from './mail.ts';
+import { applyPaddleEvent, checkoutConfig, planOf, verifyPaddleSignature, type PaddleEvent } from './billing.ts';
+import type { Db } from './db/index.ts';
 
 export type Env = { Variables: { ip: string } };
 
@@ -32,9 +34,11 @@ export interface Deps {
   /** null when accounts are off (no DATABASE_URL) */
   auth?: Auth | null;
   mailer?: Mailer | null;
+  /** The database behind accounts, for subscriptions */
+  db?: Db | null;
 }
 
-export function createApp({ auth = null, mailer = null }: Deps = {}) {
+export function createApp({ auth = null, mailer = null, db = null }: Deps = {}) {
   const app = new Hono<Env>();
 
   app.use('*', async (c: Context<Env>, next: Next) => {
@@ -47,6 +51,25 @@ export function createApp({ auth = null, mailer = null }: Deps = {}) {
     c.header('Referrer-Policy', 'no-referrer');
     c.header('Cross-Origin-Resource-Policy', 'same-origin');
     if (config.logRequests) console.log(`${c.req.method} ${new URL(c.req.url).pathname} ${c.res.status} ${Math.round(performance.now() - started)}ms`);
+  });
+
+  /*
+   * Paddle's subscription webhook. Registered before the per-address rate limit, because Paddle's servers
+   * may send many events at once; the signature check is what keeps everyone else out.
+   */
+  app.post('/api/billing/paddle/webhook', async (c) => {
+    const paddle = config.paddle;
+    if (!paddle || !db) return c.json({ error: 'notFound' }, 404);
+    const body = await c.req.text();
+    if (!verifyPaddleSignature(body, c.req.header('paddle-signature'), paddle.webhookSecret)) return c.json({ error: 'badSignature' }, 401);
+    let event: PaddleEvent;
+    try {
+      event = JSON.parse(body);
+    } catch {
+      return c.json({ error: 'badRequest' }, 400);
+    }
+    const result = await applyPaddleEvent(db, event);
+    return c.json({ result });
   });
 
   app.use('/api/*', rateLimit({ windowMs: 60_000, max: config.rateLimitPerMinute }));
@@ -158,6 +181,20 @@ export function createApp({ auth = null, mailer = null }: Deps = {}) {
     const headers = new Headers(c.req.raw.headers);
     headers.set(CLIENT_IP_HEADER, c.get('ip'));
     return auth.handler(new Request(c.req.raw, { headers }));
+  });
+
+  /* Subscriptions */
+  const session = async (headers: Headers) => (auth ? ((await auth.api.getSession({ headers })) as { user: { id: string } } | null) : null);
+
+  /** How the site opens the checkout; { checkout: null } while payments aren't set up */
+  app.get('/api/billing/config', (c) => c.json({ checkout: auth && db ? checkoutConfig() : null }));
+
+  /** The signed-in user's plan */
+  app.get('/api/billing/me', async (c) => {
+    if (!auth || !db) return c.json({ error: 'accountsDisabled' }, 503);
+    const s = await session(c.req.raw.headers);
+    if (!s) return c.json({ error: 'signInRequired' }, 401);
+    return c.json(await planOf(db, s.user.id));
   });
 
   app.notFound((c) => c.json({ error: 'notFound' }, 404));

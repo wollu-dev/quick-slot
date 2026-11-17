@@ -37,6 +37,16 @@ export const config = {
   mailFrom: env.MAIL_FROM || 'QuickSlot <no-reply@localhost>',
   google: env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET ? { clientId: env.GOOGLE_CLIENT_ID, clientSecret: env.GOOGLE_CLIENT_SECRET } : null,
   apple: env.APPLE_CLIENT_ID && env.APPLE_CLIENT_SECRET ? { clientId: env.APPLE_CLIENT_ID, clientSecret: env.APPLE_CLIENT_SECRET } : null,
+  /** Paddle (payments on the web). On only when all of these are set; PADDLE_ENV is sandbox or production */
+  paddle:
+    env.PADDLE_CLIENT_TOKEN && env.PADDLE_WEBHOOK_SECRET && env.PADDLE_PRICE_MONTHLY && env.PADDLE_PRICE_YEARLY
+      ? {
+          environment: env.PADDLE_ENV === 'production' ? ('production' as const) : ('sandbox' as const),
+          clientToken: env.PADDLE_CLIENT_TOKEN,
+          webhookSecret: env.PADDLE_WEBHOOK_SECRET,
+          prices: { monthly: env.PADDLE_PRICE_MONTHLY, yearly: env.PADDLE_PRICE_YEARLY },
+        }
+      : null,
   /** Only for tests: let outgoing requests reach private and loopback addresses */
   allowPrivateTargets: env.ALLOW_PRIVATE_TARGETS === 'true',
   version: pkg.version,

@@ -16,6 +16,8 @@ QuickSlot: everyday and developer tools that run right in the browser. See [READ
 - Server tools must: show the server badge and cloud icon (automatic from `processing`); replace the drop zone's on-device note with one saying the file is uploaded and deleted right after processing; ask for confirmation before the first upload; never store files or log their contents, and delete them as soon as the result is returned; and be covered by a privacy policy page before they ship.
 - Custom tools (`lib/customTools.ts`) are links to external sites that users add themselves. They are stored only in the browser, accept only http(s) URLs, and are opened in a new tab with `noopener,noreferrer` after the external-tool warning (`ExternalToolWarning`). Never load anything from those sites (favicons, previews, iframes).
 - Heavy engines (WebAssembly such as ffmpeg.wasm, HEIC and AVIF codecs) are loaded only when needed with dynamic `import()`, and served from this site, never from a CDN.
+- The one script loaded from another site is **Paddle.js** (payments), because Paddle requires its own CDN. Load it only when the user presses a buy button (`lib/billing.ts`), never on page load.
+- Billing (checkout, subscription status, the Paddle webhook) is regular code, not `ee`: it is how people buy Pro, not a Pro feature. Pro-only API routes use `requirePro()` from `apps/api/src/billing.ts`.
 - File conversion must never produce a file whose extension doesn't match its content. Read the real format from the bytes (`lib/convert/formats.ts`), rename only when the format already matches, and refuse what can't be converted.
 
 ## License

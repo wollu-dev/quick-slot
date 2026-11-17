@@ -26,7 +26,8 @@ async function accounts(): Promise<Deps & { close?: () => Promise<void> }> {
   if (applied.length) console.log(`[api] database migrations applied: ${applied.join(', ')}`);
   const mailer = createMailer();
   if (!mailer) console.log('[api] email sign-in off (no SMTP_URL)');
-  return { auth: createAuth(db, mailer), mailer, close };
+  if (!config.paddle) console.log('[api] payments off (no PADDLE_* settings)');
+  return { auth: createAuth(db, mailer), mailer, db, close };
 }
 
 const deps = await accounts();

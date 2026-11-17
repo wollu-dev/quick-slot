@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { OPEN_SETTINGS_EVENT } from '../lib/billing';
 import { createPortal } from 'react-dom';
 import { Check, Settings } from 'lucide-react';
 import { LANG_NAMES, LOCALES, goToLang, saveLang, useLang, useT, withI18n, type Lang } from '../i18n';
@@ -22,6 +23,13 @@ function SettingsSheet() {
     setOpen(false);
     buttonRef.current?.focus();
   };
+
+  // Other parts of the page (the pricing page's buy button) can ask for the sheet, to sign in
+  useEffect(() => {
+    const show = () => setOpen(true);
+    window.addEventListener(OPEN_SETTINGS_EVENT, show);
+    return () => window.removeEventListener(OPEN_SETTINGS_EVENT, show);
+  }, []);
 
   return (
     <>
