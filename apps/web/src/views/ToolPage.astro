@@ -23,6 +23,7 @@ import ImageResize from '../tools/image/ImageResize';
 import QrCode from '../tools/image/QrCode';
 import NormalMapFlip from '../tools/dev/NormalMapFlip';
 import NumberBase from '../tools/dev/NumberBase';
+import DrawGames from '../tools/life/DrawGames';
 import PdfMerge from '../tools/pdf/PdfMerge';
 import PdfSplit from '../tools/pdf/PdfSplit';
 import ImageToPdf from '../tools/pdf/ImageToPdf';
@@ -98,6 +99,7 @@ const tt = toolText(lang, tool.slug);
   {slug === 'qr-code' && <QrCode client:load lang={lang} />}
   {slug === 'normal-map-flip' && <NormalMapFlip client:load lang={lang} />}
   {slug === 'number-base' && <NumberBase client:load lang={lang} />}
+  {slug === 'draw-games' && <DrawGames client:only="react" lang={lang} />}
   {slug === 'pdf-merge' && <PdfMerge client:load lang={lang} />}
   {slug === 'pdf-split' && <PdfSplit client:load lang={lang} />}
   {slug === 'image-to-pdf' && <ImageToPdf client:load lang={lang} />}
