@@ -68,6 +68,7 @@ Renaming a batch of files, stripping GPS data from a photo, pretty-printing JSON
 | **Normal Map Green Flip** | Convert normal maps between DirectX and OpenGL exactly (8 and 16-bit PNG, TGA, alpha kept), with a lit preview and _DX / _GL renaming |
 | **Date Calculator** | Days between dates (D-day, weekdays), age with the Chinese zodiac sign, and adding days, weeks, months or weekdays to a date |
 | **Unit Converter** | Length, weight, area (incl. pyeong), volume, temperature, speed and data size, all units at once |
+| **Server Time Check** (server) | A site's server clock to the hundredth of a second (from its Date header, synced through our API), with a countdown and beeps for ticketing and sign-ups |
 | **Draw Games** | Roulette, ladder (amidakuji) and pinball for fair random picks, using the browser's cryptographic random generator |
 | **Bill Splitter** | Split a bill evenly or with extras per person, round to 10 / 100 / 1000, and copy a summary to share |
 
@@ -131,6 +132,7 @@ The API (`apps/api`, see `apps/api/.env.example`) reads:
 | `TRUST_PROXY` | Read the client address from `X-Forwarded-For` (set `true` behind the bundled nginx) | `false` |
 | `RATE_LIMIT_PER_MINUTE` | Requests allowed per client address per minute | `60` |
 | `LOG_REQUESTS` | One log line per request: method, path without query, status, time | `true` |
+| `SERVER_TIME_PER_MINUTE` | Server time checks per client address per minute (each sends about 20 requests to the site) | `6` |
 
 ## Project structure
 

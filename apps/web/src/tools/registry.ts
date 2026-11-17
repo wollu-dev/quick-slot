@@ -10,7 +10,7 @@ import {
   ArrowRightLeft, Binary, Braces, Calculator, CalendarClock, CalendarDays, Clapperboard, Clock, Code, Combine, Diff, Dices, EyeOff, FileArchive,
   FileImage, FileText, Film, FingerprintPattern, Folder, Hash, Image, Images, KeyRound, Languages, Layers,
   Merge, Palette, PenLine, QrCode, Receipt, Ruler, Scaling, Scissors, ScreenShare, TextCursorInput, Ticket,
-  Type, WandSparkles, type LucideIcon,
+  Timer, Type, WandSparkles, type LucideIcon,
 } from 'lucide-react';
 
 export type CategoryId = 'file' | 'pdf' | 'image' | 'media' | 'text' | 'dev' | 'life';
@@ -98,6 +98,7 @@ export const tools: Tool[] = [
 
   // Everyday
   t({ slug: 'date-calculator', category: 'life', icon: CalendarDays, keywords: ['날짜', 'dday', 'd-day', '디데이', '나이', '만나이', '만 나이', '계산', '기념일', '평일', '영업일', 'date', 'days between', 'age', 'business days', '日付', '年齢'], status: 'ready' }),
+  t({ slug: 'server-time', category: 'life', icon: Timer, keywords: ['서버 시간', '서버시간', '네이비즘', '수강신청', '티켓팅', '예매', '선착순', '정각', '시계', 'server time', 'clock', 'ticketing', 'sugang', 'サーバー時刻', 'チケット'], status: 'ready', processing: 'server' }),
   t({ slug: 'unit-converter', category: 'life', icon: Ruler, keywords: ['단위', '변환', '평', '길이', '무게', '넓이', '부피', '온도', '섭씨', '화씨', '인치', '파운드', '근', '돈', 'unit', 'convert', 'pyeong', 'inch', 'mile', 'pound', 'fahrenheit', '単位', '坪'], status: 'ready' }),
   t({ slug: 'draw-games', category: 'life', icon: Dices, keywords: ['뽑기', '룰렛', '돌림판', '사다리', '사다리타기', '핀볼', '추첨', '제비뽑기', '랜덤', '당첨', 'roulette', 'ladder', 'pinball', 'random', 'draw', 'picker', 'lottery', 'ルーレット', 'あみだ', '抽選'], status: 'ready' }),
   t({ slug: 'dutch-pay', category: 'life', icon: Receipt, keywords: ['더치페이', 'n빵', '엔빵', '정산', '나누기', '회비', '총무', 'split', 'bill', 'dutch', 'share', '割り勘', '精算'], status: 'ready' }),
