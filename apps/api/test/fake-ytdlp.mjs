@@ -1,6 +1,8 @@
 // Stands in for yt-dlp in tests: answers by the URL path, so no real site is ever contacted.
 import { mkdirSync, writeFileSync } from 'node:fs';
-import { dirname } from 'node:path';
+import { existsSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { dirname, join } from 'node:path';
 
 const args = process.argv.slice(2);
 const url = new URL(args.at(-1));
@@ -8,7 +10,7 @@ const has = (a) => args.includes(a);
 const after = (a) => args[args.indexOf(a) + 1];
 
 // The safety flags must always be there
-if (after('--use-extractors') !== 'default,-generic' || !has('--no-playlist')) {
+if (after('--use-extractors') !== 'default,-generic' || !has('--no-playlist') || after('--playlist-items') !== '1') {
   process.stderr.write('ERROR: missing safety flags\n');
   process.exit(2);
 }
@@ -24,8 +26,23 @@ switch (url.pathname) {
     fail('abc: Private video. Sign in if you have access');
   case '/unsupported':
     fail(`Unsupported URL: ${url.href}`);
+  case '/flaky': {
+    // Fails the first download with an unexplained error, then works
+    const mark = join(tmpdir(), `qs-fake-flaky-${process.ppid}`);
+    if (!has('-J') && !existsSync(mark)) {
+      writeFileSync(mark, '');
+      fail('HTTP Error 503: Service Unavailable');
+    }
+    if (!has('-J')) rmSync(mark);
+    break;
+  }
   case '/big':
     if (!has('-J')) fail('File is larger than max-filesize (2000000000 bytes > 1073741824 bytes). Aborting.');
+}
+
+if (has('-J') && url.pathname === '/list') {
+  process.stdout.write(JSON.stringify({ _type: 'playlist', title: 'A list', entries: [] }));
+  process.exit(0);
 }
 
 if (has('-J')) {
