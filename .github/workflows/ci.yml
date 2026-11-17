@@ -24,4 +24,40 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run check
+      - run: npm test
       - run: npm run build
+
+  docker:
+    name: docker images
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      # Build both images to catch Dockerfile breakage; nothing is pushed here
+      - name: web image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          target: web
+          push: false
+          load: true
+          tags: quickslot-web:ci
+          build-args: SITE_URL=https://example.com
+      - name: api image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          target: api
+          push: false
+          load: true
+          tags: quickslot-api:ci
+      - name: run both and check them
+        run: |
+          docker network create qs
+          docker run -d --name api --network qs -e TRUST_PROXY=true quickslot-api:ci
+          docker run -d --name web --network qs -p 8080:80 quickslot-web:ci
+          for i in $(seq 1 30); do curl -fs http://localhost:8080/api/health && break; sleep 1; done
+          curl -fs http://localhost:8080/api/health | grep -q '"ok":true'
+          curl -fs http://localhost:8080/ | grep -q 'QuickSlot'
+          curl -fs http://localhost:8080/privacy/ | grep -q 'QuickSlot'
+          curl -fsI http://localhost:8080/tools/qr-code/ | grep -qi 'x-content-type-options: nosniff'

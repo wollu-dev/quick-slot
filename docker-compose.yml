@@ -1,0 +1,39 @@
+# Run QuickSlot with the published images:
+#   SITE_URL is baked into the web image when it is built (see .github/workflows/release.yml),
+#   so here you only pick the version and the port.
+#
+#   docker compose up -d
+#
+# To build the images locally instead, run `docker compose build` with SITE_URL set:
+#   SITE_URL=https://example.com docker compose build
+
+services:
+  web:
+    image: ghcr.io/wollu-dev/quick-slot-web:${QUICKSLOT_VERSION:-latest}
+    build:
+      context: .
+      target: web
+      args:
+        SITE_URL: ${SITE_URL:-}
+    ports:
+      - "${QUICKSLOT_PORT:-8080}:80"
+    depends_on:
+      - api
+    restart: unless-stopped
+
+  api:
+    image: ghcr.io/wollu-dev/quick-slot-api:${QUICKSLOT_VERSION:-latest}
+    build:
+      context: .
+      target: api
+    environment:
+      TRUST_PROXY: "true"
+      RATE_LIMIT_PER_MINUTE: ${RATE_LIMIT_PER_MINUTE:-60}
+      LOG_REQUESTS: ${LOG_REQUESTS:-true}
+    # The API is reached only through nginx in the web container
+    expose:
+      - "8787"
+    read_only: true
+    tmpfs:
+      - /tmp
+    restart: unless-stopped

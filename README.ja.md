@@ -107,6 +107,8 @@ npm run dev
 | `npm run dev` | 開発サーバーを起動（`localhost:4321`） |
 | `npm run build` | 静的サイトを `apps/web/dist` にビルド |
 | `npm run preview` | ビルド結果をローカルで表示 |
+| `npm run dev:api` | API サーバーを `localhost:8787` で起動（サーバーツールにだけ必要。開発サーバーが `/api` を転送） |
+| `npm test` | API のテストを実行 |
 | `npm run check` | プロジェクト全体の型チェック |
 
 ## 設定
@@ -121,10 +123,20 @@ npm run dev
 - **GitHub Actions:** リポジトリの **Variables** に `SITE_URL` を追加
 - **Docker:** `--build-arg SITE_URL=https://…`
 
+API（`apps/api`、`apps/api/.env.example` を参照）の設定:
+
+| 変数 | 用途 | 既定値 |
+|---|---|---|
+| `PORT` | API が待ち受けるポート | `8787` |
+| `TRUST_PROXY` | クライアントのアドレスを `X-Forwarded-For` から読む（同梱の nginx の背後では `true`） | `false` |
+| `RATE_LIMIT_PER_MINUTE` | クライアントのアドレスごとの1分あたりの許可リクエスト数 | `60` |
+| `LOG_REQUESTS` | リクエストごとに1行記録: メソッド、クエリを除いたパス、ステータス、時間 | `true` |
+
 ## プロジェクト構成
 
 ```
 quick-slot/
+├─ apps/api/                 # 一部のサーバーツール用 API（Node 24 上の Hono）
 ├─ apps/web/                 # ウェブサイト（Astro + React islands + Tailwind CSS）
 │  ├─ src/
 │  │  ├─ tools/registry.ts   # ★ ツール一覧（ホーム・検索・ドックはすべてここを参照）
@@ -136,6 +148,9 @@ quick-slot/
 │  │  ├─ lib/                # ファイル・ZIP、メタデータ削除、スロット、テーマ、ドック設定
 │  │  └─ styles/global.css   # デザイントークンとガラスのデザインシステム
 │  └─ public/
+├─ deploy/nginx.conf         # web イメージの nginx 設定
+├─ Dockerfile                # イメージ: web（nginx + 静的サイト）、api
+├─ docker-compose.yml        # web と api を一緒に起動
 ├─ docs/assets/              # README 用スクリーンショット
 └─ AGENTS.md                 # 人とAIエージェントのための貢献ルール
 ```
@@ -166,7 +181,14 @@ quick-slot/
 
 ## デプロイ
 
-Docker イメージを GitHub Container Registry に公開し、セルフホストする予定です。まだ構築しておらず、現在は CI がすべてのプルリクエストの型チェックとビルドだけを行います。
+QuickSlot は Docker でセルフホストします。ルートの `Dockerfile` が2つのイメージを作ります: **web**（静的サイトを配信し `/api` を API に渡す nginx）と **api**。CI はプルリクエストごとに両方をビルドし、一緒に動くか確認します。
+
+```bash
+SITE_URL=https://example.com docker compose build
+docker compose up -d          # http://localhost:8080（QUICKSLOT_PORT で変更）
+```
+
+ポートを公開するのは web コンテナだけで、API には nginx を通してだけアクセスします。バージョンタグ（`v*`）で GitHub Container Registry にイメージを公開する仕組みは今後追加する予定です。
 
 ## コントリビュート
 

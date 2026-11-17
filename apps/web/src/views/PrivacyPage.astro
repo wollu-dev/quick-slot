@@ -1,0 +1,76 @@
+---
+/** Privacy policy. The per-language pages (src/pages/privacy.astro, src/pages/[lang]/privacy.astro) use this template. */
+import Layout from '../layouts/Layout.astro';
+import Rich from '../i18n/Rich';
+import { getDict, type Lang } from '../i18n';
+import { REPO_URL } from '../lib/project';
+import { tools, toolText, toolUrl } from '../tools/registry';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = getDict(lang);
+const p = t.privacy;
+const serverTools = tools.filter((tool) => tool.processing === 'server' && tool.status === 'ready');
+---
+
+<Layout lang={lang} path="/privacy" title={p.title} description={p.summary}>
+  <article class="mx-auto max-w-3xl space-y-8 pb-6">
+    <header class="space-y-2">
+      <h1 class="text-3xl font-bold tracking-tight">{p.title}</h1>
+      <p class="text-sm text-muted">{p.updated}</p>
+      <p class="text-[15px] leading-relaxed"><Rich text={p.summary} /></p>
+    </header>
+
+    {
+      p.sections.map((s) => (
+        <section class="panel space-y-2 p-5">
+          <h2 class="text-lg font-semibold">{s.heading}</h2>
+          {s.body.map((para) => (
+            <p class="text-[14px] leading-relaxed text-fg/90">
+              <Rich text={para} />
+            </p>
+          ))}
+        </section>
+      ))
+    }
+
+    <section class="panel space-y-2 p-5">
+      <h2 class="text-lg font-semibold">{p.serverToolsHeading}</h2>
+      {
+        serverTools.length ? (
+          <ul class="list-disc space-y-1 pl-5 text-[14px]">
+            {serverTools.map((tool) => (
+              <li>
+                <a class="text-accent underline" href={toolUrl(tool.slug, lang)}>
+                  {toolText(lang, tool.slug).name}
+                </a>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p class="text-[14px] text-muted">{p.noServerTools}</p>
+        )
+      }
+    </section>
+
+    <section class="panel space-y-2 p-5">
+      <h2 class="text-lg font-semibold">{p.contactHeading}</h2>
+      <p class="text-[14px] leading-relaxed">
+        {p.contact}
+        {
+          REPO_URL && (
+            <>
+              {' '}
+              <a class="text-accent underline" href={`${REPO_URL}/issues`} target="_blank" rel="noopener noreferrer">
+                {t.footer.issues}
+              </a>
+            </>
+          )
+        }
+      </p>
+    </section>
+  </article>
+</Layout>

@@ -28,6 +28,7 @@ const en: Dict = {
     github: 'GitHub',
     license: 'MIT License',
     issues: 'Report an issue',
+    privacy: 'Privacy',
   },
   picker: {
     prevMonth: 'Previous month',
@@ -1119,6 +1120,24 @@ const en: Dict = {
     done: (n: number) => `Refined ${n} ${n === 1 ? 'file' : 'files'}.`,
     failed: (names: string) => `Couldn’t process: ${names}`,
     badges: { strip: 'metadata removed', noExif: 'no date taken (original date kept)', unknown: 'unknown format (kept)' },
+  },
+  privacy: {
+    title: 'Privacy Policy',
+    updated: 'Last updated: November 17, 2026',
+    summary: 'QuickSlot has no accounts, and most tools process your files and input **on this device only**. The few tools that truly need a server are the exception, and they are all listed below.',
+    sections: [
+      { heading: 'What we don’t collect', body: ['No accounts, names, email addresses or phone numbers.', 'No tracking for ads or analytics: no tracking cookies, no analytics scripts, no pixels.'] },
+      { heading: 'Tools that run on your device', body: ['Tools marked **Runs on device** process your files and input inside your browser and send them nowhere.', 'Only the program files a tool needs (such as a converter engine) are downloaded from this site.'] },
+      { heading: 'Tools that use a server', body: ['Tools marked **Server** send only what the job needs (for example a file or an address) to our server.', 'You are asked before anything is sent the first time. It is deleted right after the result is returned, and is never kept or logged.'] },
+      { heading: 'Server logs', body: ['To run the service and find errors, the server records the time, the path (without query strings or what you typed), the status, the size and the duration of each request. IP addresses are not recorded.', 'To stop abuse, the number of requests per IP address is kept in memory for one minute and never stored.'] },
+      { heading: 'What your browser stores', body: ['Your appearance, language, Quick Slot layout and the external tools you added are stored only in this browser (localStorage). They are never sent to the server and are removed when you clear the browser’s data.'] },
+      { heading: 'Other sites', body: ['External tools you add yourself, and links opened from a QR code, follow those sites’ own privacy policies.'] },
+      { heading: 'Changes', body: ['If this policy changes, this page and the date above are updated.'] },
+    ],
+    serverToolsHeading: 'Tools using a server today',
+    noServerTools: 'No tool uses a server right now. Every tool runs on your device.',
+    contactHeading: 'Contact',
+    contact: 'For questions or requests, open an issue on GitHub.',
   },
   uuid: {
     version: 'Version',

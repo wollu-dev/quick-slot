@@ -10,7 +10,7 @@ This English file is the source of truth; `AGENTS.ko.md` and `AGENTS.ja.md` are 
 
 QuickSlot: everyday and developer tools that run right in the browser. See [README.md](README.md) for the structure and how to add a tool.
 
-- npm workspaces monorepo. The website is `apps/web` (Astro 7 + React 19 islands + Tailwind 4). There is no backend (`apps/api`) yet.
+- npm workspaces monorepo. The website is `apps/web` (Astro 7 + React 19 islands + Tailwind 4). The backend is `apps/api` (Hono on Node 24, TypeScript run directly by Node), used only by server tools.
 - The single source of truth for tools is `apps/web/src/tools/registry.ts`. Adding a tool or changing its status starts there.
 - Principle: tools process everything in the browser by default (`processing: 'client'`). Use `'server'` only when a tool truly can't work without one, and check first whether a browser-side engine (WebAssembly) could do the job. Never write copy that promises *every* tool stays on the device; describe processing per tool.
 - Server tools must: show the server badge and cloud icon (automatic from `processing`); replace the drop zone's on-device note with one saying the file is uploaded and deleted right after processing; ask for confirmation before the first upload; never store files or log their contents, and delete them as soon as the result is returned; and be covered by a privacy policy page before they ship.
@@ -44,11 +44,13 @@ QuickSlot: everyday and developer tools that run right in the browser. See [READ
 ## Deployment
 
 - **Deployment method: Docker image → GitHub Container Registry (`ghcr.io`) → self-hosted.** Other hosting (GitHub Pages, Vercel, Netlify, Cloudflare Pages, …) is not used, so don't suggest or set it up.
-- **Current status: not built yet.** It will be built when the service is close to complete. Don't add a `Dockerfile` or an image-publishing workflow before then. The only automation today is CI (`.github/workflows/ci.yml`: type check and build).
-- Direction for when it's built: a two-stage `Dockerfile` (build with Node → serve only the static output with nginx), taking the site URL as `ARG SITE_URL`. Publish images **only when a version tag (`v*`) is pushed**, not on every merge to `main`.
+- **Images:** the root `Dockerfile` builds two targets. `web` is nginx serving the static build and passing `/api` to the API (`deploy/nginx.conf`); it takes the site URL as `ARG SITE_URL`. `api` is Node running `apps/api`. `docker-compose.yml` runs both; only the web container is published to a port.
+- **CI** (`.github/workflows/ci.yml`) type-checks, tests and builds, and also builds both images and smoke-tests them together on every pull request. Nothing is pushed from CI.
+- **Publishing:** images go to GHCR **only when a version tag (`v*`) is pushed**, never on every merge to `main`. The publishing workflow is not added yet; adding it needs the owner's approval because it publishes packages.
+- **Logs never hold personal data:** nginx and the API log time, method, path without the query string, status, size and duration. No client addresses, no request bodies, no file names. Keep it that way when you add routes; the privacy page (`/privacy`) promises it.
 - **Never hard-code a domain or URL.** The site URL comes only from the build environment variable `SITE_URL` (`astro.config.mjs` → `Astro.site`). When you need an absolute URL use `Astro.site`, and make it work with relative URLs when it's missing.
 - Project links (the GitHub repository) and the author come from the root `package.json` (`repository`, `author`). Read them through `apps/web/src/lib/project.ts` instead of writing the URL in UI code.
-- When you add an environment variable, also document it in `apps/web/.env.example` and in the "Configuration" table of the README (all three languages).
+- When you add an environment variable, also document it in `apps/web/.env.example` (site) or `apps/api/.env.example` (API) and in the "Configuration" table of the README (all three languages).
 
 ## Design rules
 
@@ -78,7 +80,9 @@ Translucent glass surfaces over a neutral background. The reference is `apps/web
 npm install
 npm run check    # type check (always run after a change)
 npm run build    # build (always run after a change)
-npm run dev      # dev server (http://localhost:4321)
+npm run dev      # dev server (http://localhost:4321); /api is proxied to the API
+npm run dev:api  # API server (http://localhost:8787), needed only by server tools
+npm test         # API tests
 ```
 
 When an agent starts the dev server, run it in the background: `npx astro dev --background` in `apps/web`, and stop it with `npx astro dev stop`.
