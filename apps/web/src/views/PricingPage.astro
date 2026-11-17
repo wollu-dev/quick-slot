@@ -5,7 +5,8 @@ import Layout from '../layouts/Layout.astro';
 import Rich from '../i18n/Rich';
 import { getDict, LANG_TAGS, localizePath, type Lang } from '../i18n';
 import { REPO_URL } from '../lib/project';
-import { PLAN_IDS, PRO_AVAILABLE, PRO_PRICE } from '../lib/plans';
+import { PLAN_IDS, PRO_PRICE } from '../lib/plans';
+import ProCheckout from '../components/ProCheckout';
 
 interface Props {
   lang: Lang;
@@ -35,7 +36,6 @@ const contactUrl = REPO_URL ? `${REPO_URL}/issues` : undefined;
               <div class="space-y-1">
                 <div class="flex flex-wrap items-center gap-2">
                   <h2 class="text-xl font-semibold">{plan.name}</h2>
-                  {pro && !PRO_AVAILABLE && <span class="rounded-full bg-accent/15 px-2.5 py-0.5 text-xs font-semibold text-accent">{p.soon}</span>}
                 </div>
                 <p class="text-sm text-muted">{plan.tagline}</p>
               </div>
@@ -62,11 +62,7 @@ const contactUrl = REPO_URL ? `${REPO_URL}/issues` : undefined;
                   {plan.cta}
                 </a>
               )}
-              {pro && (
-                <button type="button" class="btn btn-primary w-full" disabled={!PRO_AVAILABLE}>
-                  {PRO_AVAILABLE ? plan.cta : p.soon}
-                </button>
-              )}
+              {pro && <ProCheckout client:only="react" lang={lang} />}
               {id === 'enterprise' && contactUrl && (
                 <a class="btn w-full" href={contactUrl} target="_blank" rel="noopener noreferrer">
                   {plan.cta}

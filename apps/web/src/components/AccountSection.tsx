@@ -1,6 +1,7 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { CircleCheck, LoaderCircle, Mail, UserRound } from 'lucide-react';
-import { useLang, useT } from '../i18n';
+import { LANG_TAGS, useLang, useT } from '../i18n';
+import { getPlan, type PlanInfo } from '../lib/billing';
 import Rich from '../i18n/Rich';
 import { AccountFailure, deleteAccount, getProviders, getUser, isEmail, sendSignInLink, signInWith, signOut, type AccountError, type AccountUser, type Providers } from '../lib/account';
 
@@ -14,6 +15,7 @@ export default function AccountSection({ Group }: { Group: (p: { title: string; 
   const lang = useLang();
   const [providers, setProviders] = useState<Providers | null | undefined>(undefined);
   const [user, setUser] = useState<AccountUser | null>(null);
+  const [plan, setPlan] = useState<PlanInfo | null>(null);
   const [email, setEmail] = useState('');
   const [sentTo, setSentTo] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
@@ -30,6 +32,10 @@ export default function AccountSection({ Group }: { Group: (p: { title: string; 
         try {
           const u = await getUser();
           if (alive) setUser(u);
+          if (u) {
+            const pl = await getPlan();
+            if (alive) setPlan(pl);
+          }
         } catch {
           /* treat as signed out */
         }
@@ -83,7 +89,16 @@ export default function AccountSection({ Group }: { Group: (p: { title: string; 
         </div>
         <div className="flex min-h-12 items-center justify-between gap-3 py-2 pr-4 pl-4">
           <span className="text-[15px]">{a.plan}</span>
-          <span className="text-[15px] text-muted">{a.free}</span>
+          <span className="min-w-0 text-right" data-account-plan>
+            <span className={`block text-[15px] ${plan?.plan === 'pro' ? 'font-semibold text-accent' : 'text-muted'}`}>{plan?.plan === 'pro' ? 'Pro' : a.free}</span>
+            {plan?.plan === 'pro' && (plan.cancelAt || plan.periodEnd) && (
+              <span className="block text-[12px] text-muted">
+                {plan.cancelAt
+                  ? a.ends(new Date(plan.cancelAt).toLocaleDateString(LANG_TAGS[lang], { dateStyle: 'medium' }))
+                  : a.renews(new Date(plan.periodEnd!).toLocaleDateString(LANG_TAGS[lang], { dateStyle: 'medium' }))}
+              </span>
+            )}
+          </span>
         </div>
         {errorRow}
         <button

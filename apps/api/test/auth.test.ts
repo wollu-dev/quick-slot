@@ -48,7 +48,7 @@ async function signIn(email: string, lang = 'en') {
 test('migrations run once', async () => {
   assert.deepEqual(await migrate(db), []);
   const tables = rowsOf<{ name: string }>(await db.execute(sql`SELECT table_name AS name FROM information_schema.tables WHERE table_schema = 'public' ORDER BY 1`)).map((r) => r.name);
-  assert.deepEqual(tables, ['account', 'quickslot_migrations', 'session', 'user', 'verification']);
+  assert.deepEqual(tables, ['account', 'billing_event', 'quickslot_migrations', 'session', 'subscription', 'user', 'verification']);
 });
 
 test('the site learns which sign-in methods are on', async () => {

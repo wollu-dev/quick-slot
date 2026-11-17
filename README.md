@@ -146,6 +146,7 @@ The API (`apps/api`, see `apps/api/.env.example`) reads:
 | `SMTP_URL`, `MAIL_FROM` | SMTP server and sender for sign-in emails | links printed to the console (development only) |
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | Sign in with Google | off |
 | `APPLE_CLIENT_ID`, `APPLE_CLIENT_SECRET` | Sign in with Apple | off |
+| `PADDLE_ENV`, `PADDLE_CLIENT_TOKEN`, `PADDLE_WEBHOOK_SECRET`, `PADDLE_PRICE_MONTHLY`, `PADDLE_PRICE_YEARLY` | Paddle payments for Pro (`sandbox` or `production`). The webhook goes to `SITE_URL/api/billing/paddle/webhook` | payments off ("coming soon") |
 
 ## Project structure
 

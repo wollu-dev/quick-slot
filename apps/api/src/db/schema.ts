@@ -72,4 +72,31 @@ export const verification = pgTable(
   (t) => [index('verification_identifier_idx').on(t.identifier)],
 );
 
-export const schema = { user, session, account, verification };
+/** A subscription at the payment provider (Paddle on the web, later the app stores) */
+export const subscription = pgTable(
+  'subscription',
+  {
+    id: text().primaryKey(),
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    provider: text().notNull(),
+    status: text().notNull(),
+    priceId: text('price_id'),
+    customerId: text('customer_id'),
+    currentPeriodEnd: timestamp('current_period_end', { withTimezone: true }),
+    cancelAt: timestamp('cancel_at', { withTimezone: true }),
+    /** When the provider says the latest change happened; older events are ignored (they can arrive out of order) */
+    eventAt: timestamp('event_at', { withTimezone: true }).notNull(),
+    createdAt: now('created_at'),
+    updatedAt: now('updated_at'),
+  },
+  (t) => [index('subscription_user_id_idx').on(t.userId)],
+);
+
+export const billingEvent = pgTable('billing_event', {
+  id: text().primaryKey(),
+  receivedAt: timestamp('received_at', { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const schema = { user, session, account, verification, subscription, billingEvent };

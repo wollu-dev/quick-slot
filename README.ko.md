@@ -146,6 +146,7 @@ API (`apps/api`, `apps/api/.env.example` 참고) 설정:
 | `SMTP_URL`, `MAIL_FROM` | 로그인 메일을 보낼 SMTP 서버와 보내는 사람 | 링크를 콘솔에 출력(개발에서만) |
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | Google 로그인 | 꺼짐 |
 | `APPLE_CLIENT_ID`, `APPLE_CLIENT_SECRET` | Apple 로그인 | 꺼짐 |
+| `PADDLE_ENV`, `PADDLE_CLIENT_TOKEN`, `PADDLE_WEBHOOK_SECRET`, `PADDLE_PRICE_MONTHLY`, `PADDLE_PRICE_YEARLY` | Pro 결제용 Paddle 설정(`sandbox` 또는 `production`). 웹훅 주소는 `SITE_URL/api/billing/paddle/webhook` | 결제 꺼짐("출시 예정") |
 
 ## 프로젝트 구조
 

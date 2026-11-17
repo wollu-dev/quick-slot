@@ -4,7 +4,7 @@
  * Returns codes, never text (the UI translates them).
  */
 
-export type AccountError = 'invalidEmail' | 'rateLimited' | 'failed' | 'offline';
+export type AccountError = 'invalidEmail' | 'rateLimited' | 'failed' | 'offline' | 'activeSubscription';
 
 export class AccountFailure extends Error {
   code: AccountError;
@@ -22,6 +22,7 @@ export interface Providers {
 }
 
 export interface AccountUser {
+  id: string;
   email: string;
   name: string;
 }
@@ -63,7 +64,7 @@ export async function getProviders(): Promise<Providers | null> {
 export async function getUser(): Promise<AccountUser | null> {
   const res = await call('/api/auth/get-session');
   const body = (await res.json()) as { user?: AccountUser } | null;
-  return body?.user ? { email: body.user.email, name: body.user.name } : null;
+  return body?.user ? { id: body.user.id, email: body.user.email, name: body.user.name } : null;
 }
 
 /** Where to come back after signing in: the page the user is on */
@@ -91,6 +92,12 @@ export async function signOut(): Promise<void> {
 
 /** Deletes the account and everything tied to it */
 export async function deleteAccount(): Promise<void> {
-  await call('/api/auth/delete-user', {});
+  try {
+    await call('/api/auth/delete-user', {});
+  } catch (e) {
+    // Refused while a subscription still renews (see the API's auth.ts)
+    if (e instanceof AccountFailure && e.code === 'invalidEmail') throw new AccountFailure('activeSubscription');
+    throw e;
+  }
   changed();
 }
