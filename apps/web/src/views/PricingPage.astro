@@ -1,0 +1,172 @@
+---
+/** Pricing. The per-language pages (src/pages/pricing.astro, src/pages/[lang]/pricing.astro) use this template. */
+import { Check, Minus } from 'lucide-react';
+import Layout from '../layouts/Layout.astro';
+import Rich from '../i18n/Rich';
+import { getDict, LANG_TAGS, localizePath, type Lang } from '../i18n';
+import { REPO_URL } from '../lib/project';
+import { PLAN_IDS, PRO_AVAILABLE, PRO_PRICE } from '../lib/plans';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = getDict(lang);
+const p = t.pricing;
+const money = (n: number) => new Intl.NumberFormat(LANG_TAGS[lang], { style: 'currency', currency: PRO_PRICE.currency, maximumFractionDigits: 0 }).format(n);
+const contactUrl = REPO_URL ? `${REPO_URL}/issues` : undefined;
+---
+
+<Layout lang={lang} path="/pricing" title={p.title} description={p.summary}>
+  <div class="space-y-10 pb-6">
+    <header class="max-w-3xl space-y-2">
+      <h1 class="text-3xl font-bold tracking-tight">{p.title}</h1>
+      <p class="text-[15px] leading-relaxed"><Rich text={p.summary} /></p>
+    </header>
+
+    <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+      {
+        PLAN_IDS.map((id) => {
+          const plan = p.plans[id];
+          const pro = id === 'pro';
+          return (
+            <section class={`panel flex flex-col gap-4 p-6 ${pro ? 'ring-2 ring-accent/50' : ''}`} data-plan={id}>
+              <div class="space-y-1">
+                <div class="flex flex-wrap items-center gap-2">
+                  <h2 class="text-xl font-semibold">{plan.name}</h2>
+                  {pro && !PRO_AVAILABLE && <span class="rounded-full bg-accent/15 px-2.5 py-0.5 text-xs font-semibold text-accent">{p.soon}</span>}
+                </div>
+                <p class="text-sm text-muted">{plan.tagline}</p>
+              </div>
+              <div class="min-h-14">
+                {id === 'free' && <p class="text-3xl font-bold tabular-nums">{money(0)}</p>}
+                {pro && (
+                  <>
+                    <p class="text-3xl font-bold tabular-nums">{p.perMonth(money(PRO_PRICE.monthly))}</p>
+                    <p class="text-sm text-muted">{p.perYear(money(PRO_PRICE.yearly))}</p>
+                  </>
+                )}
+                {id === 'enterprise' && <p class="text-3xl font-bold">{p.custom}</p>}
+              </div>
+              <ul class="flex-1 space-y-2 text-[14px]">
+                {plan.points.map((point) => (
+                  <li class="flex items-start gap-2">
+                    <Check size={16} strokeWidth={2.4} className="mt-0.5 shrink-0 text-accent" />
+                    <span>{point}</span>
+                  </li>
+                ))}
+              </ul>
+              {id === 'free' && (
+                <a class="btn w-full" href={localizePath(lang, '/')}>
+                  {plan.cta}
+                </a>
+              )}
+              {pro && (
+                <button type="button" class="btn btn-primary w-full" disabled={!PRO_AVAILABLE}>
+                  {PRO_AVAILABLE ? plan.cta : p.soon}
+                </button>
+              )}
+              {id === 'enterprise' && contactUrl && (
+                <a class="btn w-full" href={contactUrl} target="_blank" rel="noopener noreferrer">
+                  {plan.cta}
+                </a>
+              )}
+            </section>
+          );
+        })
+      }
+    </div>
+
+    <section class="space-y-3">
+      <h2 class="text-xl font-semibold">{p.compareHeading}</h2>
+      <!-- Narrow screens: one block per feature, with the three plans side by side underneath -->
+      <ul class="panel divide-y divide-line p-0 text-[13px] sm:hidden" data-compare-list>
+        {
+          p.rows.map((row) => (
+            <li class="space-y-2 p-4">
+              <p class="font-medium">{row.label}</p>
+              <dl class="grid grid-cols-3 gap-2">
+                {PLAN_IDS.map((id) => {
+                  const v = row[id];
+                  return (
+                    <div class="min-w-0 space-y-0.5">
+                      <dt class="text-[11px] text-muted">{p.plans[id].name}</dt>
+                      <dd class="break-words">
+                        {v === true ? (
+                          <>
+                            <Check size={16} strokeWidth={2.4} className="text-accent" aria-hidden="true" />
+                            <span class="sr-only">{p.included}</span>
+                          </>
+                        ) : v === false ? (
+                          <>
+                            <Minus size={16} className="text-muted" aria-hidden="true" />
+                            <span class="sr-only">{p.notIncluded}</span>
+                          </>
+                        ) : (
+                          v
+                        )}
+                      </dd>
+                    </div>
+                  );
+                })}
+              </dl>
+            </li>
+          ))
+        }
+      </ul>
+      <div class="panel hidden overflow-hidden p-0 sm:block">
+        <table class="w-full table-fixed text-left text-[14px]">
+          <colgroup>
+            <col class="w-[40%]" />
+            <col />
+            <col />
+            <col />
+          </colgroup>
+          <thead class="border-b border-line text-muted">
+            <tr>
+              <th scope="col" class="p-3 font-medium">{p.feature}</th>
+              {PLAN_IDS.map((id) => <th scope="col" class="p-3 font-semibold text-fg">{p.plans[id].name}</th>)}
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-line">
+            {
+              p.rows.map((row) => (
+                <tr>
+                  <th scope="row" class="p-3 align-top font-normal">{row.label}</th>
+                  {PLAN_IDS.map((id) => {
+                    const v = row[id];
+                    return (
+                      <td class="p-3 align-top break-words">
+                        {v === true ? (
+                          <>
+                            <Check size={16} strokeWidth={2.4} className="text-accent" aria-hidden="true" />
+                            <span class="sr-only">{p.included}</span>
+                          </>
+                        ) : v === false ? (
+                          <>
+                            <Minus size={16} className="text-muted" aria-hidden="true" />
+                            <span class="sr-only">{p.notIncluded}</span>
+                          </>
+                        ) : (
+                          v
+                        )}
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="max-w-3xl space-y-2 text-[13px] leading-relaxed text-muted">
+      {p.notes.map((note) => <p><Rich text={note} /></p>)}
+      <p>
+        <a class="text-accent underline" href={localizePath(lang, '/terms')}>{t.footer.terms}</a>
+      </p>
+    </section>
+  </div>
+</Layout>

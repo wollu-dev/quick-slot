@@ -1,4 +1,4 @@
-import type { Dict } from './ko';
+import type { Dict, PlanRow } from './ko';
 
 const en: Dict = {
   meta: {
@@ -29,6 +29,8 @@ const en: Dict = {
     license: 'License',
     issues: 'Report an issue',
     privacy: 'Privacy',
+    terms: 'Terms',
+    pricing: 'Pricing',
   },
   picker: {
     prevMonth: 'Previous month',
@@ -1146,6 +1148,59 @@ const en: Dict = {
     noServerTools: 'No tool uses a server right now. Every tool runs on your device.',
     contactHeading: 'Contact',
     contact: 'For questions or requests, open an issue on GitHub.',
+  },
+  terms: {
+    title: 'Terms of Service',
+    updated: 'Last updated: November 17, 2026',
+    summary: 'QuickSlot’s tools are free to use without an account. These terms set the rules for using the service and for the upcoming **paid plans** (subscriptions, payment, refunds).',
+    sections: [
+      { heading: '1. The service and who runs it', body: ['QuickSlot (the "service") is the collection of browser tools offered on this site and in its apps, run by Jaeyun Jung (WolLu) ("we").', 'By using the service you agree to these terms. Business details will be added to this page before paid plans go on sale.'] },
+      { heading: '2. Using the tools', body: ['Free tools need no account. Most tools process your files and input on your device; only tools marked **Runs on server** send what the job needs to our server, as described in the Privacy Policy.', 'You are responsible for the files and content you process and for having the rights to them.'] },
+      { heading: '3. Acceptable use', body: ['Don’t use the service for illegal purposes, to infringe the rights of others (including downloading videos you have no rights to), to attack or overload the service, or to get around its limits.', 'We may limit or block use that breaks these terms.'] },
+      { heading: '4. Paid plans', body: ['The Pro and Enterprise plans add the features listed on the Pricing page. Tools that are free today stay free.', 'Subscriptions renew automatically each month or year until you cancel. You can cancel at any time and keep access until the end of the period you paid for.'] },
+      { heading: '5. Payment', body: ['On the web and desktop, our order process is conducted by our online reseller **Paddle.com**. Paddle.com is the Merchant of Record for all our orders: it handles payment, taxes and invoices, and answers questions about orders and refunds.', 'Purchases inside the mobile apps are handled by the Apple App Store or Google Play under their own terms.'] },
+      { heading: '6. Refunds', body: ['Ask within **14 days** of your first payment for a plan and you get a full refund. A renewal can be refunded within 14 days if the plan wasn’t used after it renewed.', 'Purchases made through an app store follow that store’s refund process. Nothing in these terms limits the consumer rights the law gives you where you live (such as a right of withdrawal).'] },
+      { heading: '7. AI features', body: ['Answers and results made by AI can be wrong. Check important results yourself.', 'What you enter into AI features is processed by the AI provider named in the Privacy Policy. Don’t enter information you don’t want processed.'] },
+      { heading: '8. Source code and license', body: ['QuickSlot’s source code is published on GitHub under the Sustainable Use License. These terms cover using the service; the license covers using the code.'] },
+      { heading: '9. Changes and availability', body: ['We work to keep the service running but can’t promise it will be free of interruptions or errors.', 'Tools and features may change. If a feature you paid for is removed, you get a refund for the remaining time.'] },
+      { heading: '10. Limitation of liability', body: ['The service is provided "as is". As far as the law allows, we are not liable for indirect damages or loss of data, and our total liability is limited to the amount you paid in the last 12 months.', 'Liability that the law does not allow to be limited is not limited by this section.'] },
+      { heading: '11. Changes to these terms', body: ['When these terms change, this page and the date above are updated. For important changes to paid plans, subscribers are told at least 30 days in advance.'] },
+      { heading: '12. Governing law', body: ['These terms are governed by the laws of the Republic of Korea. Where your local consumer law gives you rights that can’t be waived, those rights come first.'] },
+    ],
+    relatedHeading: 'Related documents',
+  },
+  pricing: {
+    title: 'Pricing',
+    summary: 'Every tool on QuickSlot is free, with no account. **Pro** adds AI, sync between devices and higher limits. Paid plans are coming soon.',
+    soon: 'Coming soon',
+    custom: 'Custom',
+    perMonth: (price: string) => `${price} / month`,
+    perYear: (price: string) => `or ${price} / year (2 months free)`,
+    plans: {
+      free: { name: 'Free', tagline: 'Every tool, no account needed', cta: 'Open the tools', points: ['All tools, free', 'Files processed on your device by default', 'No ads, no tracking'] },
+      pro: { name: 'Pro', tagline: 'AI and sync for people who use QuickSlot every day', cta: 'Get Pro', points: ['AI assistant that uses the tools for you', 'AI Fold game', 'Quick Slot and your tools synced across devices', 'Higher limits for server tools', 'Hosted MCP server for AI apps'] },
+      enterprise: { name: 'Enterprise', tagline: 'Run QuickSlot for your company', cta: 'Contact us', points: ['Commercial self-hosting license', 'Use your own AI API key', 'Every paid feature'] },
+    },
+    compareHeading: 'Compare plans',
+    feature: 'Feature',
+    included: 'Included',
+    notIncluded: 'Not included',
+    rows: [
+      { label: 'All tools (convert, PDF, images, developer tools and more)', free: true, pro: true, enterprise: true },
+      { label: 'Files processed on your device', free: true, pro: true, enterprise: true },
+      { label: 'Server tools (server time, video downloader)', free: 'Basic limits', pro: 'Higher limits', enterprise: 'Self-hosted' },
+      { label: 'Quick Slot and your tools synced across devices', free: false, pro: true, enterprise: true },
+      { label: 'AI assistant that uses the tools for you', free: 'A few tries', pro: 'Monthly credits', enterprise: 'Your own API key' },
+      { label: 'AI Fold game', free: 'Card packs', pro: 'AI questions', enterprise: true },
+      { label: 'MCP server for AI apps', free: 'Local', pro: 'Local and hosted', enterprise: 'Local and hosted' },
+      { label: 'Commercial self-hosting license', free: false, pro: false, enterprise: true },
+    ] as PlanRow[],
+    notes: [
+      'Pro features are being built and will open together with the Pro plan.',
+      'Prices are in US dollars. Sales tax or VAT may be added at checkout depending on where you live.',
+      'Payments are handled by **Paddle.com**, our reseller and Merchant of Record. In the mobile apps, Apple or Google handles payment.',
+      'Cancel at any time and keep Pro until the end of the period you paid for. Full refund within 14 days of your first payment.',
+    ],
   },
   serverTime: {
     address: 'Site address',

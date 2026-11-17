@@ -119,6 +119,12 @@ const absolute = (p: string) => (Astro.site ? new URL(p, Astro.site).href : p);
           <a href={localizePath(lang, '/privacy')} class="footer-link pr-3">
             {t.footer.privacy}
           </a>
+          <a href={localizePath(lang, '/terms')} class="footer-link px-3">
+            {t.footer.terms}
+          </a>
+          <a href={localizePath(lang, '/pricing')} class="footer-link px-3">
+            {t.footer.pricing}
+          </a>
           {
             REPO_URL && (
               <>
