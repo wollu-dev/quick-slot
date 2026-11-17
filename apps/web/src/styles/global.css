@@ -78,6 +78,9 @@ html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+  /* Always keep room for the scrollbar, so the header and page width don't shift between long pages
+     (the home page scrolls) and short ones (many tool pages don't), or when a modal locks scrolling */
+  scrollbar-gutter: stable;
 }
 
 body {
