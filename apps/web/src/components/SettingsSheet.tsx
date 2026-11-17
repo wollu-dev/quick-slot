@@ -6,10 +6,11 @@ import { useDockSettings, type DockPosition, type DockSize } from '../lib/dock';
 import { useTheme, type ThemePref } from '../lib/theme';
 import Segmented from './ui/Segmented';
 import Select from './ui/Select';
+import AccountSection from './AccountSection';
 
 /**
  * Settings (gear) button on the right of the header, and the settings sheet.
- * Inset grouped list like iOS Settings: appearance · Quick Slot position/size · language.
+ * Inset grouped list like iOS Settings: account (when the server has accounts) · appearance · Quick Slot position/size · language.
  * Centered sheet on desktop, bottom sheet that slides up on mobile.
  */
 function SettingsSheet() {
@@ -94,6 +95,8 @@ function Sheet({ onClose }: { onClose: () => void }) {
         </header>
 
         <div className="space-y-6 px-4 pt-2 pb-2">
+          <AccountSection Group={Group} />
+
           <Group title={s.appearance} footer={s.autoNote}>
             <div className="grid grid-cols-3 gap-3 p-4" role="radiogroup" aria-label={s.appearance}>
               {(
