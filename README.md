@@ -43,6 +43,7 @@ Renaming a batch of files, stripping GPS data from a photo, pretty-printing JSON
 | **File Date Changer** | Download files with new created and modified dates as a ZIP, or get a PowerShell / Bash script |
 | **Merge PDF** | Combine PDFs in any order, optionally taking only some pages from each (e.g. 1-3, 5, 8-) |
 | **Split PDF** | Pick, delete, rotate and reorder pages on thumbnails, then save, extract the selection, or split every N pages or by ranges |
+| **Images → PDF** | One image per page on A4, Letter, A5 or image-sized pages, with orientation and margins; JPEG and PNG embedded without re-compression |
 | **Metadata Remover** | Strip GPS, camera info and more from JPEG / PNG / WebP without losing quality |
 | **Hash & Checksum** | MD5, SHA-1, SHA-256, SHA-512 and CRC32 of files or text, verify a published hash, and check whether files are identical |
 | **ZIP & Unzip** | Zip files and folders with UTF-8 names, browse a ZIP and extract single files or everything into a folder, and fix garbled Korean or Japanese names |
@@ -65,11 +66,11 @@ Renaming a batch of files, stripping GPS data from a photo, pretty-printing JSON
 | **Bill Splitter** | Split a bill evenly or with extras per person, round to 10 / 100 / 1000, and copy a summary to share |
 
 <details>
-<summary><b>Coming soon</b> (4 tools)</summary>
+<summary><b>Coming soon</b> (3 tools)</summary>
 
 | Category | Tools |
 |---|---|
-| PDF & Docs | Images → PDF · Office → PDF |
+| PDF & Docs | Office → PDF |
 | Video & Audio | Video → GIF · Screen Recorder |
 
 </details>

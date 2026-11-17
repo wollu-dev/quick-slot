@@ -66,7 +66,7 @@ export const tools: Tool[] = [
   // PDF
   t({ slug: 'pdf-merge', category: 'pdf', icon: Merge, keywords: ['pdf', '합치기', 'pdf 합치기', '병합', '합병', 'merge', 'combine', 'join', '結合', 'PDF結合'], status: 'ready', accepts: ['application/pdf'] }),
   t({ slug: 'pdf-split', category: 'pdf', icon: Scissors, keywords: ['pdf', '나누기', '분할', 'split', '페이지', '추출', '삭제', '회전', '순서', 'extract', 'rotate', 'delete pages', '分割', '抽出'], status: 'ready', accepts: ['application/pdf'] }),
-  t({ slug: 'image-to-pdf', category: 'pdf', icon: FileImage, keywords: ['pdf', '이미지', '변환'], status: 'soon', accepts: ['image/*'] }),
+  t({ slug: 'image-to-pdf', category: 'pdf', icon: FileImage, keywords: ['pdf', '이미지', '사진', '변환', '이미지 pdf', 'jpg to pdf', 'png to pdf', '스캔', 'image to pdf', 'photo', 'scan', '画像', 'PDF変換'], status: 'ready', accepts: ['image/*'] }),
   t({ slug: 'office-to-pdf', category: 'pdf', icon: FileText, keywords: ['word', 'excel', 'ppt', 'docx', 'pdf'], status: 'soon', processing: 'server' }),
 
   // Image
