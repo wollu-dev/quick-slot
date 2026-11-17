@@ -40,6 +40,7 @@ test('errors come back as codes, never as yt-dlp text', async () => {
     ['/unsupported', 'unsupported'],
     ['/live', 'live'],
     ['/long', 'tooLong'],
+    ['/list', 'unsupported'],
   ]) {
     const res = await post('/api/video/info', { url: `https://videos.test${path}` });
     assert.deepEqual(await res.json(), { error: code }, path);
@@ -79,4 +80,16 @@ test('a job belongs to the client that started it', async () => {
   await waitDone(id);
   const other = await app.request(`/api/video/jobs/${id}`, { headers: {} }, { incoming: { socket: { remoteAddress: '203.0.113.9' } } });
   assert.equal(other.status, 404);
+});
+
+test('an unexplained failure is retried once', async () => {
+  const { id } = (await (await post('/api/video/jobs', { url: 'https://videos.test/flaky', format: 'mp4-480' })).json()) as { id: string };
+  const s = await waitDone(id);
+  assert.equal(s.status, 'done');
+});
+
+test('MP4 asks for H.264 first, so the file plays everywhere', async () => {
+  const { formatArgs } = await import('../src/video.ts');
+  const f = formatArgs('mp4-720')[1];
+  assert.ok(f.split('/')[0].includes('[height<=720][vcodec^=avc1]'), f);
 });

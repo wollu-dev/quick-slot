@@ -1,6 +1,7 @@
 /**
  * Video downloader (server tool) on top of yt-dlp.
  *
+ * - One video per address: playlists are refused, and a download never takes more than one item.
  * - Only yt-dlp's site-specific extractors run; the generic one, which would fetch any URL, is turned off.
  *   The address must also resolve to a public network address (see netguard.ts).
  * - Downloads run as jobs: create, poll progress, fetch the file once. The file is deleted as soon as
@@ -29,7 +30,7 @@ export type VideoFormat = 'mp4-1080' | 'mp4-720' | 'mp4-480' | 'm4a' | 'mp3';
 export const FORMATS: VideoFormat[] = ['mp4-1080', 'mp4-720', 'mp4-480', 'm4a', 'mp3'];
 
 // Node (already in the image) runs the JavaScript some sites, such as YouTube, need
-const BASE_ARGS = ['--js-runtimes', 'node', '--no-playlist', '--use-extractors', 'default,-generic', '--no-warnings', '--no-cache-dir', '--no-mtime', '--socket-timeout', '20'];
+const BASE_ARGS = ['--js-runtimes', 'node', '--no-playlist', '--playlist-items', '1', '--use-extractors', 'default,-generic', '--no-warnings', '--no-cache-dir', '--no-mtime', '--socket-timeout', '20'];
 
 function run(args: string[], timeoutMs: number, onLine?: (line: string) => void): Promise<{ code: number; out: string; err: string }> {
   return new Promise((resolve) => {
@@ -67,7 +68,8 @@ function classify(err: string): VideoError {
   if (/Unsupported URL|no suitable extractor|is not a valid URL/i.test(err)) return 'unsupported';
   if (/larger than max-filesize|File is larger/i.test(err)) return 'tooLarge';
   if (/does not pass filter|skipping/i.test(err)) return 'tooLong';
-  if (/private|sign in|members|unavailable|removed|not available|copyright|age/i.test(err)) return 'unavailable';
+  // Only yt-dlp's messages about the video itself; an HTTP error such as '503 Service Unavailable' is not one of them
+  if (/Private video|Sign in to|members[- ]only|Join this channel|Video unavailable|video is (no longer )?(un)?available|not available in your country|has been removed|copyright|age[- ]restricted|confirm your age/i.test(err)) return 'unavailable';
   return 'failed';
 }
 
@@ -95,25 +97,29 @@ export interface VideoInfo {
 }
 
 export async function info(url: URL): Promise<VideoInfo> {
-  const r = await run([...BASE_ARGS, '-J', '--skip-download', url.href], 45_000);
+  const r = await run([...BASE_ARGS, '-J', '--skip-download', '--flat-playlist', url.href], 45_000);
   if (r.code !== 0) throw new VideoFailure(classify(r.err));
-  let j: { title?: string; uploader?: string; channel?: string; duration?: number; is_live?: boolean; extractor_key?: string; formats?: { height?: number | null; vcodec?: string }[] };
+  let j: { _type?: string; title?: string; uploader?: string; channel?: string; duration?: number; is_live?: boolean; extractor_key?: string; formats?: { height?: number | null; vcodec?: string }[] };
   try {
     j = JSON.parse(r.out);
   } catch {
     throw new VideoFailure('failed');
   }
+  // One video per address: a playlist or channel page is refused instead of downloading everything in it
+  if (j._type === 'playlist' || j._type === 'multi_video') throw new VideoFailure('unsupported');
   if (j.is_live) throw new VideoFailure('live');
   if (j.duration && j.duration > config.videoMaxMinutes * 60) throw new VideoFailure('tooLong');
   const heights = [...new Set((j.formats ?? []).filter((f) => f.height && f.vcodec !== 'none').map((f) => f.height as number))].sort((a, b) => b - a);
   return { title: j.title ?? '', uploader: j.uploader ?? j.channel, duration: j.duration, site: j.extractor_key ?? url.hostname, heights };
 }
 
-function formatArgs(f: VideoFormat): string[] {
+export function formatArgs(f: VideoFormat): string[] {
   if (f === 'm4a') return ['-f', 'ba[ext=m4a]/ba', '-x', '--audio-format', 'm4a'];
   if (f === 'mp3') return ['-f', 'ba', '-x', '--audio-format', 'mp3', '--audio-quality', '192K'];
   const h = Number(f.split('-')[1]);
-  return ['-f', `bv*[height<=${h}][ext=mp4]+ba[ext=m4a]/b[height<=${h}][ext=mp4]/bv*[height<=${h}]+ba/b[height<=${h}]`, '--merge-output-format', 'mp4'];
+  const v = `bv*[height<=${h}]`;
+  // H.264 first: it plays everywhere, while AV1 or VP9 in an MP4 does not play on many phones and PCs
+  return ['-f', `${v}[vcodec^=avc1]+ba[ext=m4a]/b[height<=${h}][vcodec^=avc1]/${v}[ext=mp4]+ba[ext=m4a]/b[height<=${h}][ext=mp4]/${v}+ba/b[height<=${h}]`, '--merge-output-format', 'mp4'];
 }
 
 /* ------------------------------------------------------------------ */
@@ -170,44 +176,15 @@ export function createJob(url: URL, format: VideoFormat, owner: string): Job {
 
 async function work(job: Job, url: URL, format: VideoFormat) {
   try {
-    await mkdir(job.dir, { recursive: true });
-    // Downloads of video and audio each go 0→100 %; count the parts so the bar keeps moving forward
-    let part = 0;
-    let last = 0;
-    const parts = format.startsWith('mp4') ? 2 : 1;
-    const r = await run(
-      [
-        ...BASE_ARGS,
-        ...formatArgs(format),
-        '--max-filesize',
-        `${config.videoMaxMb}M`,
-        '--match-filter',
-        `!is_live & duration <= ${config.videoMaxMinutes * 60}`,
-        '--newline',
-        '--progress-template',
-        'download:qs-progress %(progress._percent_str)s',
-        '-o',
-        join(job.dir, '%(title).120B.%(ext)s'),
-        url.href,
-      ],
-      config.videoMaxMinutes * 60_000,
-      (line) => {
-        const m = line.match(/^qs-progress\s+([\d.]+)%/);
-        if (!m) return;
-        const p = Number(m[1]) / 100;
-        if (p < last - 0.5) part = Math.min(parts - 1, part + 1);
-        last = p;
-        job.progress = Math.min(0.99, (part + p) / parts);
-      },
-    );
-    if (r.code !== 0) throw new VideoFailure(classify(r.err));
-    const files = (await readdir(job.dir)).filter((f) => !f.endsWith('.part') && !f.endsWith('.ytdl'));
-    if (!files.length) throw new VideoFailure(classify(r.err + r.out));
-    const sized = await Promise.all(files.map(async (f) => ({ f, size: (await stat(join(job.dir, f))).size })));
-    const best = sized.sort((a, b) => b.size - a.size)[0];
-    job.file = join(job.dir, best.f);
-    job.name = best.f;
-    job.size = best.size;
+    try {
+      await attempt(job, url, format);
+    } catch (e) {
+      // Sites fail now and then for no lasting reason: try once more when the cause is unknown
+      if (!(e instanceof VideoFailure && e.code === 'failed')) throw e;
+      await rm(job.dir, { recursive: true, force: true }).catch(() => {});
+      job.progress = 0;
+      await attempt(job, url, format);
+    }
     job.progress = 1;
     job.status = 'done';
   } catch (e) {
@@ -217,6 +194,47 @@ async function work(job: Job, url: URL, format: VideoFormat) {
   }
   job.expires = setTimeout(() => cleanup(job), LINGER);
   job.expires.unref();
+}
+
+async function attempt(job: Job, url: URL, format: VideoFormat) {
+  await mkdir(job.dir, { recursive: true });
+  // Downloads of video and audio each go 0→100 %; count the parts so the bar keeps moving forward
+  let part = 0;
+  let last = 0;
+  const parts = format.startsWith('mp4') ? 2 : 1;
+  const r = await run(
+    [
+      ...BASE_ARGS,
+      ...formatArgs(format),
+      '--max-filesize',
+      `${config.videoMaxMb}M`,
+      '--match-filter',
+      `!is_live & duration <= ${config.videoMaxMinutes * 60}`,
+      '--newline',
+      '--progress-template',
+      'download:qs-progress %(progress._percent_str)s',
+      '-o',
+      join(job.dir, '%(title).120B.%(ext)s'),
+      url.href,
+    ],
+    config.videoMaxMinutes * 60_000,
+    (line) => {
+      const m = line.match(/^qs-progress\s+([\d.]+)%/);
+      if (!m) return;
+      const p = Number(m[1]) / 100;
+      if (p < last - 0.5) part = Math.min(parts - 1, part + 1);
+      last = p;
+      job.progress = Math.min(0.99, (part + p) / parts);
+    },
+  );
+  if (r.code !== 0) throw new VideoFailure(classify(r.err));
+  const files = (await readdir(job.dir)).filter((f) => !f.endsWith('.part') && !f.endsWith('.ytdl'));
+  if (!files.length) throw new VideoFailure(classify(r.err + r.out));
+  const sized = await Promise.all(files.map(async (f) => ({ f, size: (await stat(join(job.dir, f))).size })));
+  const best = sized.sort((a, b) => b.size - a.size)[0];
+  job.file = join(job.dir, best.f);
+  job.name = best.f;
+  job.size = best.size;
 }
 
 export function getJob(id: string, owner: string): Job | undefined {
