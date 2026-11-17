@@ -8,7 +8,9 @@
  */
 import { Hono, type Context, type Next } from 'hono';
 import { config } from './config.ts';
+import { GuardError, parseTarget } from './netguard.ts';
 import { rateLimit } from './rateLimit.ts';
+import { measure, MeasureFailure } from './serverTime.ts';
 
 export type Env = { Variables: { ip: string } };
 
@@ -40,6 +42,38 @@ export function createApp() {
   app.use('/api/*', rateLimit({ windowMs: 60_000, max: config.rateLimitPerMinute }));
 
   app.get('/api/health', (c) => c.json({ ok: true, version: config.version }));
+
+  /** Our clock, so the browser can tell how far its own clock is from ours */
+  app.get('/api/time', (c) => c.json({ now: performance.timeOrigin + performance.now() }));
+
+  /** How far a site's clock is from ours (server time check). The address is used for this request only. */
+  app.post('/api/server-time', rateLimit({ windowMs: 60_000, max: config.serverTimePerMinute }), async (c) => {
+    let body: { url?: unknown };
+    try {
+      body = await c.req.json();
+    } catch {
+      return c.json({ error: 'invalidUrl' }, 400);
+    }
+    if (typeof body.url !== 'string' || body.url.length > 2048) return c.json({ error: 'invalidUrl' }, 400);
+    try {
+      const url = parseTarget(body.url);
+      let m;
+      try {
+        m = await measure(url);
+      } catch (e) {
+        // Typed without a scheme and https didn't connect: the site may only speak plain http
+        const bare = !/^[a-z][a-z0-9+.-]*:\/\//i.test(body.url.trim());
+        if (!(bare && e instanceof MeasureFailure && e.code === 'unreachable')) throw e;
+        url.protocol = 'http:';
+        m = await measure(url);
+      }
+      return c.json({ ...m, now: performance.timeOrigin + performance.now() });
+    } catch (e) {
+      if (e instanceof GuardError) return c.json({ error: e.code }, 400);
+      if (e instanceof MeasureFailure) return c.json({ error: e.code }, 502);
+      throw e;
+    }
+  });
 
   app.notFound((c) => c.json({ error: 'notFound' }, 404));
   app.onError((err, c) => {
