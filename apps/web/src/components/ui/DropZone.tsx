@@ -16,6 +16,12 @@ interface Props {
   privacyNote?: boolean;
 }
 
+/** Paths of files that came from a dropped folder ("folder/sub/a.txt") */
+const paths = new WeakMap<File, string>();
+
+/** Path inside a dropped or picked folder, or just the file name */
+export const filePath = (f: File) => paths.get(f) ?? (f.webkitRelativePath || f.name);
+
 /** Drag and drop, or click to pick files. Dropping a folder reads every file inside it. */
 export default function DropZone({ onFiles, accept, multiple = true, hint, compact, privacyNote = true }: Props) {
   const t = useT();
@@ -82,7 +88,15 @@ export default function DropZone({ onFiles, accept, multiple = true, hint, compa
 
 async function readEntry(entry: FileSystemEntry): Promise<File[]> {
   if (entry.isFile) {
-    return new Promise((res) => (entry as FileSystemFileEntry).file((f) => res([f]), () => res([])));
+    return new Promise((res) =>
+      (entry as FileSystemFileEntry).file(
+        (f) => {
+          paths.set(f, entry.fullPath.replace(/^\/+/, ''));
+          res([f]);
+        },
+        () => res([]),
+      ),
+    );
   }
   if (entry.isDirectory) {
     const reader = (entry as FileSystemDirectoryEntry).createReader();

@@ -61,7 +61,7 @@ export const tools: Tool[] = [
   t({ slug: 'file-date-changer', category: 'file', icon: CalendarClock, keywords: ['날짜', '생성일', '수정일', 'timestamp', 'date', 'touch'], status: 'ready', accepts: ['*'] }),
   t({ slug: 'metadata-remover', category: 'file', icon: EyeOff, keywords: ['메타데이터', 'exif', 'gps', '위치', '개인정보', 'metadata'], status: 'ready', accepts: ['image/jpeg', 'image/png', 'image/webp'] }),
   t({ slug: 'file-hash', category: 'file', icon: FingerprintPattern, keywords: ['해시', 'hash', 'md5', 'sha', 'sha256', 'crc32', 'checksum', '체크섬', '무결성', '검증', '파일 비교', 'ハッシュ', 'チェックサム'], status: 'ready', accepts: ['*'] }),
-  t({ slug: 'zip', category: 'file', icon: FileArchive, keywords: ['zip', '압축'], status: 'soon', accepts: ['application/zip', '*'] }),
+  t({ slug: 'zip', category: 'file', icon: FileArchive, keywords: ['zip', '압축', '압축 풀기', '해제', '압축 해제', 'unzip', 'compress', 'extract', 'archive', '한글 깨짐', '圧縮', '解凍'], status: 'ready', accepts: ['application/zip', '*'] }),
 
   // PDF
   t({ slug: 'pdf-merge', category: 'pdf', icon: Merge, keywords: ['pdf', '합치기', 'merge'], status: 'soon', accepts: ['application/pdf'] }),
