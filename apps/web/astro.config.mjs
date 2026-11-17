@@ -3,6 +3,7 @@ import { defineConfig } from 'astro/config';
 import { loadEnv } from 'vite';
 
 import react from '@astrojs/react';
+import pdfjsAssets from './integrations/pdfjs-assets.mjs';
 import tailwindcss from '@tailwindcss/vite';
 
 /**
@@ -25,7 +26,7 @@ if (site) {
 // https://astro.build/config
 export default defineConfig({
   site,
-  integrations: [react()],
+  integrations: [react(), pdfjsAssets()],
 
   vite: {
     plugins: [tailwindcss()],

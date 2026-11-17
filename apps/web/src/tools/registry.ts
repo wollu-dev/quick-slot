@@ -64,7 +64,7 @@ export const tools: Tool[] = [
   t({ slug: 'zip', category: 'file', icon: FileArchive, keywords: ['zip', '압축', '압축 풀기', '해제', '압축 해제', 'unzip', 'compress', 'extract', 'archive', '한글 깨짐', '圧縮', '解凍'], status: 'ready', accepts: ['application/zip', '*'] }),
 
   // PDF
-  t({ slug: 'pdf-merge', category: 'pdf', icon: Merge, keywords: ['pdf', '합치기', 'merge'], status: 'soon', accepts: ['application/pdf'] }),
+  t({ slug: 'pdf-merge', category: 'pdf', icon: Merge, keywords: ['pdf', '합치기', 'pdf 합치기', '병합', '합병', 'merge', 'combine', 'join', '結合', 'PDF結合'], status: 'ready', accepts: ['application/pdf'] }),
   t({ slug: 'pdf-split', category: 'pdf', icon: Scissors, keywords: ['pdf', '나누기', 'split', '페이지'], status: 'soon', accepts: ['application/pdf'] }),
   t({ slug: 'image-to-pdf', category: 'pdf', icon: FileImage, keywords: ['pdf', '이미지', '변환'], status: 'soon', accepts: ['image/*'] }),
   t({ slug: 'office-to-pdf', category: 'pdf', icon: FileText, keywords: ['word', 'excel', 'ppt', 'docx', 'pdf'], status: 'soon', processing: 'server' }),
