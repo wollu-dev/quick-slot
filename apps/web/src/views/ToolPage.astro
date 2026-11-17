@@ -22,6 +22,7 @@ import ImageResize from '../tools/image/ImageResize';
 import QrCode from '../tools/image/QrCode';
 import NormalMapFlip from '../tools/dev/NormalMapFlip';
 import PdfMerge from '../tools/pdf/PdfMerge';
+import PdfSplit from '../tools/pdf/PdfSplit';
 import CharCounter from '../tools/text/CharCounter';
 import KoreanEnglishTypo from '../tools/text/KoreanEnglishTypo';
 import TextDiff from '../tools/text/TextDiff';
@@ -91,6 +92,7 @@ const tt = toolText(lang, tool.slug);
   {slug === 'qr-code' && <QrCode client:load lang={lang} />}
   {slug === 'normal-map-flip' && <NormalMapFlip client:load lang={lang} />}
   {slug === 'pdf-merge' && <PdfMerge client:load lang={lang} />}
+  {slug === 'pdf-split' && <PdfSplit client:load lang={lang} />}
   {slug === 'char-counter' && <CharCounter client:load lang={lang} />}
   {slug === 'korean-english-typo' && <KoreanEnglishTypo client:load lang={lang} />}
   {slug === 'text-diff' && <TextDiff client:load lang={lang} />}
