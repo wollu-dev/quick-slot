@@ -1,6 +1,7 @@
 import { after, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createHmac } from 'node:crypto';
+import http from 'node:http';
 import { Hono } from 'hono';
 
 process.env.LOG_REQUESTS = 'false';
@@ -13,7 +14,7 @@ type Mail = import('../src/mail.ts').Mail;
 
 const SECRET = 'pdl_ntfset_test_secret';
 config.authSecret = 'test-secret-that-is-long-enough-1234567890';
-config.paddle = { environment: 'sandbox', clientToken: 'test_client_token', webhookSecret: SECRET, prices: { monthly: 'pri_month', yearly: 'pri_year' } };
+config.paddle = { environment: 'sandbox', clientToken: 'test_client_token', webhookSecret: SECRET, prices: { monthly: 'pri_month', yearly: 'pri_year' }, apiKey: '', apiBase: '' };
 
 const { db, close } = await connect('pglite:memory');
 await migrate(db);
@@ -130,9 +131,69 @@ test('without payment settings the checkout is off and the webhook is not there'
   const saved = config.paddle;
   config.paddle = null;
   try {
-    assert.deepEqual(await (await app.request('/api/billing/config')).json(), { checkout: null });
+    assert.deepEqual(await (await app.request('/api/billing/config')).json(), { checkout: null, portal: false });
     assert.equal((await deliver(event('subscription.created', { id: 'x', status: 'active' }))).status, 404);
   } finally {
     config.paddle = saved;
+  }
+});
+
+/** Stands in for Paddle's API: records what it was asked and answers like Paddle */
+async function fakePaddle(status = 201) {
+  const seen: { path: string; auth: string; body: unknown }[] = [];
+  const server = http.createServer((req, res) => {
+    let raw = '';
+    req.on('data', (d) => (raw += d));
+    req.on('end', () => {
+      seen.push({ path: req.url!, auth: req.headers.authorization ?? '', body: JSON.parse(raw || 'null') });
+      res.writeHead(status, { 'content-type': 'application/json' });
+      res.end(status === 201 ? JSON.stringify({ data: { id: 'cpls_1', urls: { general: { overview: 'https://customer-portal.paddle.com/cpl_1?action=overview&token=t' }, subscriptions: [] } } }) : '{"error":{}}');
+    });
+  });
+  await new Promise<void>((r) => server.listen(0, '127.0.0.1', r));
+  const { port } = server.address() as { port: number };
+  return { base: `http://127.0.0.1:${port}`, seen, close: () => new Promise<void>((r) => server.close(() => r())) };
+}
+
+test('subscribers get a one-time link to the customer portal', async () => {
+  const paddleApi = await fakePaddle();
+  const saved = { ...config.paddle! };
+  Object.assign(config.paddle!, { apiKey: 'pdl_sdbx_apikey_test', apiBase: paddleApi.base });
+  try {
+    assert.equal(((await (await app.request('/api/billing/config')).json()) as { portal: boolean }).portal, true);
+    const { cookie, userId } = await signIn('portal@example.com');
+    const post = (extra: Record<string, string> = {}) => app.request('/api/billing/portal', { method: 'POST', headers: { origin, cookie, ...extra } });
+
+    assert.equal((await app.request('/api/billing/portal', { method: 'POST', headers: { origin } })).status, 401, 'signed out');
+    assert.equal((await post({ origin: 'https://evil.example' })).status, 403, 'other sites');
+    assert.deepEqual(await (await post()).json(), { error: 'noSubscription' });
+
+    await deliver(event('subscription.created', { id: 'sub_portal', status: 'active', customer_id: 'ctm_portal', custom_data: { userId }, current_billing_period: { ends_at: days(30) } }));
+    const res = await post();
+    assert.equal(res.status, 200);
+    assert.deepEqual(await res.json(), { url: 'https://customer-portal.paddle.com/cpl_1?action=overview&token=t' });
+    assert.deepEqual(paddleApi.seen.at(-1), { path: '/customers/ctm_portal/portal-sessions', auth: 'Bearer pdl_sdbx_apikey_test', body: { subscription_ids: ['sub_portal'] } });
+  } finally {
+    Object.assign(config.paddle!, saved);
+    await paddleApi.close();
+  }
+});
+
+test('the portal is off without an API key, and a Paddle error is reported, not leaked', async () => {
+  assert.equal(((await (await app.request('/api/billing/config')).json()) as { portal: boolean }).portal, false);
+  const { cookie, userId } = await signIn('portal2@example.com');
+  await deliver(event('subscription.created', { id: 'sub_portal2', status: 'active', customer_id: 'ctm_portal2', custom_data: { userId } }));
+  assert.equal((await app.request('/api/billing/portal', { method: 'POST', headers: { origin, cookie } })).status, 501);
+
+  const broken = await fakePaddle(403);
+  const saved = { ...config.paddle! };
+  Object.assign(config.paddle!, { apiKey: 'pdl_sdbx_apikey_test', apiBase: broken.base });
+  try {
+    const res = await app.request('/api/billing/portal', { method: 'POST', headers: { origin, cookie } });
+    assert.equal(res.status, 502);
+    assert.deepEqual(await res.json(), { error: 'failed' });
+  } finally {
+    Object.assign(config.paddle!, saved);
+    await broken.close();
   }
 });

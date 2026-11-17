@@ -147,6 +147,7 @@ API（`apps/api`、`apps/api/.env.example` を参照）の設定:
 | `GOOGLE_CLIENT_ID`、`GOOGLE_CLIENT_SECRET` | Google でログイン | オフ |
 | `APPLE_CLIENT_ID`、`APPLE_CLIENT_SECRET` | Apple でログイン | オフ |
 | `PADDLE_ENV`、`PADDLE_CLIENT_TOKEN`、`PADDLE_WEBHOOK_SECRET`、`PADDLE_PRICE_MONTHLY`、`PADDLE_PRICE_YEARLY` | Pro の決済用 Paddle 設定（`sandbox` または `production`）。Webhook の送り先は `SITE_URL/api/billing/paddle/webhook` | 決済はオフ（「近日公開」） |
+| `PADDLE_API_KEY` | `customer_portal_session.write` 権限のある Paddle API キー:「サブスクリプションの管理」（解約、カード変更、領収書）ボタンを表示 | ボタンなし（お支払い確認メールにリンクあり） |
 
 ## プロジェクト構成
 

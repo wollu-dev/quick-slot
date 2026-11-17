@@ -147,6 +147,7 @@ API (`apps/api`, `apps/api/.env.example` 참고) 설정:
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | Google 로그인 | 꺼짐 |
 | `APPLE_CLIENT_ID`, `APPLE_CLIENT_SECRET` | Apple 로그인 | 꺼짐 |
 | `PADDLE_ENV`, `PADDLE_CLIENT_TOKEN`, `PADDLE_WEBHOOK_SECRET`, `PADDLE_PRICE_MONTHLY`, `PADDLE_PRICE_YEARLY` | Pro 결제용 Paddle 설정(`sandbox` 또는 `production`). 웹훅 주소는 `SITE_URL/api/billing/paddle/webhook` | 결제 꺼짐("출시 예정") |
+| `PADDLE_API_KEY` | `customer_portal_session.write` 권한이 있는 Paddle API 키: "구독 관리"(해지, 카드 변경, 영수증) 버튼을 켬 | 버튼 없음(결제 확인 메일에 링크 있음) |
 
 ## 프로젝트 구조
 

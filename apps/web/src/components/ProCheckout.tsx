@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { CircleCheck, LoaderCircle } from 'lucide-react';
 import { LANG_TAGS, useLang, useT, withI18n } from '../i18n';
 import { ACCOUNT_EVENT, getProviders, getUser, type AccountUser } from '../lib/account';
-import { getCheckoutConfig, getPlan, openCheckout, openSettings, waitForPro, type CheckoutConfig, type Period, type PlanInfo } from '../lib/billing';
+import { getCheckoutConfig, getPlan, openCheckout, openPortal, openSettings, portalAvailable, waitForPro, type CheckoutConfig, type Period, type PlanInfo } from '../lib/billing';
 import { PRO_PRICE } from '../lib/plans';
 import Segmented from './ui/Segmented';
 
@@ -20,6 +20,7 @@ function ProCheckout() {
   const [period, setPeriod] = useState<Period>('yearly');
   const [state, setState] = useState<'idle' | 'opening' | 'paid' | 'active' | 'slow' | 'error'>('idle');
   const [askSignIn, setAskSignIn] = useState(false);
+  const [portal, setPortal] = useState(false);
 
   const refresh = async () => {
     const c = await getCheckoutConfig();
@@ -32,7 +33,9 @@ function ProCheckout() {
       }
     }
     setUser(u);
-    setPlan(u ? await getPlan() : null);
+    const pl = u ? await getPlan() : null;
+    setPlan(pl);
+    setPortal(pl?.provider === 'paddle' && (await portalAvailable()));
     setCfg(c);
   };
 
@@ -77,6 +80,11 @@ function ProCheckout() {
         ) : plan?.periodEnd ? (
           <p className="text-center text-[13px] text-muted">{p.renewsOn(date(plan.periodEnd))}</p>
         ) : null}
+        {portal && (
+          <button type="button" className="btn w-full" onClick={() => openPortal().catch(() => setState('error'))}>
+            {t.settings.account.manage}
+          </button>
+        )}
       </div>
     );
   }

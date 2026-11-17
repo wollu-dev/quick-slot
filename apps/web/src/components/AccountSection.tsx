@@ -1,7 +1,7 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { CircleCheck, LoaderCircle, Mail, UserRound } from 'lucide-react';
 import { LANG_TAGS, useLang, useT } from '../i18n';
-import { getPlan, type PlanInfo } from '../lib/billing';
+import { getPlan, openPortal, portalAvailable, type PlanInfo } from '../lib/billing';
 import Rich from '../i18n/Rich';
 import { AccountFailure, deleteAccount, getProviders, getUser, isEmail, sendSignInLink, signInWith, signOut, type AccountError, type AccountUser, type Providers } from '../lib/account';
 
@@ -16,6 +16,8 @@ export default function AccountSection({ Group }: { Group: (p: { title: string; 
   const [providers, setProviders] = useState<Providers | null | undefined>(undefined);
   const [user, setUser] = useState<AccountUser | null>(null);
   const [plan, setPlan] = useState<PlanInfo | null>(null);
+  const [portal, setPortal] = useState(false);
+  const [portalError, setPortalError] = useState(false);
   const [email, setEmail] = useState('');
   const [sentTo, setSentTo] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
@@ -35,6 +37,7 @@ export default function AccountSection({ Group }: { Group: (p: { title: string; 
           if (u) {
             const pl = await getPlan();
             if (alive) setPlan(pl);
+            if (pl?.provider === 'paddle' && (await portalAvailable()) && alive) setPortal(true);
           }
         } catch {
           /* treat as signed out */
@@ -100,6 +103,32 @@ export default function AccountSection({ Group }: { Group: (p: { title: string; 
             )}
           </span>
         </div>
+        {portal && (
+          <button
+            type="button"
+            className="flex min-h-12 w-full items-center gap-2 px-4 text-left text-[15px] text-accent hover:bg-panel-2 disabled:opacity-50"
+            disabled={!!busy}
+            data-manage-subscription
+            onClick={async () => {
+              setBusy('portal');
+              setPortalError(false);
+              try {
+                await openPortal();
+              } catch {
+                setPortalError(true);
+                setBusy(null);
+              }
+            }}
+          >
+            {busy === 'portal' && <LoaderCircle size={15} className="animate-spin" />}
+            {a.manage}
+          </button>
+        )}
+        {portalError && (
+          <p className="px-4 py-2.5 text-[13px] text-danger" role="alert">
+            {a.portalError}
+          </p>
+        )}
         {errorRow}
         <button
           type="button"

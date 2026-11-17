@@ -140,6 +140,49 @@ export function checkoutConfig() {
   return { provider: 'paddle' as const, environment: p.environment, clientToken: p.clientToken, prices: p.prices };
 }
 
+/** Whether subscribers can open Paddle's customer portal (cancel, change card, invoices) */
+export const portalAvailable = () => !!config.paddle?.apiKey;
+
+export type PortalError = 'unavailable' | 'noSubscription' | 'failed';
+export class PortalFailure extends Error {
+  code: PortalError;
+  constructor(code: PortalError) {
+    super(code);
+    this.code = code;
+  }
+}
+
+/**
+ * A one-time link to Paddle's customer portal for the user's latest Paddle subscription.
+ * The link carries a temporary token, so it is made on request and never stored.
+ */
+export async function portalUrl(db: Db, userId: string): Promise<string> {
+  const p = config.paddle;
+  if (!p?.apiKey) throw new PortalFailure('unavailable');
+  const rows = await db.select().from(subscription).where(eq(subscription.userId, userId));
+  const sub = rows.filter((r) => r.provider === 'paddle' && r.customerId).sort((a, b) => b.eventAt.getTime() - a.eventAt.getTime())[0];
+  if (!sub?.customerId) throw new PortalFailure('noSubscription');
+  let res: Response;
+  try {
+    res = await fetch(`${p.apiBase}/customers/${encodeURIComponent(sub.customerId)}/portal-sessions`, {
+      method: 'POST',
+      headers: { authorization: `Bearer ${p.apiKey}`, 'content-type': 'application/json' },
+      body: JSON.stringify({ subscription_ids: [sub.id] }),
+      signal: AbortSignal.timeout(10_000),
+    });
+  } catch {
+    throw new PortalFailure('failed');
+  }
+  if (!res.ok) {
+    console.error(`[billing] customer portal request failed: ${res.status}`);
+    throw new PortalFailure('failed');
+  }
+  const body = (await res.json().catch(() => null)) as { data?: { urls?: { general?: { overview?: string } } } } | null;
+  const url = body?.data?.urls?.general?.overview;
+  if (!url || !url.startsWith('https://')) throw new PortalFailure('failed');
+  return url;
+}
+
 /* ------------------------------------------------------------------ */
 /* Guarding Pro routes                                                 */
 /* ------------------------------------------------------------------ */
