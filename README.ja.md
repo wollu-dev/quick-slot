@@ -201,7 +201,7 @@ docker compose up -d          # http://localhost:8080（QUICKSLOT_PORT で変更
 
 ## コントリビュート
 
-コントリビュート歓迎です！GitHub Flow に従います: `main` からブランチを作り、プルリクエストを開き、CI が通ったら squash merge します。
+コントリビュート歓迎です！変更の送り方は **[CONTRIBUTING.ja.md](CONTRIBUTING.ja.md)** をご覧ください。GitHub Flow に従います: `main` からブランチを作り、プルリクエストを開き、CI が通ったら squash merge します。最初のプルリクエストで[コントリビューターライセンス契約（CLA）](CLA.md)への署名をお願いします。著作権はコントリビューターに残ります。
 
 まず **[AGENTS.ja.md](AGENTS.ja.md)** をお読みください。コード・デザイン・多言語・コミット・プルリクエストのルールがあり、人にもAIコーディングエージェントにも適用されます。（原文: [AGENTS.md](AGENTS.md)、英語）
 

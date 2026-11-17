@@ -201,7 +201,7 @@ docker compose up -d          # http://localhost:8080 (QUICKSLOT_PORT 로 변경
 
 ## 기여하기
 
-기여를 환영합니다! GitHub Flow 를 따릅니다: `main` 에서 브랜치를 만들고, PR 을 열고, CI 가 통과하면 squash merge 합니다.
+기여를 환영합니다! 변경을 보내는 방법은 **[CONTRIBUTING.ko.md](CONTRIBUTING.ko.md)**를 보세요. GitHub Flow 를 따릅니다: `main` 에서 브랜치를 만들고, PR 을 열고, CI 가 통과하면 squash merge 합니다. 첫 PR에서 [기여자 라이선스 동의서(CLA)](CLA.md) 서명을 요청받습니다. 저작권은 계속 기여자에게 있습니다.
 
 먼저 **[AGENTS.ko.md](AGENTS.ko.md)** 를 읽어 주세요. 코드·디자인·다국어·커밋·PR 규칙이 있고, 사람과 AI 코딩 에이전트 모두에게 적용됩니다. (원본: [AGENTS.md](AGENTS.md), 영어)
 

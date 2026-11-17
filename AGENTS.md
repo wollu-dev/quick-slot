@@ -23,6 +23,7 @@ QuickSlot: everyday and developer tools that run right in the browser. See [READ
 - The project is source-available under the Sustainable Use License (`LICENSE.md`), like n8n. Versions up to commit `7ee6d28` stay MIT.
 - **Code for paid features lives only in files with `.ee.` in the name or in an `ee/` folder**, covered by `LICENSE_EE.md`. Code outside them never imports from them; paid features plug in from the `ee` side.
 - **Tools that are free today stay free.** Paid plans add new things (AI, sync, higher limits); never move an existing free feature behind a subscription.
+- Outside contributions need the signed Contributor License Agreement (`CLA.md`, English only), checked by the CLA bot on each pull request.
 - Third-party engines keep their own licenses (ffmpeg.wasm is GPL-2.0-or-later, `heic-to` is LGPL-3.0). Load them as separate, unmodified files, as today. Don't copy code from other projects unless its license allows it (MIT, Apache-2.0, BSD and similar are fine).
 
 ## Languages of the repository
@@ -31,10 +32,10 @@ QuickSlot: everyday and developer tools that run right in the browser. See [READ
 |---|---|
 | Code, identifiers, comments, developer-facing messages (build warnings, thrown errors) | **English** |
 | Commit messages, PR titles and descriptions, branch names | **English** |
-| Documentation (`README`, `AGENTS`) | **English is the source** (`*.md`), with Korean (`*.ko.md`) and Japanese (`*.ja.md`) translations |
+| Documentation (`README`, `AGENTS`, `CONTRIBUTING`) | **English is the source** (`*.md`), with Korean (`*.ko.md`) and Japanese (`*.ja.md`) translations |
 | UI text shown to users | Korean · English · Japanese, through the i18n dictionaries (see below) |
 
-- When you change `README.md` or `AGENTS.md`, update the `.ko.md` and `.ja.md` translations **in the same PR** so they never drift apart.
+- When you change `README.md`, `AGENTS.md` or `CONTRIBUTING.md`, update the `.ko.md` and `.ja.md` translations **in the same PR** so they never drift apart.
 - Korean that is product data is fine in code: the Korean dictionary `i18n/ko.ts` and the Korean search `keywords` in `registry.ts`.
 - Write docs, commit messages and PR descriptions in plain, direct prose. Avoid em dashes (—); use a period, comma, colon or parentheses instead.
 
