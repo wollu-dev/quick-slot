@@ -30,6 +30,8 @@ export default defineConfig({
   vite: {
     plugins: [tailwindcss()],
     // These ship their own workers and WebAssembly files; pre-bundling them breaks the relative URLs
-    optimizeDeps: { exclude: ['@ffmpeg/ffmpeg', '@ffmpeg/util', '@jsquash/avif'] },
+    optimizeDeps: { exclude: ['@ffmpeg/ffmpeg', '@ffmpeg/util', '@jsquash/avif', '@jsquash/jpeg', '@jsquash/oxipng', '@jsquash/webp'] },
+    // Our own workers load codecs with dynamic import(), which needs ES module workers
+    worker: { format: 'es' },
   },
 });

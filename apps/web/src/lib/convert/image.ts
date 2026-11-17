@@ -17,7 +17,8 @@ export interface ImageOptions {
 
 const OPAQUE: FormatId[] = ['jpeg', 'bmp'];
 
-async function decode(file: Blob, source: FormatId): Promise<ImageBitmap> {
+/** Decodes any supported image to a bitmap (EXIF orientation applied by the browser) */
+export async function decodeImage(file: Blob, source: FormatId): Promise<ImageBitmap> {
   if (source === 'heic') {
     const { heicTo } = await import('heic-to');
     return heicTo({ blob: file, type: 'bitmap' });
@@ -155,7 +156,7 @@ async function encodeAvif(data: ImageData, quality: number): Promise<Blob> {
 }
 
 export async function convertImage(file: Blob, source: FormatId, target: FormatId, opts: ImageOptions): Promise<Blob> {
-  const bitmap = await decode(file, source);
+  const bitmap = await decodeImage(file, source);
   try {
     if (target === 'ico') return await encodeIco(bitmap);
     const { canvas, ctx, width, height } = draw(bitmap, target, opts);
