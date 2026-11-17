@@ -31,6 +31,15 @@ HEALTHCHECK --interval=30s --timeout=3s CMD wget -qO- http://127.0.0.1/ >/dev/nu
 FROM node:${NODE_VERSION}-alpine AS api
 WORKDIR /app
 ENV NODE_ENV=production
+# The video downloader runs yt-dlp (ffmpeg merges video and audio; yt-dlp-ejs, from the [default] extra,
+# runs site JavaScript with Node). Sites change often,
+# so rebuild the image regularly to pick up a current yt-dlp.
+ARG YTDLP_VERSION=2026.10.26
+RUN apk add --no-cache ffmpeg python3 py3-pip \
+  && pip install --no-cache-dir --break-system-packages "yt-dlp[default]==${YTDLP_VERSION}" \
+  && apk del py3-pip \
+  && mkdir /work && chown node:node /work
+ENV VIDEO_WORK_DIR=/work XDG_CACHE_HOME=/tmp
 COPY package.json package-lock.json ./
 COPY apps/api/package.json apps/api/
 COPY apps/web/package.json apps/web/

@@ -48,6 +48,7 @@ Renaming a batch of files, stripping GPS data from a photo, pretty-printing JSON
 | **Images → PDF** | One image per page on A4, Letter, A5 or image-sized pages, with orientation and margins; JPEG and PNG embedded without re-compression |
 | **Video → GIF** | Trim a clip and turn it into an animated GIF with your choice of width, frame rate, speed and quality |
 | **Screen Recorder** | Record a screen, window or tab with screen or tab audio and the microphone, pause and resume, and save as MP4 or WebM |
+| **Video Downloader** (server) | Saves a video from its page address as MP4 or MP3/M4A with yt-dlp on our API; the file is deleted as soon as it is sent. Only for videos you have the rights to |
 | **Metadata Remover & Editor** | Strip GPS, camera info and more from JPEG / PNG / WebP without losing quality, or edit the date taken (set or shift many photos at once), location, author, copyright and title of JPEGs |
 | **Hash & Checksum** | MD5, SHA-1, SHA-256, SHA-512 and CRC32 of files or text, verify a published hash, and check whether files are identical |
 | **ZIP & Unzip** | Zip files and folders with UTF-8 names, browse a ZIP and extract single files or everything into a folder, and fix garbled Korean or Japanese names |
@@ -133,6 +134,12 @@ The API (`apps/api`, see `apps/api/.env.example`) reads:
 | `RATE_LIMIT_PER_MINUTE` | Requests allowed per client address per minute | `60` |
 | `LOG_REQUESTS` | One log line per request: method, path without query, status, time | `true` |
 | `SERVER_TIME_PER_MINUTE` | Server time checks per client address per minute (each sends about 20 requests to the site) | `6` |
+| `VIDEO_MAX_MB` | Largest file the video downloader makes, in MB | `1024` |
+| `VIDEO_MAX_MINUTES` | Longest video it accepts, in minutes | `120` |
+| `VIDEO_CONCURRENT` | Video downloads running at once on the server | `2` |
+| `VIDEO_PER_HOUR` | Video downloads per client address per hour | `10` |
+| `VIDEO_WORK_DIR` | Folder where downloads wait until they are sent (deleted right after) | system temp folder; `/work` in the image |
+| `YTDLP_PATH` | The yt-dlp command | `yt-dlp` |
 
 ## Project structure
 

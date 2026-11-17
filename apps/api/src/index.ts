@@ -1,6 +1,9 @@
 import { serve } from '@hono/node-server';
 import { createApp } from './app.ts';
 import { config } from './config.ts';
+import { clearLeftovers } from './video.ts';
+
+await clearLeftovers();
 
 const server = serve({ fetch: createApp().fetch, port: config.port }, (info) => {
   console.log(`[api] listening on :${info.port}`);

@@ -61,3 +61,8 @@ jobs:
           curl -fs http://localhost:8080/ | grep -q 'QuickSlot'
           curl -fs http://localhost:8080/privacy/ | grep -q 'QuickSlot'
           curl -fsI http://localhost:8080/tools/qr-code/ | grep -qi 'x-content-type-options: nosniff'
+          # The video downloader's tools are in the api image and the work folder is writable
+          docker exec api yt-dlp --version
+          docker exec api python3 -c 'import yt_dlp_ejs'
+          docker exec api ffmpeg -hide_banner -version | head -1
+          docker exec api sh -c 'touch /work/.w && rm /work/.w'
