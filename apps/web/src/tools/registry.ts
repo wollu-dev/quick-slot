@@ -36,7 +36,7 @@ export interface Tool {
   accepts?: string[];
 }
 
-export const categories: Category[] = [
+const allCategories: Category[] = [
   { id: 'file', icon: Folder, color: '#0a84ff' },
   { id: 'pdf', icon: FileText, color: '#ff453a' },
   { id: 'image', icon: Image, color: '#30b158' },
@@ -54,7 +54,7 @@ const t = (tool: Omit<Tool, 'processing'> & { processing?: Tool['processing'] })
   ...tool,
 });
 
-export const tools: Tool[] = [
+const allTools: Tool[] = [
   // File
   t({ slug: 'file-converter', category: 'file', icon: ArrowRightLeft, keywords: ['변환', '형식', '확장자', 'convert', 'converter', 'format', 'extension', 'heic', 'jpg', 'png', 'webp', 'avif', 'mp3', 'mp4', 'webm', 'gif', 'json', 'yaml', 'csv', 'xml', '変換', '拡張子'], status: 'ready', accepts: ['*'] }),
   t({ slug: 'file-refinery', category: 'file', icon: WandSparkles, keywords: ['정제', '정리', '일괄', '올인원', '한번에', '파일 정리', '변환', '이름', '날짜', '메타데이터', '해시', 'nfc', 'all in one', 'batch', 'refine', 'cleanup', 'workflow', '一括', '整理'], status: 'ready', accepts: ['*'] }),
@@ -104,6 +104,24 @@ export const tools: Tool[] = [
   t({ slug: 'draw-games', category: 'life', icon: Dices, keywords: ['뽑기', '룰렛', '돌림판', '사다리', '사다리타기', '핀볼', '추첨', '제비뽑기', '랜덤', '당첨', 'roulette', 'ladder', 'pinball', 'random', 'draw', 'picker', 'lottery', 'ルーレット', 'あみだ', '抽選'], status: 'ready' }),
   t({ slug: 'dutch-pay', category: 'life', icon: Receipt, keywords: ['더치페이', 'n빵', '엔빵', '정산', '나누기', '회비', '총무', 'split', 'bill', 'dutch', 'share', '割り勘', '精算'], status: 'ready' }),
 ];
+
+/**
+ * Which tools this build shows, from the HIDE_TOOLS and SHOW_TOOLS environment variables (comma-separated
+ * tool slugs or category ids), read at build time in astro.config.mjs. Hidden tools get no page and don't
+ * appear in the list, search or Quick Slots; categories left empty are dropped too.
+ */
+declare const __TOOL_FILTER__: { hide: string[]; show: string[] } | undefined;
+const filter = typeof __TOOL_FILTER__ === 'undefined' ? { hide: [], show: [] } : __TOOL_FILTER__;
+const named = (tool: Tool, names: string[]) => names.includes(tool.slug) || names.includes(tool.category);
+
+export const tools: Tool[] = allTools.filter((x) => (!filter.show.length || named(x, filter.show)) && !named(x, filter.hide));
+export const categories: Category[] = allCategories.filter((c) => tools.some((x) => x.category === c.id));
+
+if (import.meta.env.SSR) {
+  const known = new Set<string>([...allTools.map((x) => x.slug), ...allCategories.map((c) => c.id)]);
+  const unknown = [...filter.hide, ...filter.show].filter((n) => !known.has(n));
+  if (unknown.length) console.warn(`[quickslot] HIDE_TOOLS / SHOW_TOOLS name unknown tools or categories: ${unknown.join(', ')}`);
+}
 
 export const getTool = (slug: string) => tools.find((x) => x.slug === slug);
 export const getCategory = (id: CategoryId) => categories.find((c) => c.id === id)!;

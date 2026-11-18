@@ -115,15 +115,19 @@ npm run dev
 
 ## 설정
 
-사이트 주소는 코드에 쓰지 않습니다. 빌드하는 곳에서 넣습니다.
+사이트 주소는 코드에 쓰지 않습니다. 주소와 보여 줄 도구는 사이트를 빌드하거나 실행하는 곳에서 넣습니다.
 
 | 변수 | 용도 | 없으면 |
 |---|---|---|
 | `SITE_URL` | 사이트 전체 주소 (예: `https://example.com`). `hreflang`·`canonical` 링크에 사용 | 상대 주소로 대신 (개발용으로는 충분) |
+| `HIDE_TOOLS` | 숨길 도구, 쉼표로 구분: 도구 slug (`registry.ts` 의 이름, 예: `video-downloader`) 또는 카테고리 (`file`, `pdf`, `image`, `media`, `text`, `dev`, `life`) | 모든 도구 표시 |
+| `SHOW_TOOLS` | 이것만 보여 줄 도구나 카테고리, 같은 형식 (예: `pdf,image,qr-code`) | 모든 도구 표시 |
 
 - **내 PC:** `apps/web/.env.example` 을 `apps/web/.env` 로 복사 (git 에 안 올라감)
 - **GitHub Actions:** 저장소 **Variables** 에 `SITE_URL` 추가
-- **Docker:** `--build-arg SITE_URL=https://…`
+- **Docker:** web 컨테이너의 환경 변수로 지정 (배포 참고). 값이 바뀌면 사이트를 다시 빌드합니다.
+
+숨긴 도구는 페이지가 만들어지지 않고 목록, 검색, 퀵슬롯에도 나오지 않습니다. API 에도 같은 `HIDE_TOOLS` / `SHOW_TOOLS` 를 넣으면 숨긴 서버 도구가 응답하지 않습니다 (`docker-compose.yml` 은 그렇게 되어 있습니다).
 
 API (`apps/api`, `apps/api/.env.example` 참고) 설정:
 
@@ -140,6 +144,8 @@ API (`apps/api`, `apps/api/.env.example` 참고) 설정:
 | `VIDEO_PER_HOUR` | 클라이언트 주소별 1시간당 영상 다운로드 횟수 | `10` |
 | `VIDEO_WORK_DIR` | 보내기 전까지 파일을 두는 폴더 (보낸 즉시 삭제) | 시스템 임시 폴더, 이미지에서는 `/work` |
 | `YTDLP_PATH` | yt-dlp 명령 | `yt-dlp` |
+| `HIDE_TOOLS`, `SHOW_TOOLS` | 사이트와 같은 목록. 숨긴 서버 도구의 경로는 404 로 응답 | 모든 도구 켜짐 |
+| `APP_VERSION` | `/api/health` 가 알려 주는 버전 (게시된 이미지에 들어 있음) | 패키지 버전 |
 
 ## 프로젝트 구조
 
@@ -192,12 +198,32 @@ quick-slot/
 
 QuickSlot 은 Docker 로 직접 호스팅합니다. 루트 `Dockerfile` 이 두 이미지를 만듭니다: **web** (정적 사이트를 제공하고 `/api` 를 API 로 넘기는 nginx) 와 **api**. CI 는 PR 마다 두 이미지를 빌드하고 함께 동작하는지 확인합니다.
 
+포트는 web 컨테이너만 열고, API 는 nginx 를 거쳐서만 접근합니다.
+
+### 릴리스 실행하기
+
+GitHub 릴리스를 게시할 때마다 두 이미지가 GitHub Container Registry 에 올라갑니다. 태그는 버전(`1.2.0`, `1.2`)과 `latest` 입니다. `main` 머지로는 아무것도 올라가지 않으므로, 서버는 새 버전을 고를 때만 바뀝니다.
+
+서버에 `docker-compose.yml` 을 두고 옆에 `.env` 파일을 만듭니다:
+
 ```bash
-SITE_URL=https://example.com docker compose build
-docker compose up -d          # http://localhost:8080 (QUICKSLOT_PORT 로 변경)
+QUICKSLOT_VERSION=1.2.0          # 기본값: latest
+QUICKSLOT_PORT=8080
+SITE_URL=https://example.com
+HIDE_TOOLS=video-downloader      # 또는 SHOW_TOOLS=pdf,image
 ```
 
-포트는 web 컨테이너만 열고, API 는 nginx 를 거쳐서만 접근합니다. 버전 태그(`v*`)를 올릴 때 GitHub Container Registry 에 이미지를 게시하는 것은 다음에 추가할 예정입니다.
+```bash
+docker compose pull && docker compose up -d
+```
+
+`SITE_URL`, `HIDE_TOOLS`, `SHOW_TOOLS` 를 지정하면 web 컨테이너가 시작할 때 사이트를 빌드하고 (30초쯤), 그 뒤에 제공합니다. 값이 바뀔 때만 다시 빌드합니다. 이미지를 소스에서 직접 만들려면 `docker compose build` 를 실행합니다.
+
+### 릴리스 게시하기 (관리자)
+
+1. 버전 태그로 릴리스를 만듭니다: `gh release create v1.2.0 --generate-notes` (또는 GitHub 의 Releases 에서).
+2. Release 워크플로 (`.github/workflows/release.yml`) 가 `linux/amd64`, `linux/arm64` 용 이미지를 빌드해 올립니다. 사전 릴리스(pre-release)는 자기 버전 태그만 받고 `latest` 는 받지 않습니다.
+3. 처음 한 번은 GitHub 프로필 → Packages 에서 두 패키지(`quick-slot-web`, `quick-slot-api`)의 공개 범위를 public 으로 바꿔야 서버가 로그인 없이 받을 수 있습니다.
 
 ## 기여하기
 

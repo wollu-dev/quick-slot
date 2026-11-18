@@ -115,15 +115,19 @@ npm run dev
 
 ## 設定
 
-サイトのURLはコードに書きません。ビルドする場所で指定します。
+サイトのURLはコードに書きません。URLと表示するツールは、サイトをビルドまたは実行する場所で指定します。
 
 | 変数 | 用途 | 未設定の場合 |
 |---|---|---|
 | `SITE_URL` | サイトの完全なURL（例: `https://example.com`）。`hreflang`・`canonical` リンクに使用 | 相対URLで代用（開発には十分） |
+| `HIDE_TOOLS` | 非表示にするツール、カンマ区切り: ツールの slug（`registry.ts` の名前、例: `video-downloader`）またはカテゴリ（`file`, `pdf`, `image`, `media`, `text`, `dev`, `life`） | すべてのツールを表示 |
+| `SHOW_TOOLS` | これだけを表示するツールやカテゴリ、同じ形式（例: `pdf,image,qr-code`） | すべてのツールを表示 |
 
 - **ローカル:** `apps/web/.env.example` を `apps/web/.env` にコピー（git には含まれません）
 - **GitHub Actions:** リポジトリの **Variables** に `SITE_URL` を追加
-- **Docker:** `--build-arg SITE_URL=https://…`
+- **Docker:** web コンテナの環境変数で指定（デプロイを参照）。値が変わるとサイトをビルドし直します。
+
+非表示のツールはページが作られず、一覧・検索・クイックスロットにも出ません。API にも同じ `HIDE_TOOLS` / `SHOW_TOOLS` を指定すると、非表示のサーバーツールは応答しなくなります（`docker-compose.yml` はそうなっています）。
 
 API（`apps/api`、`apps/api/.env.example` を参照）の設定:
 
@@ -140,6 +144,8 @@ API（`apps/api`、`apps/api/.env.example` を参照）の設定:
 | `VIDEO_PER_HOUR` | クライアントのアドレスごとの1時間あたりの動画ダウンロード回数 | `10` |
 | `VIDEO_WORK_DIR` | 送るまでファイルを置くフォルダー（送った直後に削除） | システムの一時フォルダー、イメージでは `/work` |
 | `YTDLP_PATH` | yt-dlp コマンド | `yt-dlp` |
+| `HIDE_TOOLS`, `SHOW_TOOLS` | サイトと同じリスト。非表示のサーバーツールのルートは 404 を返す | すべてのツールが有効 |
+| `APP_VERSION` | `/api/health` が返すバージョン（公開イメージに設定済み） | パッケージのバージョン |
 
 ## プロジェクト構成
 
@@ -192,12 +198,32 @@ quick-slot/
 
 QuickSlot は Docker でセルフホストします。ルートの `Dockerfile` が2つのイメージを作ります: **web**（静的サイトを配信し `/api` を API に渡す nginx）と **api**。CI はプルリクエストごとに両方をビルドし、一緒に動くか確認します。
 
+ポートを公開するのは web コンテナだけで、API には nginx を通してだけアクセスします。
+
+### リリースを動かす
+
+GitHub リリースを公開するたびに、2つのイメージが GitHub Container Registry に公開されます。タグはバージョン（`1.2.0`、`1.2`）と `latest` です。`main` へのマージでは何も公開されないので、サーバーは新しいバージョンを選んだときだけ変わります。
+
+サーバーに `docker-compose.yml` を置き、隣に `.env` ファイルを作ります:
+
 ```bash
-SITE_URL=https://example.com docker compose build
-docker compose up -d          # http://localhost:8080（QUICKSLOT_PORT で変更）
+QUICKSLOT_VERSION=1.2.0          # 既定: latest
+QUICKSLOT_PORT=8080
+SITE_URL=https://example.com
+HIDE_TOOLS=video-downloader      # または SHOW_TOOLS=pdf,image
 ```
 
-ポートを公開するのは web コンテナだけで、API には nginx を通してだけアクセスします。バージョンタグ（`v*`）で GitHub Container Registry にイメージを公開する仕組みは今後追加する予定です。
+```bash
+docker compose pull && docker compose up -d
+```
+
+`SITE_URL`・`HIDE_TOOLS`・`SHOW_TOOLS` を指定すると、web コンテナは起動時にサイトをビルドし（30秒ほど）、その後に配信します。値が変わったときだけビルドし直します。イメージをソースから作るには `docker compose build` を実行します。
+
+### リリースを公開する（管理者）
+
+1. バージョンタグでリリースを作ります: `gh release create v1.2.0 --generate-notes`（または GitHub の Releases から）。
+2. Release ワークフロー（`.github/workflows/release.yml`）が `linux/amd64`・`linux/arm64` 用のイメージをビルドして公開します。プレリリースは自分のバージョンタグだけを受け取り、`latest` は付きません。
+3. 初回だけ、GitHub のプロフィール → Packages で2つのパッケージ（`quick-slot-web`、`quick-slot-api`）の公開範囲を public にすると、サーバーがログインなしで取得できます。
 
 ## コントリビュート
 

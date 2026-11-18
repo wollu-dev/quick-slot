@@ -7,7 +7,7 @@
  * - every route is rate limited per client address
  */
 import { Hono, type Context, type Next } from 'hono';
-import { config } from './config.ts';
+import { config, type ToolFilter } from './config.ts';
 import { GuardError, parseTarget } from './netguard.ts';
 import { rateLimit } from './rateLimit.ts';
 import { measure, MeasureFailure } from './serverTime.ts';
@@ -26,8 +26,23 @@ function clientIp(c: Context): string {
   return info?.remoteAddress ?? 'unknown';
 }
 
-export function createApp() {
+/**
+ * Server tools and the routes they use. HIDE_TOOLS and SHOW_TOOLS name tool slugs or category ids, as in
+ * apps/web/src/tools/registry.ts (keep slug and category in step with it).
+ */
+const SERVER_TOOLS = [
+  { slug: 'server-time', category: 'life', prefix: '/api/server-time' },
+  { slug: 'video-downloader', category: 'media', prefix: '/api/video/' },
+];
+
+export function toolEnabled(tool: { slug: string; category: string }, filter: ToolFilter): boolean {
+  const named = (list: string[]) => list.includes(tool.slug) || list.includes(tool.category);
+  return (!filter.show.length || named(filter.show)) && !named(filter.hide);
+}
+
+export function createApp(tools: ToolFilter = config.tools) {
   const app = new Hono<Env>();
+  const off = SERVER_TOOLS.filter((t) => !toolEnabled(t, tools)).map((t) => t.prefix);
 
   app.use('*', async (c: Context<Env>, next: Next) => {
     const started = performance.now();
@@ -42,6 +57,15 @@ export function createApp() {
   });
 
   app.use('/api/*', rateLimit({ windowMs: 60_000, max: config.rateLimitPerMinute }));
+
+  // Tools turned off on this site: their routes are gone, as if they didn't exist
+  if (off.length) {
+    app.use('/api/*', async (c, next) => {
+      const path = new URL(c.req.url).pathname;
+      if (off.some((p) => path === p || path.startsWith(p))) return c.json({ error: 'notFound' }, 404);
+      await next();
+    });
+  }
 
   app.get('/api/health', (c) => c.json({ ok: true, version: config.version }));
 
