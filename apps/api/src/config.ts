@@ -16,7 +16,9 @@ export interface ToolFilter {
 
 export const config = {
   port: num(env.PORT, 8787),
-  /** Read the client address from X-Forwarded-For (set when running behind the bundled nginx) */
+  /** The built website to serve next to the API (apps/web/dist; set in the Docker image). Empty serves only /api. */
+  siteDir: env.SITE_DIR || '',
+  /** Read the client address from X-Forwarded-For (set only behind your own reverse proxy) */
   trustProxy: env.TRUST_PROXY === 'true',
   rateLimitPerMinute: num(env.RATE_LIMIT_PER_MINUTE, 60),
   logRequests: env.LOG_REQUESTS !== 'false',

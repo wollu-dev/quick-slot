@@ -1,5 +1,6 @@
 /**
  * QuickSlot API. Only for tools that truly need a server (see AGENTS.md, "server tools").
+ * With SITE_DIR set (the Docker image) it also serves the built website, so one server runs everything.
  *
  * Privacy by construction:
  * - nothing users send is stored or logged; the access log has method, path (without the query), status and time only
@@ -7,9 +8,12 @@
  * - every route is rate limited per client address
  */
 import { Hono, type Context, type Next } from 'hono';
+import { bodyLimit } from 'hono/body-limit';
+import { compress } from 'hono/compress';
 import { config, type ToolFilter } from './config.ts';
 import { GuardError, parseTarget } from './netguard.ts';
 import { rateLimit } from './rateLimit.ts';
+import { COMPRESSIBLE, serveSite, SITE_HEADERS } from './site.ts';
 import { measure, MeasureFailure } from './serverTime.ts';
 import { checkUrl, createJob, disposition, FORMATS, getJob, info, takeFile, VideoFailure, type VideoFormat } from './video.ts';
 import { Readable } from 'node:stream';
@@ -40,7 +44,9 @@ export function toolEnabled(tool: { slug: string; category: string }, filter: To
   return (!filter.show.length || named(filter.show)) && !named(filter.hide);
 }
 
-export function createApp(tools: ToolFilter = config.tools) {
+const isApi = (path: string) => path === '/api' || path.startsWith('/api/');
+
+export function createApp({ tools = config.tools, siteDir = config.siteDir }: { tools?: ToolFilter; siteDir?: string } = {}) {
   const app = new Hono<Env>();
   const off = SERVER_TOOLS.filter((t) => !toolEnabled(t, tools)).map((t) => t.prefix);
 
@@ -48,15 +54,19 @@ export function createApp(tools: ToolFilter = config.tools) {
     const started = performance.now();
     c.set('ip', clientIp(c));
     await next();
-    // API responses are for the site itself: never cached by shared caches, never framed, no MIME sniffing
-    c.header('Cache-Control', 'no-store');
-    c.header('X-Content-Type-Options', 'nosniff');
-    c.header('Referrer-Policy', 'no-referrer');
-    c.header('Cross-Origin-Resource-Policy', 'same-origin');
+    if (isApi(c.req.path)) {
+      // API responses are for the site itself: never cached by shared caches, never framed, no MIME sniffing
+      c.header('Cache-Control', 'no-store');
+      c.header('X-Content-Type-Options', 'nosniff');
+      c.header('Referrer-Policy', 'no-referrer');
+      c.header('Cross-Origin-Resource-Policy', 'same-origin');
+    }
     if (config.logRequests) console.log(`${c.req.method} ${new URL(c.req.url).pathname} ${c.res.status} ${Math.round(performance.now() - started)}ms`);
   });
 
   app.use('/api/*', rateLimit({ windowMs: 60_000, max: config.rateLimitPerMinute }));
+  // Requests to the API are small JSON bodies (addresses, a format); refuse anything larger
+  app.use('/api/*', bodyLimit({ maxSize: 64 * 1024, onError: (c) => c.json({ error: 'tooLarge' }, 413) }));
 
   // Tools turned off on this site: their routes are gone, as if they didn't exist
   if (off.length) {
@@ -164,7 +174,14 @@ export function createApp(tools: ToolFilter = config.tools) {
     });
   });
 
-  app.notFound((c) => c.json({ error: 'notFound' }, 404));
+  if (siteDir) {
+    const site = serveSite(siteDir);
+    const zip = compress({ contentTypeFilter: COMPRESSIBLE });
+    app.use('*', (c, next) => (isApi(c.req.path) ? next() : zip(c, next)));
+    app.get('*', (c) => (isApi(c.req.path) ? c.json({ error: 'notFound' }, 404) : site(c)));
+  }
+
+  app.notFound((c) => (isApi(c.req.path) ? c.json({ error: 'notFound' }, 404) : c.text('Not found', 404, SITE_HEADERS)));
   app.onError((err, c) => {
     console.error('[api] unhandled error', err instanceof Error ? err.message : err);
     return c.json({ error: 'internal' }, 500);

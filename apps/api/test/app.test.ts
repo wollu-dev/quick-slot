@@ -18,13 +18,13 @@ test('health answers with security headers', async () => {
 
 test('tools turned off with HIDE_TOOLS or SHOW_TOOLS lose their routes', async () => {
   const post = (app: ReturnType<typeof createApp>, path: string) => app.request(path, { method: 'POST', headers: { 'content-type': 'application/json' }, body: '{}' });
-  const hidden = createApp({ hide: ['video-downloader'], show: [] });
+  const hidden = createApp({ tools: { hide: ['video-downloader'], show: [] } });
   assert.equal((await post(hidden, '/api/video/info')).status, 404);
   assert.equal((await hidden.request('/api/video/jobs/abc')).status, 404);
   assert.equal((await post(hidden, '/api/server-time')).status, 400); // still there (empty body)
-  const byCategory = createApp({ hide: ['life'], show: [] });
+  const byCategory = createApp({ tools: { hide: ['life'], show: [] } });
   assert.equal((await post(byCategory, '/api/server-time')).status, 404);
-  const only = createApp({ hide: [], show: ['pdf'] });
+  const only = createApp({ tools: { hide: [], show: ['pdf'] } });
   assert.equal((await post(only, '/api/server-time')).status, 404);
   assert.equal((await post(only, '/api/video/info')).status, 404);
   assert.equal((await only.request('/api/health')).status, 200);

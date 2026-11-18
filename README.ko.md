@@ -125,16 +125,16 @@ npm run dev
 
 - **내 PC:** `apps/web/.env.example` 을 `apps/web/.env` 로 복사 (git 에 안 올라감)
 - **GitHub Actions:** 저장소 **Variables** 에 `SITE_URL` 추가
-- **Docker:** web 컨테이너의 환경 변수로 지정 (배포 참고). 값이 바뀌면 사이트를 다시 빌드합니다.
+- **Docker:** 컨테이너의 환경 변수로 지정 (배포 참고). 값이 바뀌면 사이트를 다시 빌드합니다.
 
-숨긴 도구는 페이지가 만들어지지 않고 목록, 검색, 퀵슬롯에도 나오지 않습니다. API 에도 같은 `HIDE_TOOLS` / `SHOW_TOOLS` 를 넣으면 숨긴 서버 도구가 응답하지 않습니다 (`docker-compose.yml` 은 그렇게 되어 있습니다).
+숨긴 도구는 페이지가 만들어지지 않고 목록, 검색, 퀵슬롯에도 나오지 않으며, API 도 숨긴 서버 도구의 경로를 끕니다.
 
 API (`apps/api`, `apps/api/.env.example` 참고) 설정:
 
 | 변수 | 용도 | 기본값 |
 |---|---|---|
 | `PORT` | API 가 받는 포트 | `8787` |
-| `TRUST_PROXY` | 클라이언트 주소를 `X-Forwarded-For` 에서 읽기 (함께 들어 있는 nginx 뒤에서는 `true`) | `false` |
+| `TRUST_PROXY` | 클라이언트 주소를 `X-Forwarded-For` 에서 읽기 (직접 둔 리버스 프록시 뒤에서만 `true`) | `false` |
 | `RATE_LIMIT_PER_MINUTE` | 클라이언트 주소별 1분당 허용 요청 수 | `60` |
 | `LOG_REQUESTS` | 요청마다 한 줄 기록: 메서드, 쿼리를 뺀 경로, 상태, 시간 | `true` |
 | `SERVER_TIME_PER_MINUTE` | 클라이언트 주소별 1분당 서버 시간 확인 횟수 (한 번에 사이트로 약 20번 요청) | `6` |
@@ -145,6 +145,7 @@ API (`apps/api`, `apps/api/.env.example` 참고) 설정:
 | `VIDEO_WORK_DIR` | 보내기 전까지 파일을 두는 폴더 (보낸 즉시 삭제) | 시스템 임시 폴더, 이미지에서는 `/work` |
 | `YTDLP_PATH` | yt-dlp 명령 | `yt-dlp` |
 | `HIDE_TOOLS`, `SHOW_TOOLS` | 사이트와 같은 목록. 숨긴 서버 도구의 경로는 404 로 응답 | 모든 도구 켜짐 |
+| `SITE_DIR` | API 와 함께 제공할 빌드된 사이트 (`apps/web/dist`) | `/api` 만 제공. 이미지에서는 `/app/apps/web/dist` |
 | `APP_VERSION` | `/api/health` 가 알려 주는 버전 (게시된 이미지에 들어 있음) | 패키지 버전 |
 
 ## 프로젝트 구조
@@ -163,9 +164,9 @@ quick-slot/
 │  │  ├─ lib/                # 파일·ZIP, 메타데이터 제거, 슬롯, 테마, 독 설정
 │  │  └─ styles/global.css   # 디자인 토큰과 글래스 디자인 시스템
 │  └─ public/
-├─ deploy/nginx.conf         # web 이미지의 nginx 설정
-├─ Dockerfile                # 이미지: web (nginx + 정적 사이트), api
-├─ docker-compose.yml        # web 과 api 를 함께 실행
+├─ deploy/entrypoint.sh      # 컨테이너 시작: 설정이 바뀌었으면 사이트를 다시 빌드하고 서버 실행
+├─ Dockerfile                # 이미지: API 와 사이트를 함께 제공하는 Node 서버
+├─ docker-compose.yml        # 게시된 이미지를 실행
 ├─ docs/assets/              # README 스크린샷
 └─ AGENTS.md                 # 사람과 AI 에이전트를 위한 기여 규칙
 ```
@@ -196,15 +197,21 @@ quick-slot/
 
 ## 배포
 
-QuickSlot 은 Docker 로 직접 호스팅합니다. 루트 `Dockerfile` 이 두 이미지를 만듭니다: **web** (정적 사이트를 제공하고 `/api` 를 API 로 넘기는 nginx) 와 **api**. CI 는 PR 마다 두 이미지를 빌드하고 함께 동작하는지 확인합니다.
-
-포트는 web 컨테이너만 열고, API 는 nginx 를 거쳐서만 접근합니다.
+QuickSlot 은 Docker 로 직접 호스팅합니다. 루트 `Dockerfile` 이 **이미지 하나**를 만듭니다. Node 서버가 `/api` 에 응답하고 웹사이트도 8080 포트로 제공합니다. CI 는 PR 마다 이미지를 빌드하고 잘 동작하는지 확인합니다.
 
 ### 릴리스 실행하기
 
-GitHub 릴리스를 게시할 때마다 두 이미지가 GitHub Container Registry 에 올라갑니다. 태그는 버전(`1.2.0`, `1.2`)과 `latest` 입니다. `main` 머지로는 아무것도 올라가지 않으므로, 서버는 새 버전을 고를 때만 바뀝니다.
+GitHub 릴리스를 게시할 때마다 이미지가 GitHub Container Registry 에 `ghcr.io/wollu-dev/quick-slot` 으로 올라갑니다. 태그는 버전(`1.2.0`, `1.2`)과 `latest` 입니다. `main` 머지로는 아무것도 올라가지 않으므로, 서버는 새 버전을 고를 때만 바뀝니다.
 
-서버에 `docker-compose.yml` 을 두고 옆에 `.env` 파일을 만듭니다:
+가장 간단한 방법은 명령 한 줄입니다:
+
+```bash
+docker run -d --name quickslot -p 8080:8080 --restart unless-stopped \
+  -e SITE_URL=https://example.com -e HIDE_TOOLS=video-downloader \
+  ghcr.io/wollu-dev/quick-slot:1.2.0
+```
+
+또는 서버에 `docker-compose.yml` 을 두고 옆에 `.env` 파일을 만듭니다:
 
 ```bash
 QUICKSLOT_VERSION=1.2.0          # 기본값: latest
@@ -217,13 +224,13 @@ HIDE_TOOLS=video-downloader      # 또는 SHOW_TOOLS=pdf,image
 docker compose pull && docker compose up -d
 ```
 
-`SITE_URL`, `HIDE_TOOLS`, `SHOW_TOOLS` 를 지정하면 web 컨테이너가 시작할 때 사이트를 빌드하고 (30초쯤), 그 뒤에 제공합니다. 값이 바뀔 때만 다시 빌드합니다. 이미지를 소스에서 직접 만들려면 `docker compose build` 를 실행합니다.
+`SITE_URL`, `HIDE_TOOLS`, `SHOW_TOOLS` 를 지정하면 컨테이너가 시작할 때 사이트를 빌드하고 (30초쯤), 그 뒤에 제공합니다. 값이 바뀔 때만 다시 빌드합니다. HTTPS 를 위해 직접 둔 리버스 프록시 뒤에서 쓸 때는 `TRUST_PROXY=true` 로 두어야 요청 제한이 실제 클라이언트 주소를 봅니다. 이미지를 소스에서 직접 만들려면 `docker compose build` 를 실행합니다.
 
 ### 릴리스 게시하기 (관리자)
 
 1. 버전 태그로 릴리스를 만듭니다: `gh release create v1.2.0 --generate-notes` (또는 GitHub 의 Releases 에서).
-2. Release 워크플로 (`.github/workflows/release.yml`) 가 `linux/amd64`, `linux/arm64` 용 이미지를 빌드해 올립니다. 사전 릴리스(pre-release)는 자기 버전 태그만 받고 `latest` 는 받지 않습니다.
-3. 처음 한 번은 GitHub 프로필 → Packages 에서 두 패키지(`quick-slot-web`, `quick-slot-api`)의 공개 범위를 public 으로 바꿔야 서버가 로그인 없이 받을 수 있습니다.
+2. Release 워크플로 (`.github/workflows/release.yml`) 가 `linux/amd64`, `linux/arm64` 용 이미지를 빌드해 올립니다. 사전 릴리스(pre-release)는 자기 버전 태그만 받고 `latest` 는 받지 않습니다. 실행이 실패하면 고친 뒤 같은 태그로 **Run workflow** 를 실행합니다.
+3. 처음 한 번은 GitHub 프로필 → Packages 에서 `quick-slot` 패키지의 공개 범위를 public 으로 바꿔야 서버가 로그인 없이 받을 수 있습니다.
 
 ## 기여하기
 

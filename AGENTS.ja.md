@@ -11,7 +11,7 @@
 
 QuickSlot: ブラウザですぐ使える日常・開発ツール集。構成とツールの追加方法は [README.ja.md](README.ja.md) を参照。
 
-- npm workspaces のモノレポ。ウェブサイトは `apps/web`（Astro 7 + React 19 islands + Tailwind 4）。バックエンドは `apps/api`（Node 24 上の Hono、TypeScript を Node がそのまま実行）。サーバーツールだけが使う。
+- npm workspaces のモノレポ。ウェブサイトは `apps/web`（Astro 7 + React 19 islands + Tailwind 4）。バックエンドは `apps/api`（Node 24 上の Hono、TypeScript を Node がそのまま実行）。サーバーツールだけが使う。 Docker イメージではビルド済みのサイトも配信する（`apps/api/src/site.ts`）。
 - ツールの唯一の情報源は `apps/web/src/tools/registry.ts`。ツールの追加・状態変更はここから。
 - 原則: ツールは基本的にすべての処理をブラウザ内で行う（`processing: 'client'`）。サーバーなしでは本当に動かないツールだけ `'server'` にし、その前にブラウザ用エンジン（WebAssembly）で実現できないか確認する。*すべての*ツールが端末内で処理されると約束する文言は書かず、処理場所はツールごとに説明する。
 - サーバーツールは必ず: サーバーのバッジと雲アイコンを表示し（`processing` から自動）、ドロップ領域の「端末内で処理」の文言を「アップロード後、処理が終わり次第削除」の文言に置き換え、最初のアップロード前に確認を取り、ファイルを保存したり内容をログに残したりせず、結果を返したらすぐに削除し、公開前にプライバシーポリシーのページに記載する。
@@ -45,11 +45,11 @@ QuickSlot: ブラウザですぐ使える日常・開発ツール集。構成と
 ## デプロイ
 
 - **デプロイ方式: Docker イメージ → GitHub Container Registry（`ghcr.io`）→ セルフホスト。** 他のホスティング（GitHub Pages、Vercel、Netlify、Cloudflare Pages など）は使わないので、提案も設定もしない。
-- **イメージ:** ルートの `Dockerfile` が2つのターゲットを作る。`web` は静的ビルドを配信し `/api` を API に渡す nginx（`deploy/nginx.conf`）。コンテナの起動時に `SITE_URL`・`HIDE_TOOLS`・`SHOW_TOOLS` を指定できるようビルドツールも含め、値が前回のビルドと違えば `deploy/web-entrypoint.sh` がサイトをビルドし直す。`api` は `apps/api` を実行する Node。`docker-compose.yml` が両方を起動し、ポートを公開するのは web コンテナだけ。
-- **CI**（`.github/workflows/ci.yml`）は型チェック・テスト・ビルドに加え、プルリクエストごとに2つのイメージをビルドし、一緒に起動して簡単に確認する。CI からは何も公開しない。
+- **イメージ:** ルートの `Dockerfile` が1つのイメージを作る。Node サーバー（`apps/api`）が `/api` に応答し、`SITE_DIR` のビルド済みサイトも配信する（ヘッダーとキャッシュは `apps/api/src/site.ts`）。nginx は使わない。コンテナの起動時に `SITE_URL`・`HIDE_TOOLS`・`SHOW_TOOLS` を指定できるようビルドツールも含め、値が前回のビルドと違えば `deploy/entrypoint.sh` がサイトをビルドし直す。権限のない `node` ユーザーとしてポート 8080 で動く。`docker-compose.yml` は公開イメージでこれを起動する。
+- **CI**（`.github/workflows/ci.yml`）は型チェック・テスト・ビルドに加え、プルリクエストごとにイメージをビルドし、起動して簡単に確認する。CI からは何も公開しない。
 - **公開:** イメージは **GitHub リリースを公開したときだけ** GHCR に公開し（タグ `v1.2.0` など、`.github/workflows/release.yml`）、`main` へのマージごとには公開しない。リリースを作るとパッケージが公開されるため、作るのはリポジトリ所有者か、所有者が頼んだ人だけ。
 - **ツールの非表示:** `HIDE_TOOLS`・`SHOW_TOOLS`（ツールの slug かカテゴリ id）はビルド時に `registry.ts` の `tools` を絞り込み、API は非表示のサーバーツールのルートを止める（`apps/api/src/app.ts` の `SERVER_TOOLS`）。あるツールから別のツールへリンクするコードは、そのツールが非表示かもしれないので先に `getTool(slug)` で確かめる。
-- **ログに個人情報を残さない:** nginx と API が記録するのは、時刻、メソッド、クエリ文字列を除いたパス、ステータス、サイズ、処理時間だけ。クライアントのアドレス、リクエスト本文、ファイル名は残さない。ルートを追加するときも守る。プライバシーポリシー（`/privacy`）で約束している内容。
+- **ログに個人情報を残さない:** サーバーが記録するのは、時刻、メソッド、クエリ文字列を除いたパス、ステータス、サイズ、処理時間だけ。クライアントのアドレス、リクエスト本文、ファイル名は残さない。ルートを追加するときも守る。プライバシーポリシー（`/privacy`）で約束している内容。
 - **ドメインやURLをコードに書かない。** サイトURLはビルド環境変数 `SITE_URL` からのみ受け取る（`astro.config.mjs` → `Astro.site`）。絶対URLが必要なら `Astro.site` を使い、未設定のときは相対URLで動くようにする。
 - プロジェクトのリンク（GitHub リポジトリ）と作者は、ルートの `package.json` の `repository`、`author` から取得する。画面のコードにURLを書かず、`apps/web/src/lib/project.ts` で読み込む。
 - 環境変数を追加したら、`apps/web/.env.example`（サイト）または `apps/api/.env.example`（API）と、README の「設定（Configuration）」表（3言語すべて）にも書く。
