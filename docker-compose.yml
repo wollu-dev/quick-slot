@@ -1,4 +1,4 @@
-# Run QuickSlot with the published images (see README, "Deployment"):
+# Run QuickSlot with the published image (see README, "Deployment"):
 #
 #   docker compose up -d
 #
@@ -8,42 +8,24 @@
 #   SITE_URL           full site URL, e.g. https://example.com (for hreflang and canonical links)
 #   HIDE_TOOLS         tools or categories to hide, comma separated, e.g. video-downloader,server-time
 #   SHOW_TOOLS         or the only tools or categories to show, e.g. pdf,image
-# Changing SITE_URL, HIDE_TOOLS or SHOW_TOOLS rebuilds the site when the web container starts.
+#   TRUST_PROXY        true only behind your own reverse proxy that sets X-Forwarded-For
+# Changing SITE_URL, HIDE_TOOLS or SHOW_TOOLS rebuilds the site when the container starts.
 #
-# To build the images from this checkout instead: docker compose build
+# To build the image from this checkout instead: docker compose build
 
 services:
-  web:
-    image: ghcr.io/wollu-dev/quick-slot-web:${QUICKSLOT_VERSION:-latest}
-    build:
-      context: .
-      target: web
+  quickslot:
+    image: ghcr.io/wollu-dev/quick-slot:${QUICKSLOT_VERSION:-latest}
+    build: .
+    ports:
+      - "${QUICKSLOT_PORT:-8080}:8080"
     environment:
       SITE_URL: ${SITE_URL:-}
       HIDE_TOOLS: ${HIDE_TOOLS:-}
       SHOW_TOOLS: ${SHOW_TOOLS:-}
-    ports:
-      - "${QUICKSLOT_PORT:-8080}:80"
-    depends_on:
-      - api
-    restart: unless-stopped
-
-  api:
-    image: ghcr.io/wollu-dev/quick-slot-api:${QUICKSLOT_VERSION:-latest}
-    build:
-      context: .
-      target: api
-    environment:
-      TRUST_PROXY: "true"
+      TRUST_PROXY: ${TRUST_PROXY:-false}
       RATE_LIMIT_PER_MINUTE: ${RATE_LIMIT_PER_MINUTE:-60}
       LOG_REQUESTS: ${LOG_REQUESTS:-true}
-      # The same lists as the web container, so hidden server tools stop answering too
-      HIDE_TOOLS: ${HIDE_TOOLS:-}
-      SHOW_TOOLS: ${SHOW_TOOLS:-}
-    # The API is reached only through nginx in the web container
-    expose:
-      - "8787"
-    read_only: true
     tmpfs:
       - /tmp
     # Video downloads are written here until they are sent, then deleted right away

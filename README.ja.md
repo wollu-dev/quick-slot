@@ -125,16 +125,16 @@ npm run dev
 
 - **ローカル:** `apps/web/.env.example` を `apps/web/.env` にコピー（git には含まれません）
 - **GitHub Actions:** リポジトリの **Variables** に `SITE_URL` を追加
-- **Docker:** web コンテナの環境変数で指定（デプロイを参照）。値が変わるとサイトをビルドし直します。
+- **Docker:** コンテナの環境変数で指定（デプロイを参照）。値が変わるとサイトをビルドし直します。
 
-非表示のツールはページが作られず、一覧・検索・クイックスロットにも出ません。API にも同じ `HIDE_TOOLS` / `SHOW_TOOLS` を指定すると、非表示のサーバーツールは応答しなくなります（`docker-compose.yml` はそうなっています）。
+非表示のツールはページが作られず、一覧・検索・クイックスロットにも出ません。API も非表示のサーバーツールのルートを止めます。
 
 API（`apps/api`、`apps/api/.env.example` を参照）の設定:
 
 | 変数 | 用途 | 既定値 |
 |---|---|---|
 | `PORT` | API が待ち受けるポート | `8787` |
-| `TRUST_PROXY` | クライアントのアドレスを `X-Forwarded-For` から読む（同梱の nginx の背後では `true`） | `false` |
+| `TRUST_PROXY` | クライアントのアドレスを `X-Forwarded-For` から読む（自分で置いたリバースプロキシの背後でだけ `true`） | `false` |
 | `RATE_LIMIT_PER_MINUTE` | クライアントのアドレスごとの1分あたりの許可リクエスト数 | `60` |
 | `LOG_REQUESTS` | リクエストごとに1行記録: メソッド、クエリを除いたパス、ステータス、時間 | `true` |
 | `SERVER_TIME_PER_MINUTE` | クライアントのアドレスごとの1分あたりのサーバー時刻確認回数（1回でサイトに約20回リクエスト） | `6` |
@@ -145,6 +145,7 @@ API（`apps/api`、`apps/api/.env.example` を参照）の設定:
 | `VIDEO_WORK_DIR` | 送るまでファイルを置くフォルダー（送った直後に削除） | システムの一時フォルダー、イメージでは `/work` |
 | `YTDLP_PATH` | yt-dlp コマンド | `yt-dlp` |
 | `HIDE_TOOLS`, `SHOW_TOOLS` | サイトと同じリスト。非表示のサーバーツールのルートは 404 を返す | すべてのツールが有効 |
+| `SITE_DIR` | API と一緒に配信するビルド済みサイト（`apps/web/dist`） | `/api` だけを配信。イメージでは `/app/apps/web/dist` |
 | `APP_VERSION` | `/api/health` が返すバージョン（公開イメージに設定済み） | パッケージのバージョン |
 
 ## プロジェクト構成
@@ -163,9 +164,9 @@ quick-slot/
 │  │  ├─ lib/                # ファイル・ZIP、メタデータ削除、スロット、テーマ、ドック設定
 │  │  └─ styles/global.css   # デザイントークンとガラスのデザインシステム
 │  └─ public/
-├─ deploy/nginx.conf         # web イメージの nginx 設定
-├─ Dockerfile                # イメージ: web（nginx + 静的サイト）、api
-├─ docker-compose.yml        # web と api を一緒に起動
+├─ deploy/entrypoint.sh      # コンテナの起動: 設定が変わっていればサイトをビルドし直し、サーバーを起動
+├─ Dockerfile                # イメージ: API とサイトを一緒に配信する Node サーバー
+├─ docker-compose.yml        # 公開イメージを起動
 ├─ docs/assets/              # README 用スクリーンショット
 └─ AGENTS.md                 # 人とAIエージェントのための貢献ルール
 ```
@@ -196,15 +197,21 @@ quick-slot/
 
 ## デプロイ
 
-QuickSlot は Docker でセルフホストします。ルートの `Dockerfile` が2つのイメージを作ります: **web**（静的サイトを配信し `/api` を API に渡す nginx）と **api**。CI はプルリクエストごとに両方をビルドし、一緒に動くか確認します。
-
-ポートを公開するのは web コンテナだけで、API には nginx を通してだけアクセスします。
+QuickSlot は Docker でセルフホストします。ルートの `Dockerfile` が **1つのイメージ** を作ります。Node サーバーが `/api` に応答し、ウェブサイトもポート 8080 で配信します。CI はプルリクエストごとにイメージをビルドし、動くか確認します。
 
 ### リリースを動かす
 
-GitHub リリースを公開するたびに、2つのイメージが GitHub Container Registry に公開されます。タグはバージョン（`1.2.0`、`1.2`）と `latest` です。`main` へのマージでは何も公開されないので、サーバーは新しいバージョンを選んだときだけ変わります。
+GitHub リリースを公開するたびに、イメージが GitHub Container Registry に `ghcr.io/wollu-dev/quick-slot` として公開されます。タグはバージョン（`1.2.0`、`1.2`）と `latest` です。`main` へのマージでは何も公開されないので、サーバーは新しいバージョンを選んだときだけ変わります。
 
-サーバーに `docker-compose.yml` を置き、隣に `.env` ファイルを作ります:
+いちばん簡単なのはコマンド1つです:
+
+```bash
+docker run -d --name quickslot -p 8080:8080 --restart unless-stopped \
+  -e SITE_URL=https://example.com -e HIDE_TOOLS=video-downloader \
+  ghcr.io/wollu-dev/quick-slot:1.2.0
+```
+
+または、サーバーに `docker-compose.yml` を置き、隣に `.env` ファイルを作ります:
 
 ```bash
 QUICKSLOT_VERSION=1.2.0          # 既定: latest
@@ -217,13 +224,13 @@ HIDE_TOOLS=video-downloader      # または SHOW_TOOLS=pdf,image
 docker compose pull && docker compose up -d
 ```
 
-`SITE_URL`・`HIDE_TOOLS`・`SHOW_TOOLS` を指定すると、web コンテナは起動時にサイトをビルドし（30秒ほど）、その後に配信します。値が変わったときだけビルドし直します。イメージをソースから作るには `docker compose build` を実行します。
+`SITE_URL`・`HIDE_TOOLS`・`SHOW_TOOLS` を指定すると、コンテナは起動時にサイトをビルドし（30秒ほど）、その後に配信します。値が変わったときだけビルドし直します。HTTPS のために自分で置いたリバースプロキシの背後では、`TRUST_PROXY=true` にするとレート制限が実際のクライアントのアドレスを見ます。イメージをソースから作るには `docker compose build` を実行します。
 
 ### リリースを公開する（管理者）
 
 1. バージョンタグでリリースを作ります: `gh release create v1.2.0 --generate-notes`（または GitHub の Releases から）。
-2. Release ワークフロー（`.github/workflows/release.yml`）が `linux/amd64`・`linux/arm64` 用のイメージをビルドして公開します。プレリリースは自分のバージョンタグだけを受け取り、`latest` は付きません。
-3. 初回だけ、GitHub のプロフィール → Packages で2つのパッケージ（`quick-slot-web`、`quick-slot-api`）の公開範囲を public にすると、サーバーがログインなしで取得できます。
+2. Release ワークフロー（`.github/workflows/release.yml`）が `linux/amd64`・`linux/arm64` 用のイメージをビルドして公開します。プレリリースは自分のバージョンタグだけを受け取り、`latest` は付きません。実行が失敗したら、直してから同じタグで **Run workflow** を実行します。
+3. 初回だけ、GitHub のプロフィール → Packages で `quick-slot` パッケージの公開範囲を public にすると、サーバーがログインなしで取得できます。
 
 ## コントリビュート
 

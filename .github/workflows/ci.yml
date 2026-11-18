@@ -28,55 +28,44 @@ jobs:
       - run: npm run build
 
   docker:
-    name: docker images
+    name: docker image
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: docker/setup-buildx-action@v3
-      # Build both images to catch Dockerfile breakage; nothing is pushed here
-      - name: web image
-        uses: docker/build-push-action@v6
+      # Build the image to catch Dockerfile breakage; nothing is pushed here
+      - uses: docker/build-push-action@v6
         with:
           context: .
-          target: web
           push: false
           load: true
-          tags: quickslot-web:ci
-      - name: api image
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          target: api
-          push: false
-          load: true
-          tags: quickslot-api:ci
-      - name: run both and check them
+          tags: quickslot:ci
+      - name: run it and check it
         run: |
-          docker network create qs
-          docker run -d --name api --network qs -e TRUST_PROXY=true quickslot-api:ci
-          docker run -d --name web --network qs -p 8080:80 quickslot-web:ci
+          docker run -d --name qs -p 8080:8080 quickslot:ci
           for i in $(seq 1 30); do curl -fs http://localhost:8080/api/health && break; sleep 1; done
           curl -fs http://localhost:8080/api/health | grep -q '"ok":true'
           curl -fs http://localhost:8080/ | grep -q 'QuickSlot'
           curl -fs http://localhost:8080/privacy/ | grep -q 'QuickSlot'
           curl -fsI http://localhost:8080/tools/qr-code/ | grep -qi 'x-content-type-options: nosniff'
-          # The video downloader's tools are in the api image and the work folder is writable
-          docker exec api yt-dlp --version
-          docker exec api python3 -c 'import yt_dlp_ejs'
-          docker exec api ffmpeg -hide_banner -version | head -1
-          docker exec api sh -c 'touch /work/.w && rm /work/.w'
+          curl -fs --compressed -o /dev/null -w '%{content_type}\n' "http://localhost:8080$(curl -fs http://localhost:8080/ | grep -o '/_astro/[^"]*\.js' | head -1)" | grep -q javascript
+          # Runs as the unprivileged node user; the video downloader's tools are there and the work folder is writable
+          test "$(docker exec qs id -un)" = node
+          docker exec qs yt-dlp --version
+          docker exec qs python3 -c 'import yt_dlp_ejs'
+          docker exec qs ffmpeg -hide_banner -version | head -1
+          docker exec qs sh -c 'touch /work/.w && rm /work/.w'
       - name: settings at start rebuild the site and turn tools off
         run: |
-          docker rm -f web api
-          docker run -d --name api --network qs -e TRUST_PROXY=true -e HIDE_TOOLS=video-downloader quickslot-api:ci
-          docker run -d --name web --network qs -p 8080:80 -e SITE_URL=https://example.com -e HIDE_TOOLS=video-downloader quickslot-web:ci
-          for i in $(seq 1 180); do curl -fs http://localhost:8080/ >/dev/null && break; sleep 1; done
-          docker logs web 2>&1 | grep -q 'site built'
+          docker rm -f qs
+          docker run -d --name qs -p 8080:8080 -e SITE_URL=https://example.com -e HIDE_TOOLS=video-downloader quickslot:ci
+          for i in $(seq 1 180); do curl -fs http://localhost:8080/api/health >/dev/null && break; sleep 1; done
+          docker logs qs 2>&1 | grep -q 'site built'
           curl -fs http://localhost:8080/ | grep -q 'https://example.com/'
           curl -fs -o /dev/null http://localhost:8080/tools/qr-code/
           test "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8080/tools/video-downloader/)" = 404
           test "$(curl -s -o /dev/null -w '%{http_code}' -X POST -H 'content-type: application/json' -d '{}' http://localhost:8080/api/video/info)" = 404
           # A restart with the same settings serves the built site without building again
-          docker restart web
-          for i in $(seq 1 30); do curl -fs http://localhost:8080/ >/dev/null && break; sleep 1; done
-          test "$(docker logs web 2>&1 | grep -c 'site built')" = 1
+          docker restart qs
+          for i in $(seq 1 30); do curl -fs http://localhost:8080/api/health >/dev/null && break; sleep 1; done
+          test "$(docker logs qs 2>&1 | grep -c 'site built')" = 1

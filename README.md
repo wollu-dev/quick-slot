@@ -125,16 +125,16 @@ The site URL is never hard-coded. Set it, and which tools to show, where you bui
 
 - **Locally:** copy `apps/web/.env.example` to `apps/web/.env` (git-ignored).
 - **GitHub Actions:** add a repository **variable** named `SITE_URL`.
-- **Docker:** set them on the web container (see Deployment). It rebuilds the site when they change.
+- **Docker:** set them on the container (see Deployment). It rebuilds the site when they change.
 
-Hidden tools get no page and don't appear in the list, search or Quick Slots. Set the same `HIDE_TOOLS` / `SHOW_TOOLS` on the API too, so hidden server tools stop answering (`docker-compose.yml` does this).
+Hidden tools get no page and don't appear in the list, search or Quick Slots, and the API turns off the routes of hidden server tools.
 
 The API (`apps/api`, see `apps/api/.env.example`) reads:
 
 | Variable | Purpose | Default |
 |---|---|---|
 | `PORT` | Port the API listens on | `8787` |
-| `TRUST_PROXY` | Read the client address from `X-Forwarded-For` (set `true` behind the bundled nginx) | `false` |
+| `TRUST_PROXY` | Read the client address from `X-Forwarded-For` (set `true` only behind your own reverse proxy) | `false` |
 | `RATE_LIMIT_PER_MINUTE` | Requests allowed per client address per minute | `60` |
 | `LOG_REQUESTS` | One log line per request: method, path without query, status, time | `true` |
 | `SERVER_TIME_PER_MINUTE` | Server time checks per client address per minute (each sends about 20 requests to the site) | `6` |
@@ -145,6 +145,7 @@ The API (`apps/api`, see `apps/api/.env.example`) reads:
 | `VIDEO_WORK_DIR` | Folder where downloads wait until they are sent (deleted right after) | system temp folder; `/work` in the image |
 | `YTDLP_PATH` | The yt-dlp command | `yt-dlp` |
 | `HIDE_TOOLS`, `SHOW_TOOLS` | The same lists as the site: routes of hidden server tools answer 404 | every tool on |
+| `SITE_DIR` | Built site to serve next to the API (`apps/web/dist`) | only `/api` is served; `/app/apps/web/dist` in the image |
 | `APP_VERSION` | Version reported by `/api/health` (set in the published images) | the package version |
 
 ## Project structure
@@ -163,9 +164,9 @@ quick-slot/
 │  │  ├─ lib/                # Files/ZIP, metadata stripping, slots, theme, dock settings
 │  │  └─ styles/global.css   # Design tokens and the glass design system
 │  └─ public/
-├─ deploy/nginx.conf         # nginx config of the web image
-├─ Dockerfile                # Images: web (nginx + static site) and api
-├─ docker-compose.yml        # Runs web and api together
+├─ deploy/entrypoint.sh      # Container start: rebuild the site if settings changed, run the server
+├─ Dockerfile                # The image: Node server with the API and the site
+├─ docker-compose.yml        # Runs the published image
 ├─ docs/assets/              # Screenshots for the README
 └─ AGENTS.md                 # Contribution rules for humans and AI agents
 ```
@@ -196,15 +197,21 @@ Every language is a separate static page with `hreflang` links. QuickSlot never 
 
 ## Deployment
 
-QuickSlot is self-hosted with Docker. The root `Dockerfile` builds two images: **web** (nginx serving the static site and passing `/api` to the API) and **api**. CI builds both on every pull request and checks that they work together.
-
-Only the web container opens a port; the API is reached through nginx.
+QuickSlot is self-hosted with Docker. The root `Dockerfile` builds **one image**: the Node server answers `/api` and serves the website on port 8080. CI builds it on every pull request and checks that it works.
 
 ### Running a release
 
-Each GitHub release publishes both images to the GitHub Container Registry, tagged with its version (`1.2.0` and `1.2`) and `latest`. Merges to `main` publish nothing, so a server only changes when you pick a new version.
+Each GitHub release publishes the image to the GitHub Container Registry as `ghcr.io/wollu-dev/quick-slot`, tagged with its version (`1.2.0` and `1.2`) and `latest`. Merges to `main` publish nothing, so a server only changes when you pick a new version.
 
-Put `docker-compose.yml` on the server with a `.env` file next to it:
+The quickest way is one command:
+
+```bash
+docker run -d --name quickslot -p 8080:8080 --restart unless-stopped \
+  -e SITE_URL=https://example.com -e HIDE_TOOLS=video-downloader \
+  ghcr.io/wollu-dev/quick-slot:1.2.0
+```
+
+Or put `docker-compose.yml` on the server with a `.env` file next to it:
 
 ```bash
 QUICKSLOT_VERSION=1.2.0          # default: latest
@@ -217,13 +224,13 @@ HIDE_TOOLS=video-downloader      # or SHOW_TOOLS=pdf,image
 docker compose pull && docker compose up -d
 ```
 
-With `SITE_URL`, `HIDE_TOOLS` or `SHOW_TOOLS` set, the web container builds the site when it starts (about half a minute) and serves it after that; it builds again only when they change. To build the images from a checkout instead, run `docker compose build`.
+With `SITE_URL`, `HIDE_TOOLS` or `SHOW_TOOLS` set, the container builds the site when it starts (about half a minute) and serves it after that; it builds again only when they change. Behind your own reverse proxy (for HTTPS), set `TRUST_PROXY=true` so rate limits see the real client address. To build the image from a checkout instead, run `docker compose build`.
 
 ### Publishing a release (maintainers)
 
 1. Create a release with a version tag: `gh release create v1.2.0 --generate-notes` (or on GitHub under Releases).
-2. The Release workflow (`.github/workflows/release.yml`) builds both images for `linux/amd64` and `linux/arm64` and pushes them. A pre-release gets only its own version tag, not `latest`.
-3. The first time, open the two packages (`quick-slot-web`, `quick-slot-api`) under your GitHub profile → Packages and set their visibility to public, so servers can pull them without signing in.
+2. The Release workflow (`.github/workflows/release.yml`) builds the image for `linux/amd64` and `linux/arm64` and pushes it. A pre-release gets only its own version tag, not `latest`. If a run fails, fix it and use **Run workflow** with the same tag.
+3. The first time, open the `quick-slot` package under your GitHub profile → Packages and set its visibility to public, so servers can pull it without signing in.
 
 ## Contributing
 

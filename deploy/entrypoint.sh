@@ -1,5 +1,5 @@
 #!/bin/sh
-# QuickSlot web container: serve the static site with nginx.
+# QuickSlot container: build the site if needed, then run the server (API and website on one port).
 #
 # The image ships a site built with no SITE_URL and every tool. When SITE_URL, HIDE_TOOLS or SHOW_TOOLS are set
 # to something else, the site is built again here first (about half a minute), and only again when they change.
@@ -15,9 +15,9 @@ have=$(cat "$stamp" 2>/dev/null || true)
 if [ "$want" != "$have" ]; then
   echo "[quickslot] building the site for:" $want
   rm -f "$stamp"
-  npm run build -w apps/web --silent
+  NODE_ENV=production npm run build -w apps/web --silent
   printf '%s' "$want" > "$stamp"
   echo "[quickslot] site built"
 fi
 
-exec nginx -g 'daemon off;'
+exec node apps/api/src/index.ts
