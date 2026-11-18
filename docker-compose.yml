@@ -1,11 +1,16 @@
-# Run QuickSlot with the published images:
-#   SITE_URL is baked into the web image when it is built (see .github/workflows/release.yml),
-#   so here you only pick the version and the port.
+# Run QuickSlot with the published images (see README, "Deployment"):
 #
 #   docker compose up -d
 #
-# To build the images locally instead, run `docker compose build` with SITE_URL set:
-#   SITE_URL=https://example.com docker compose build
+# Settings come from the environment or a .env file next to this file:
+#   QUICKSLOT_VERSION  image version to run, e.g. 1.2.0 (default: latest)
+#   QUICKSLOT_PORT     port on this machine (default: 8080)
+#   SITE_URL           full site URL, e.g. https://example.com (for hreflang and canonical links)
+#   HIDE_TOOLS         tools or categories to hide, comma separated, e.g. video-downloader,server-time
+#   SHOW_TOOLS         or the only tools or categories to show, e.g. pdf,image
+# Changing SITE_URL, HIDE_TOOLS or SHOW_TOOLS rebuilds the site when the web container starts.
+#
+# To build the images from this checkout instead: docker compose build
 
 services:
   web:
@@ -13,8 +18,10 @@ services:
     build:
       context: .
       target: web
-      args:
-        SITE_URL: ${SITE_URL:-}
+    environment:
+      SITE_URL: ${SITE_URL:-}
+      HIDE_TOOLS: ${HIDE_TOOLS:-}
+      SHOW_TOOLS: ${SHOW_TOOLS:-}
     ports:
       - "${QUICKSLOT_PORT:-8080}:80"
     depends_on:
@@ -30,6 +37,9 @@ services:
       TRUST_PROXY: "true"
       RATE_LIMIT_PER_MINUTE: ${RATE_LIMIT_PER_MINUTE:-60}
       LOG_REQUESTS: ${LOG_REQUESTS:-true}
+      # The same lists as the web container, so hidden server tools stop answering too
+      HIDE_TOOLS: ${HIDE_TOOLS:-}
+      SHOW_TOOLS: ${SHOW_TOOLS:-}
     # The API is reached only through nginx in the web container
     expose:
       - "8787"

@@ -42,7 +42,6 @@ jobs:
           push: false
           load: true
           tags: quickslot-web:ci
-          build-args: SITE_URL=https://example.com
       - name: api image
         uses: docker/build-push-action@v6
         with:
@@ -66,3 +65,18 @@ jobs:
           docker exec api python3 -c 'import yt_dlp_ejs'
           docker exec api ffmpeg -hide_banner -version | head -1
           docker exec api sh -c 'touch /work/.w && rm /work/.w'
+      - name: settings at start rebuild the site and turn tools off
+        run: |
+          docker rm -f web api
+          docker run -d --name api --network qs -e TRUST_PROXY=true -e HIDE_TOOLS=video-downloader quickslot-api:ci
+          docker run -d --name web --network qs -p 8080:80 -e SITE_URL=https://example.com -e HIDE_TOOLS=video-downloader quickslot-web:ci
+          for i in $(seq 1 180); do curl -fs http://localhost:8080/ >/dev/null && break; sleep 1; done
+          docker logs web 2>&1 | grep -q 'site built'
+          curl -fs http://localhost:8080/ | grep -q 'https://example.com/'
+          curl -fs -o /dev/null http://localhost:8080/tools/qr-code/
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8080/tools/video-downloader/)" = 404
+          test "$(curl -s -o /dev/null -w '%{http_code}' -X POST -H 'content-type: application/json' -d '{}' http://localhost:8080/api/video/info)" = 404
+          # A restart with the same settings serves the built site without building again
+          docker restart web
+          for i in $(seq 1 30); do curl -fs http://localhost:8080/ >/dev/null && break; sleep 1; done
+          test "$(docker logs web 2>&1 | grep -c 'site built')" = 1

@@ -115,15 +115,19 @@ Then open <http://localhost:4321>.
 
 ## Configuration
 
-The site URL is never hard-coded. Set it where you build:
+The site URL is never hard-coded. Set it, and which tools to show, where you build or run the site:
 
 | Variable | Purpose | If unset |
 |---|---|---|
 | `SITE_URL` | Full site URL, e.g. `https://example.com`. Used for `hreflang` and `canonical` links | Relative URLs are used (fine for development) |
+| `HIDE_TOOLS` | Tools to hide, comma separated: tool slugs (as in `registry.ts`, e.g. `video-downloader`) or categories (`file`, `pdf`, `image`, `media`, `text`, `dev`, `life`) | Every tool is shown |
+| `SHOW_TOOLS` | The only tools or categories to show, in the same form, e.g. `pdf,image,qr-code` | Every tool is shown |
 
 - **Locally:** copy `apps/web/.env.example` to `apps/web/.env` (git-ignored).
 - **GitHub Actions:** add a repository **variable** named `SITE_URL`.
-- **Docker:** pass `--build-arg SITE_URL=https://…`.
+- **Docker:** set them on the web container (see Deployment). It rebuilds the site when they change.
+
+Hidden tools get no page and don't appear in the list, search or Quick Slots. Set the same `HIDE_TOOLS` / `SHOW_TOOLS` on the API too, so hidden server tools stop answering (`docker-compose.yml` does this).
 
 The API (`apps/api`, see `apps/api/.env.example`) reads:
 
@@ -140,6 +144,8 @@ The API (`apps/api`, see `apps/api/.env.example`) reads:
 | `VIDEO_PER_HOUR` | Video downloads per client address per hour | `10` |
 | `VIDEO_WORK_DIR` | Folder where downloads wait until they are sent (deleted right after) | system temp folder; `/work` in the image |
 | `YTDLP_PATH` | The yt-dlp command | `yt-dlp` |
+| `HIDE_TOOLS`, `SHOW_TOOLS` | The same lists as the site: routes of hidden server tools answer 404 | every tool on |
+| `APP_VERSION` | Version reported by `/api/health` (set in the published images) | the package version |
 
 ## Project structure
 
@@ -192,12 +198,32 @@ Every language is a separate static page with `hreflang` links. QuickSlot never 
 
 QuickSlot is self-hosted with Docker. The root `Dockerfile` builds two images: **web** (nginx serving the static site and passing `/api` to the API) and **api**. CI builds both on every pull request and checks that they work together.
 
+Only the web container opens a port; the API is reached through nginx.
+
+### Running a release
+
+Each GitHub release publishes both images to the GitHub Container Registry, tagged with its version (`1.2.0` and `1.2`) and `latest`. Merges to `main` publish nothing, so a server only changes when you pick a new version.
+
+Put `docker-compose.yml` on the server with a `.env` file next to it:
+
 ```bash
-SITE_URL=https://example.com docker compose build
-docker compose up -d          # http://localhost:8080 (change with QUICKSLOT_PORT)
+QUICKSLOT_VERSION=1.2.0          # default: latest
+QUICKSLOT_PORT=8080
+SITE_URL=https://example.com
+HIDE_TOOLS=video-downloader      # or SHOW_TOOLS=pdf,image
 ```
 
-Only the web container opens a port; the API is reached through nginx. Publishing images to the GitHub Container Registry on version tags (`v*`) is planned.
+```bash
+docker compose pull && docker compose up -d
+```
+
+With `SITE_URL`, `HIDE_TOOLS` or `SHOW_TOOLS` set, the web container builds the site when it starts (about half a minute) and serves it after that; it builds again only when they change. To build the images from a checkout instead, run `docker compose build`.
+
+### Publishing a release (maintainers)
+
+1. Create a release with a version tag: `gh release create v1.2.0 --generate-notes` (or on GitHub under Releases).
+2. The Release workflow (`.github/workflows/release.yml`) builds both images for `linux/amd64` and `linux/arm64` and pushes them. A pre-release gets only its own version tag, not `latest`.
+3. The first time, open the two packages (`quick-slot-web`, `quick-slot-api`) under your GitHub profile → Packages and set their visibility to public, so servers can pull them without signing in.
 
 ## Contributing
 

@@ -5,7 +5,7 @@ import { useLang, useT, withI18n } from '../../i18n';
 import Rich from '../../i18n/Rich';
 import { downloadBlob, formatBytes, timestampForFilename } from '../../lib/files';
 import { BITRATE, canRecordScreen, clock, finishWebm, mimeFor, startCapture, type Capture, type RecFormat, type RecQuality } from '../../lib/screenRecord';
-import { toolUrl } from '../../tools/registry';
+import { getTool, toolUrl } from '../../tools/registry';
 
 type Phase = 'idle' | 'recording' | 'paused' | 'saving' | 'done';
 
@@ -253,7 +253,7 @@ function ScreenRecorder() {
           </div>
         )}
 
-        {phase === 'done' && (
+        {phase === 'done' && getTool('video-to-gif') && (
           <p className="flex items-center gap-2 px-1 text-sm text-muted">
             <Film size={15} className="shrink-0" />
             <span>

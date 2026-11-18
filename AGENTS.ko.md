@@ -45,9 +45,10 @@ QuickSlot: 브라우저에서 바로 쓰는 생활·개발 도구 모음. 구조
 ## 배포
 
 - **배포 방식: Docker 이미지 → GitHub Container Registry(`ghcr.io`) → 직접 호스팅.** 다른 호스팅(GitHub Pages, Vercel, Netlify, Cloudflare Pages 등)은 쓰지 않으므로 제안하거나 설정하지 않는다.
-- **이미지:** 루트 `Dockerfile` 이 두 타깃을 만든다. `web` 은 정적 빌드를 제공하고 `/api` 를 API 로 넘기는 nginx (`deploy/nginx.conf`), 사이트 주소는 `ARG SITE_URL`. `api` 는 `apps/api` 를 실행하는 Node. `docker-compose.yml` 이 둘을 함께 띄우고, 포트는 web 컨테이너만 연다.
+- **이미지:** 루트 `Dockerfile` 이 두 타깃을 만든다. `web` 은 정적 빌드를 제공하고 `/api` 를 API 로 넘기는 nginx (`deploy/nginx.conf`). 컨테이너를 시작할 때 `SITE_URL`, `HIDE_TOOLS`, `SHOW_TOOLS` 를 정할 수 있도록 빌드 도구를 함께 담고, 값이 마지막 빌드와 다르면 `deploy/web-entrypoint.sh` 가 사이트를 다시 빌드한다. `api` 는 `apps/api` 를 실행하는 Node. `docker-compose.yml` 이 둘을 함께 띄우고, 포트는 web 컨테이너만 연다.
 - **CI** (`.github/workflows/ci.yml`) 는 타입 검사·테스트·빌드에 더해, PR 마다 두 이미지를 빌드하고 함께 띄워 간단히 검사한다. CI 에서는 아무것도 게시하지 않는다.
-- **게시:** 이미지는 **버전 태그(`v*`)를 push 할 때만** GHCR 에 올리고, `main` 머지마다 올리지 않는다. 게시 워크플로는 아직 추가하지 않았다. 패키지를 공개하는 일이라 추가하려면 저장소 주인의 승인이 필요하다.
+- **게시:** 이미지는 **GitHub 릴리스를 게시할 때만** GHCR 에 올리고 (태그 `v1.2.0` 등, `.github/workflows/release.yml`), `main` 머지마다 올리지 않는다. 릴리스를 만들면 패키지가 공개되므로, 저장소 주인이나 주인이 부탁한 사람만 만든다.
+- **도구 숨기기:** `HIDE_TOOLS`, `SHOW_TOOLS` (도구 slug 또는 카테고리 id) 는 빌드할 때 `registry.ts` 의 `tools` 를 거르고, API 는 숨긴 서버 도구의 경로를 끈다 (`apps/api/src/app.ts` 의 `SERVER_TOOLS`). 한 도구에서 다른 도구로 링크하는 코드는 그 도구가 숨겨졌을 수 있으므로 먼저 `getTool(slug)` 로 확인한다.
 - **로그에 개인정보를 남기지 않는다:** nginx 와 API 는 시각, 메서드, 쿼리 문자열을 뺀 경로, 상태, 크기, 처리 시간만 기록한다. 클라이언트 주소, 요청 본문, 파일 이름은 남기지 않는다. 경로를 추가할 때도 지킨다. 개인정보처리방침(`/privacy`)이 약속하는 내용이다.
 - **도메인·주소를 코드에 쓰지 않는다.** 사이트 주소는 빌드 환경 변수 `SITE_URL` 로만 받는다 (`astro.config.mjs` → `Astro.site`). 전체 주소가 필요하면 `Astro.site` 를 쓰고, 없을 때는 상대 주소로 동작하게 만든다.
 - 프로젝트 링크(GitHub 저장소)와 작성자는 루트 `package.json` 의 `repository`, `author` 에서 가져온다. 화면 코드에 주소를 쓰지 말고 `apps/web/src/lib/project.ts` 로 읽는다.

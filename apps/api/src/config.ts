@@ -5,8 +5,14 @@ import { join } from 'node:path';
 /** Settings from environment variables (documented in apps/api/.env.example and the README) */
 const env = process.env;
 const num = (v: string | undefined, fallback: number) => (v && Number.isFinite(Number(v)) ? Number(v) : fallback);
+const names = (v: string | undefined) => (v ?? '').split(',').map((s) => s.trim()).filter(Boolean);
 
 const pkg = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8')) as { version: string };
+
+export interface ToolFilter {
+  hide: string[];
+  show: string[];
+}
 
 export const config = {
   port: num(env.PORT, 8787),
@@ -28,5 +34,8 @@ export const config = {
   videoPerHour: num(env.VIDEO_PER_HOUR, 10),
   /** Only for tests: let outgoing requests reach private and loopback addresses */
   allowPrivateTargets: env.ALLOW_PRIVATE_TARGETS === 'true',
-  version: pkg.version,
+  /** Tools turned off on this site (same variables as the web build): their API routes answer 404 */
+  tools: { hide: names(env.HIDE_TOOLS), show: names(env.SHOW_TOOLS) } as ToolFilter,
+  /** The release version (set in the published images), else the package version */
+  version: (env.APP_VERSION || pkg.version).replace(/^v/, ''),
 };

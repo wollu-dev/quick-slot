@@ -45,9 +45,10 @@ QuickSlot: ブラウザですぐ使える日常・開発ツール集。構成と
 ## デプロイ
 
 - **デプロイ方式: Docker イメージ → GitHub Container Registry（`ghcr.io`）→ セルフホスト。** 他のホスティング（GitHub Pages、Vercel、Netlify、Cloudflare Pages など）は使わないので、提案も設定もしない。
-- **イメージ:** ルートの `Dockerfile` が2つのターゲットを作る。`web` は静的ビルドを配信し `/api` を API に渡す nginx（`deploy/nginx.conf`）、サイトURLは `ARG SITE_URL`。`api` は `apps/api` を実行する Node。`docker-compose.yml` が両方を起動し、ポートを公開するのは web コンテナだけ。
+- **イメージ:** ルートの `Dockerfile` が2つのターゲットを作る。`web` は静的ビルドを配信し `/api` を API に渡す nginx（`deploy/nginx.conf`）。コンテナの起動時に `SITE_URL`・`HIDE_TOOLS`・`SHOW_TOOLS` を指定できるようビルドツールも含め、値が前回のビルドと違えば `deploy/web-entrypoint.sh` がサイトをビルドし直す。`api` は `apps/api` を実行する Node。`docker-compose.yml` が両方を起動し、ポートを公開するのは web コンテナだけ。
 - **CI**（`.github/workflows/ci.yml`）は型チェック・テスト・ビルドに加え、プルリクエストごとに2つのイメージをビルドし、一緒に起動して簡単に確認する。CI からは何も公開しない。
-- **公開:** イメージは **バージョンタグ（`v*`）を push したときだけ** GHCR に公開し、`main` へのマージごとには公開しない。公開用ワークフローはまだ追加していない。パッケージを公開するため、追加にはリポジトリ所有者の承認が必要。
+- **公開:** イメージは **GitHub リリースを公開したときだけ** GHCR に公開し（タグ `v1.2.0` など、`.github/workflows/release.yml`）、`main` へのマージごとには公開しない。リリースを作るとパッケージが公開されるため、作るのはリポジトリ所有者か、所有者が頼んだ人だけ。
+- **ツールの非表示:** `HIDE_TOOLS`・`SHOW_TOOLS`（ツールの slug かカテゴリ id）はビルド時に `registry.ts` の `tools` を絞り込み、API は非表示のサーバーツールのルートを止める（`apps/api/src/app.ts` の `SERVER_TOOLS`）。あるツールから別のツールへリンクするコードは、そのツールが非表示かもしれないので先に `getTool(slug)` で確かめる。
 - **ログに個人情報を残さない:** nginx と API が記録するのは、時刻、メソッド、クエリ文字列を除いたパス、ステータス、サイズ、処理時間だけ。クライアントのアドレス、リクエスト本文、ファイル名は残さない。ルートを追加するときも守る。プライバシーポリシー（`/privacy`）で約束している内容。
 - **ドメインやURLをコードに書かない。** サイトURLはビルド環境変数 `SITE_URL` からのみ受け取る（`astro.config.mjs` → `Astro.site`）。絶対URLが必要なら `Astro.site` を使い、未設定のときは相対URLで動くようにする。
 - プロジェクトのリンク（GitHub リポジトリ）と作者は、ルートの `package.json` の `repository`、`author` から取得する。画面のコードにURLを書かず、`apps/web/src/lib/project.ts` で読み込む。

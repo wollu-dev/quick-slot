@@ -16,6 +16,20 @@ test('health answers with security headers', async () => {
   assert.equal(res.headers.get('referrer-policy'), 'no-referrer');
 });
 
+test('tools turned off with HIDE_TOOLS or SHOW_TOOLS lose their routes', async () => {
+  const post = (app: ReturnType<typeof createApp>, path: string) => app.request(path, { method: 'POST', headers: { 'content-type': 'application/json' }, body: '{}' });
+  const hidden = createApp({ hide: ['video-downloader'], show: [] });
+  assert.equal((await post(hidden, '/api/video/info')).status, 404);
+  assert.equal((await hidden.request('/api/video/jobs/abc')).status, 404);
+  assert.equal((await post(hidden, '/api/server-time')).status, 400); // still there (empty body)
+  const byCategory = createApp({ hide: ['life'], show: [] });
+  assert.equal((await post(byCategory, '/api/server-time')).status, 404);
+  const only = createApp({ hide: [], show: ['pdf'] });
+  assert.equal((await post(only, '/api/server-time')).status, 404);
+  assert.equal((await post(only, '/api/video/info')).status, 404);
+  assert.equal((await only.request('/api/health')).status, 200);
+});
+
 test('unknown routes are a JSON 404', async () => {
   const res = await createApp().request('/api/nope');
   assert.equal(res.status, 404);
