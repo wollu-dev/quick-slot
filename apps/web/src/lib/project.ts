@@ -15,6 +15,3 @@ function repoUrl(repository: Repository): string | undefined {
 
 /** Repository web URL, or undefined when package.json has no `repository` field */
 export const REPO_URL = repoUrl((pkg as { repository?: Repository }).repository);
-
-/** The license text in the repository (Sustainable Use License, see LICENSE.md) */
-export const LICENSE_URL = REPO_URL && `${REPO_URL}/blob/main/LICENSE.md`;

@@ -26,30 +26,6 @@ export const config = {
   videoConcurrent: num(env.VIDEO_CONCURRENT, 2),
   /** Downloads per client address per hour */
   videoPerHour: num(env.VIDEO_PER_HOUR, 10),
-  /** Public address of the site (same as the web build's SITE_URL): sign-in links and cookie origin */
-  siteUrl: (env.SITE_URL || 'http://localhost:4321').replace(/\/$/, ''),
-  /** Accounts are on only when a database is set: postgres://… in production, pglite:<folder> for local development */
-  databaseUrl: env.DATABASE_URL || '',
-  /** Signs session cookies. Required in production; in development a random one is made at each start */
-  authSecret: env.AUTH_SECRET || '',
-  /** SMTP server for sign-in emails, e.g. smtps://user:pass@smtp.example.com:465 */
-  smtpUrl: env.SMTP_URL || '',
-  mailFrom: env.MAIL_FROM || 'QuickSlot <no-reply@localhost>',
-  google: env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET ? { clientId: env.GOOGLE_CLIENT_ID, clientSecret: env.GOOGLE_CLIENT_SECRET } : null,
-  apple: env.APPLE_CLIENT_ID && env.APPLE_CLIENT_SECRET ? { clientId: env.APPLE_CLIENT_ID, clientSecret: env.APPLE_CLIENT_SECRET } : null,
-  /** Paddle (payments on the web). On only when all of these are set; PADDLE_ENV is sandbox or production */
-  paddle:
-    env.PADDLE_CLIENT_TOKEN && env.PADDLE_WEBHOOK_SECRET && env.PADDLE_PRICE_MONTHLY && env.PADDLE_PRICE_YEARLY
-      ? {
-          environment: env.PADDLE_ENV === 'production' ? ('production' as const) : ('sandbox' as const),
-          clientToken: env.PADDLE_CLIENT_TOKEN,
-          webhookSecret: env.PADDLE_WEBHOOK_SECRET,
-          prices: { monthly: env.PADDLE_PRICE_MONTHLY, yearly: env.PADDLE_PRICE_YEARLY },
-          /** Optional: lets subscribers open Paddle's customer portal (needs the customer_portal_session.write permission) */
-          apiKey: env.PADDLE_API_KEY || '',
-          apiBase: env.PADDLE_API_BASE || (env.PADDLE_ENV === 'production' ? 'https://api.paddle.com' : 'https://sandbox-api.paddle.com'),
-        }
-      : null,
   /** Only for tests: let outgoing requests reach private and loopback addresses */
   allowPrivateTargets: env.ALLOW_PRIVATE_TARGETS === 'true',
   version: pkg.version,

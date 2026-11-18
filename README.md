@@ -10,7 +10,7 @@ Everyday and developer utilities that run on your device.<br />
 No install, no sign-up, and your files stay on your computer unless a tool clearly says otherwise.
 
 [![CI](https://github.com/wollu-dev/quick-slot/actions/workflows/ci.yml/badge.svg)](https://github.com/wollu-dev/quick-slot/actions/workflows/ci.yml)
-[![License: Sustainable Use](https://img.shields.io/badge/License-Sustainable%20Use-blue.svg)](LICENSE.md)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 ![Astro](https://img.shields.io/badge/Astro-7-BC52EE?logo=astro&logoColor=white)
 ![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white)
@@ -140,14 +140,6 @@ The API (`apps/api`, see `apps/api/.env.example`) reads:
 | `VIDEO_PER_HOUR` | Video downloads per client address per hour | `10` |
 | `VIDEO_WORK_DIR` | Folder where downloads wait until they are sent (deleted right after) | system temp folder; `/work` in the image |
 | `YTDLP_PATH` | The yt-dlp command | `yt-dlp` |
-| `SITE_URL` | Public site address (same as the web build). Sign-in links point here | `http://localhost:4321` |
-| `DATABASE_URL` | Turns accounts on: `postgres://…`, or `pglite:.data/db` for a local development database | accounts off |
-| `AUTH_SECRET` | Long random string that signs session cookies (required with `DATABASE_URL` in production) | random at each start (development) |
-| `SMTP_URL`, `MAIL_FROM` | SMTP server and sender for sign-in emails | links printed to the console (development only) |
-| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | Sign in with Google | off |
-| `APPLE_CLIENT_ID`, `APPLE_CLIENT_SECRET` | Sign in with Apple | off |
-| `PADDLE_ENV`, `PADDLE_CLIENT_TOKEN`, `PADDLE_WEBHOOK_SECRET`, `PADDLE_PRICE_MONTHLY`, `PADDLE_PRICE_YEARLY` | Paddle payments for Pro (`sandbox` or `production`). The webhook goes to `SITE_URL/api/billing/paddle/webhook` | payments off ("coming soon") |
-| `PADDLE_API_KEY` | Paddle API key with the `customer_portal_session.write` permission: adds "Manage subscription" (cancel, change card, invoices) | no button (the receipt email has the link) |
 
 ## Project structure
 
@@ -207,32 +199,12 @@ docker compose up -d          # http://localhost:8080 (change with QUICKSLOT_POR
 
 Only the web container opens a port; the API is reached through nginx. Publishing images to the GitHub Container Registry on version tags (`v*`) is planned.
 
-**Accounts (optional, for Pro features).** Every free tool works without them. To turn them on, start the bundled Postgres with the `accounts` profile and give the API a database, a secret and the site address:
-
-```bash
-COMPOSE_PROFILES=accounts POSTGRES_PASSWORD=… AUTH_SECRET=$(openssl rand -base64 32) \
-SITE_URL=https://example.com DATABASE_URL=postgres://quickslot:…@db:5432/quickslot \
-SMTP_URL=smtps://… docker compose up -d
-```
-
-The API creates its tables at startup. For local development, put `DATABASE_URL=pglite:.data/db` in `apps/api/.env`: no Postgres is needed, and sign-in links are printed to the console.
-
 ## Contributing
 
-Contributions are welcome! See **[CONTRIBUTING.md](CONTRIBUTING.md)** for how to send a change. This project follows GitHub Flow: branch from `main`, open a pull request, and squash-merge once CI passes. On your first pull request you'll be asked to sign the [Contributor License Agreement](CLA.md); you keep the copyright in your work.
+Contributions are welcome! This project follows GitHub Flow: branch from `main`, open a pull request, and squash-merge once CI passes.
 
 Please read **[AGENTS.md](AGENTS.md)** first. It holds the rules for code, design, i18n, commits and pull requests, for humans and AI coding agents alike. ([한국어](AGENTS.ko.md) · [日本語](AGENTS.ja.md))
 
 ## License
 
-QuickSlot is **source-available** under the [Sustainable Use License](LICENSE.md), the same "fair-code" model as n8n.
-
-- **Allowed:** using, modifying and self-hosting it for personal or non-commercial use and for your own internal business purposes, and sharing it free of charge for non-commercial purposes.
-- **Not allowed:** selling it, or offering it to others as a paid or commercial service.
-- Files with `.ee.` in their name and files in `ee/` folders (paid features) are under the [QuickSlot Enterprise License](LICENSE_EE.md). They can be used in production only with a QuickSlot subscription or an Enterprise license; development and testing are free.
-- Versions up to commit `7ee6d28` (17 November 2026) were released under the MIT License and remain available under it.
-- Third-party components keep their own licenses (for example ffmpeg.wasm, GPL-2.0-or-later).
-
-For a commercial license, [open an issue](https://github.com/wollu-dev/quick-slot/issues).
-
-© 2026 Jaeyun Jung (WolLu)
+[MIT](LICENSE) © 2026 Jaeyun Jung (WolLu)

@@ -10,7 +10,7 @@
 インストールも登録も不要で、特に表示のあるツールを除き、ファイルがパソコンの外に出ることはありません。
 
 [![CI](https://github.com/wollu-dev/quick-slot/actions/workflows/ci.yml/badge.svg)](https://github.com/wollu-dev/quick-slot/actions/workflows/ci.yml)
-[![License: Sustainable Use](https://img.shields.io/badge/License-Sustainable%20Use-blue.svg)](LICENSE.md)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 ![Astro](https://img.shields.io/badge/Astro-7-BC52EE?logo=astro&logoColor=white)
 ![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white)
@@ -140,14 +140,6 @@ API（`apps/api`、`apps/api/.env.example` を参照）の設定:
 | `VIDEO_PER_HOUR` | クライアントのアドレスごとの1時間あたりの動画ダウンロード回数 | `10` |
 | `VIDEO_WORK_DIR` | 送るまでファイルを置くフォルダー（送った直後に削除） | システムの一時フォルダー、イメージでは `/work` |
 | `YTDLP_PATH` | yt-dlp コマンド | `yt-dlp` |
-| `SITE_URL` | サイトの公開アドレス（Web ビルドと同じ値）。ログインリンクはこのアドレスを指す | `http://localhost:4321` |
-| `DATABASE_URL` | アカウント機能をオンにする: `postgres://…`、またはローカル開発用の `pglite:.data/db` | アカウントはオフ |
-| `AUTH_SECRET` | セッション Cookie に署名する長いランダムな文字列（本番では `DATABASE_URL` と併せて必須） | 起動ごとにランダム（開発） |
-| `SMTP_URL`、`MAIL_FROM` | ログインメールを送る SMTP サーバーと差出人 | リンクをコンソールに表示（開発のみ） |
-| `GOOGLE_CLIENT_ID`、`GOOGLE_CLIENT_SECRET` | Google でログイン | オフ |
-| `APPLE_CLIENT_ID`、`APPLE_CLIENT_SECRET` | Apple でログイン | オフ |
-| `PADDLE_ENV`、`PADDLE_CLIENT_TOKEN`、`PADDLE_WEBHOOK_SECRET`、`PADDLE_PRICE_MONTHLY`、`PADDLE_PRICE_YEARLY` | Pro の決済用 Paddle 設定（`sandbox` または `production`）。Webhook の送り先は `SITE_URL/api/billing/paddle/webhook` | 決済はオフ（「近日公開」） |
-| `PADDLE_API_KEY` | `customer_portal_session.write` 権限のある Paddle API キー:「サブスクリプションの管理」（解約、カード変更、領収書）ボタンを表示 | ボタンなし（お支払い確認メールにリンクあり） |
 
 ## プロジェクト構成
 
@@ -207,32 +199,12 @@ docker compose up -d          # http://localhost:8080（QUICKSLOT_PORT で変更
 
 ポートを公開するのは web コンテナだけで、API には nginx を通してだけアクセスします。バージョンタグ（`v*`）で GitHub Container Registry にイメージを公開する仕組みは今後追加する予定です。
 
-**アカウント（任意、Pro 機能用）。** 無料ツールはすべてアカウントなしで動作します。オンにするには、`accounts` プロファイルで同梱の Postgres を起動し、API にデータベース・シークレット・サイトのアドレスを渡します:
-
-```bash
-COMPOSE_PROFILES=accounts POSTGRES_PASSWORD=… AUTH_SECRET=$(openssl rand -base64 32) \
-SITE_URL=https://example.com DATABASE_URL=postgres://quickslot:…@db:5432/quickslot \
-SMTP_URL=smtps://… docker compose up -d
-```
-
-API は起動時にテーブルを作成します。ローカル開発では `apps/api/.env` に `DATABASE_URL=pglite:.data/db` と書けば Postgres なしで動作し、ログインリンクはコンソールに表示されます。
-
 ## コントリビュート
 
-コントリビュート歓迎です！変更の送り方は **[CONTRIBUTING.ja.md](CONTRIBUTING.ja.md)** をご覧ください。GitHub Flow に従います: `main` からブランチを作り、プルリクエストを開き、CI が通ったら squash merge します。最初のプルリクエストで[コントリビューターライセンス契約（CLA）](CLA.md)への署名をお願いします。著作権はコントリビューターに残ります。
+コントリビュート歓迎です！GitHub Flow に従います: `main` からブランチを作り、プルリクエストを開き、CI が通ったら squash merge します。
 
 まず **[AGENTS.ja.md](AGENTS.ja.md)** をお読みください。コード・デザイン・多言語・コミット・プルリクエストのルールがあり、人にもAIコーディングエージェントにも適用されます。（原文: [AGENTS.md](AGENTS.md)、英語）
 
 ## ライセンス
 
-QuickSlot は n8n と同じ「フェアコード（fair-code）」方式で、ソースを公開した [Sustainable Use License](LICENSE.md) に従います。
-
-- **できること:** 個人的・非商用の目的や自社の社内業務のために使用、改変、セルフホストすること、非商用の目的で無料で共有すること。
-- **できないこと:** 販売すること、他者に有料・商用サービスとして提供すること。
-- 名前に `.ee.` を含むファイルと `ee/` フォルダーのファイル（有料機能）は [QuickSlot Enterprise License](LICENSE_EE.md) に従います。本番利用には QuickSlot のサブスクリプションか Enterprise ライセンスが必要で、開発・テストは無料です。
-- コミット `7ee6d28`（2026年11月17日）までのバージョンは MIT ライセンスで公開されており、引き続き MIT で利用できます。
-- サードパーティのコンポーネントはそれぞれのライセンスに従います（例: ffmpeg.wasm は GPL-2.0-or-later）。
-
-商用ライセンスは [Issue](https://github.com/wollu-dev/quick-slot/issues) でお問い合わせください。
-
-© 2026 Jaeyun Jung (WolLu)
+[MIT](LICENSE) © 2026 Jaeyun Jung (WolLu)
