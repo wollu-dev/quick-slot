@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { OPEN_SETTINGS_EVENT } from '../lib/billing';
 import { createPortal } from 'react-dom';
 import { Check, Settings } from 'lucide-react';
 import { LANG_NAMES, LOCALES, goToLang, saveLang, useLang, useT, withI18n, type Lang } from '../i18n';
@@ -7,11 +6,10 @@ import { useDockSettings, type DockPosition, type DockSize } from '../lib/dock';
 import { useTheme, type ThemePref } from '../lib/theme';
 import Segmented from './ui/Segmented';
 import Select from './ui/Select';
-import AccountSection from './AccountSection';
 
 /**
  * Settings (gear) button on the right of the header, and the settings sheet.
- * Inset grouped list like iOS Settings: account (when the server has accounts) · appearance · Quick Slot position/size · language.
+ * Inset grouped list like iOS Settings: appearance · Quick Slot position/size · language.
  * Centered sheet on desktop, bottom sheet that slides up on mobile.
  */
 function SettingsSheet() {
@@ -23,13 +21,6 @@ function SettingsSheet() {
     setOpen(false);
     buttonRef.current?.focus();
   };
-
-  // Other parts of the page (the pricing page's buy button) can ask for the sheet, to sign in
-  useEffect(() => {
-    const show = () => setOpen(true);
-    window.addEventListener(OPEN_SETTINGS_EVENT, show);
-    return () => window.removeEventListener(OPEN_SETTINGS_EVENT, show);
-  }, []);
 
   return (
     <>
@@ -103,8 +94,6 @@ function Sheet({ onClose }: { onClose: () => void }) {
         </header>
 
         <div className="space-y-6 px-4 pt-2 pb-2">
-          <AccountSection Group={Group} />
-
           <Group title={s.appearance} footer={s.autoNote}>
             <div className="grid grid-cols-3 gap-3 p-4" role="radiogroup" aria-label={s.appearance}>
               {(

@@ -13,10 +13,6 @@ import { rateLimit } from './rateLimit.ts';
 import { measure, MeasureFailure } from './serverTime.ts';
 import { checkUrl, createJob, disposition, FORMATS, getJob, info, takeFile, VideoFailure, type VideoFormat } from './video.ts';
 import { Readable } from 'node:stream';
-import { CLIENT_IP_HEADER, providers, type Auth } from './auth.ts';
-import type { Mailer } from './mail.ts';
-import { applyPaddleEvent, checkoutConfig, planOf, portalAvailable, portalUrl, PortalFailure, verifyPaddleSignature, type PaddleEvent } from './billing.ts';
-import type { Db } from './db/index.ts';
 
 export type Env = { Variables: { ip: string } };
 
@@ -30,15 +26,7 @@ function clientIp(c: Context): string {
   return info?.remoteAddress ?? 'unknown';
 }
 
-export interface Deps {
-  /** null when accounts are off (no DATABASE_URL) */
-  auth?: Auth | null;
-  mailer?: Mailer | null;
-  /** The database behind accounts, for subscriptions */
-  db?: Db | null;
-}
-
-export function createApp({ auth = null, mailer = null, db = null }: Deps = {}) {
+export function createApp() {
   const app = new Hono<Env>();
 
   app.use('*', async (c: Context<Env>, next: Next) => {
@@ -51,25 +39,6 @@ export function createApp({ auth = null, mailer = null, db = null }: Deps = {}) 
     c.header('Referrer-Policy', 'no-referrer');
     c.header('Cross-Origin-Resource-Policy', 'same-origin');
     if (config.logRequests) console.log(`${c.req.method} ${new URL(c.req.url).pathname} ${c.res.status} ${Math.round(performance.now() - started)}ms`);
-  });
-
-  /*
-   * Paddle's subscription webhook. Registered before the per-address rate limit, because Paddle's servers
-   * may send many events at once; the signature check is what keeps everyone else out.
-   */
-  app.post('/api/billing/paddle/webhook', async (c) => {
-    const paddle = config.paddle;
-    if (!paddle || !db) return c.json({ error: 'notFound' }, 404);
-    const body = await c.req.text();
-    if (!verifyPaddleSignature(body, c.req.header('paddle-signature'), paddle.webhookSecret)) return c.json({ error: 'badSignature' }, 401);
-    let event: PaddleEvent;
-    try {
-      event = JSON.parse(body);
-    } catch {
-      return c.json({ error: 'badRequest' }, 400);
-    }
-    const result = await applyPaddleEvent(db, event);
-    return c.json({ result });
   });
 
   app.use('/api/*', rateLimit({ windowMs: 60_000, max: config.rateLimitPerMinute }));
@@ -169,47 +138,6 @@ export function createApp({ auth = null, mailer = null, db = null }: Deps = {}) 
         'x-content-type-options': 'nosniff',
       },
     });
-  });
-
-  /* Accounts: only for people who want Pro features. Everything above works without them. */
-  app.get('/api/account/providers', (c) => c.json({ enabled: !!auth, ...(auth ? providers(mailer) : { email: false, google: false, apple: false }) }));
-
-  app.on(['GET', 'POST'], '/api/auth/*', (c) => {
-    if (!auth) return c.json({ error: 'accountsDisabled' }, 503);
-    // better-auth reads the client address from this header (for its rate limit). Set it from the address
-    // this app already worked out, and drop any copy the client sent, so it can't be spoofed.
-    const headers = new Headers(c.req.raw.headers);
-    headers.set(CLIENT_IP_HEADER, c.get('ip'));
-    return auth.handler(new Request(c.req.raw, { headers }));
-  });
-
-  /* Subscriptions */
-  const session = async (headers: Headers) => (auth ? ((await auth.api.getSession({ headers })) as { user: { id: string } } | null) : null);
-
-  /** How the site opens the checkout; { checkout: null } while payments aren't set up */
-  app.get('/api/billing/config', (c) => c.json({ checkout: auth && db ? checkoutConfig() : null, portal: !!(auth && db && portalAvailable()) }));
-
-  /** A one-time link to Paddle's customer portal (cancel, change card, invoices) */
-  app.post('/api/billing/portal', async (c) => {
-    if (!auth || !db) return c.json({ error: 'accountsDisabled' }, 503);
-    // A POST that creates something for the signed-in user: only from our own pages
-    if (c.req.header('origin') !== config.siteUrl) return c.json({ error: 'badOrigin' }, 403);
-    const s = await session(c.req.raw.headers);
-    if (!s) return c.json({ error: 'signInRequired' }, 401);
-    try {
-      return c.json({ url: await portalUrl(db, s.user.id) });
-    } catch (e) {
-      if (!(e instanceof PortalFailure)) throw e;
-      return c.json({ error: e.code }, e.code === 'unavailable' ? 501 : e.code === 'noSubscription' ? 404 : 502);
-    }
-  });
-
-  /** The signed-in user's plan */
-  app.get('/api/billing/me', async (c) => {
-    if (!auth || !db) return c.json({ error: 'accountsDisabled' }, 503);
-    const s = await session(c.req.raw.headers);
-    if (!s) return c.json({ error: 'signInRequired' }, 401);
-    return c.json(await planOf(db, s.user.id));
   });
 
   app.notFound((c) => c.json({ error: 'notFound' }, 404));

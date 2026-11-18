@@ -1,12 +1,11 @@
 {
   "name": "@quickslot/api",
   "version": "0.0.1",
-  "license": "SEE LICENSE IN LICENSE.md",
   "private": true,
   "type": "module",
   "description": "Server side of the few QuickSlot tools that can't run in the browser",
   "scripts": {
-    "dev": "node --env-file-if-exists=.env --watch src/index.ts",
+    "dev": "node --watch src/index.ts",
     "start": "node src/index.ts",
     "check": "tsc --noEmit",
     "test": "node --test test/*.test.ts"
@@ -16,16 +15,10 @@
   },
   "dependencies": {
     "@hono/node-server": "2.1.6",
-    "better-auth": "1.7.15",
-    "drizzle-orm": "0.45.4",
-    "hono": "4.13.16",
-    "nodemailer": "10.3.1",
-    "postgres": "4.0.0"
+    "hono": "4.13.16"
   },
   "devDependencies": {
-    "@electric-sql/pglite": "0.5.14",
     "@types/node": "^24.0.0",
-    "@types/nodemailer": "8.0.2",
     "typescript": "^6.0.3"
   }
 }
